@@ -1,0 +1,10 @@
+{
+  "name": "Pasaporte Motero",
+  "short_name": "Pasaporte",
+  "description": "Tu pasaporte de aventuras por el Perú",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f0e5",
+  "theme_color": "#102c25",
+  "icons": []
+}
