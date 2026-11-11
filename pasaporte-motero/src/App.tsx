@@ -248,9 +248,20 @@ export default function App() {
     const [m,d] = await Promise.all([supabase.from('motorcycle_maintenance').select('*').eq('motorcycle_id',data.id).order('service_date',{ascending:false}),supabase.from('motorcycle_documents').select('*').eq('motorcycle_id',data.id).order('expiry_date',{ascending:true})])
     setMaintenance(m.data || []); setDocuments(d.data || [])
   }
+  async function getCurrentAuthUser() {
+    if (!supabase) return null
+    const {data:{session},error:sessionError} = await supabase.auth.getSession()
+    if (session?.user) return session.user
+    const {data:{user},error:userError} = await supabase.auth.getUser()
+    if (user) return user
+    if (authUserId) return {id:authUserId} as {id:string}
+    if (sessionError || userError) console.warn('Supabase auth state:', sessionError || userError)
+    return null
+  }
+
   async function saveMotorcycle() {
     if (!supabase) return
-    const {data:{session}} = await supabase.auth.getSession(); const user = session?.user
+    const user = await getCurrentAuthUser()
     if (!user) { notify('Tu sesión no está disponible. Vuelve a entrar y prueba nuevamente.'); return }
     if (!motorcycleBrand.trim() || !motorcycleModel.trim()) { notify('Completa marca y modelo en Configuración.'); return }
     const cc = motorcycleCc.trim() ? Number(motorcycleCc) : null, km = motorcycleOdometer.trim() ? Number(motorcycleOdometer) : null
@@ -271,7 +282,7 @@ export default function App() {
   }
   async function addMaintenance() {
     if (!supabase || !motorcycleId) { notify('Primero guarda la ficha de tu motocicleta.'); return }
-    const {data:{user}} = await supabase.auth.getUser(); if (!user) { notify('Tu sesión no está disponible. Vuelve a entrar y prueba nuevamente.'); return }
+    const user = await getCurrentAuthUser(); if (!user) { setAuthMode('login'); setAuthOpen(true); notify('No encontramos una sesión activa. Inicia sesión para sincronizar tus datos.'); return }
     const km = maintenanceKm.trim() ? Number(maintenanceKm) : null, cost = maintenanceCost.trim() ? Number(maintenanceCost) : null
     if ((km !== null && km < 0) || (cost !== null && cost < 0)) { notify('Ingresa valores válidos.'); return }
     const {data,error} = await supabase.from('motorcycle_maintenance').insert({motorcycle_id:motorcycleId,user_id:user.id,service_date:maintenanceDate,service_type:maintenanceType,odometer_km:km,cost_pen:cost,notes:maintenanceNotes.trim() || null}).select('*').single()
@@ -280,7 +291,7 @@ export default function App() {
   }
   async function addMotorcycleDocument() {
     if (!supabase || !motorcycleId) { notify('Primero guarda la ficha de tu motocicleta.'); return }
-    const {data:{user}} = await supabase.auth.getUser(); if (!user || !documentExpiry) { notify(!user ? 'Tu sesión no está disponible. Vuelve a entrar y prueba nuevamente.' : 'Selecciona la fecha de vencimiento.'); return }
+    const user = await getCurrentAuthUser(); if (!user || !documentExpiry) { if (!user) { setAuthMode('login'); setAuthOpen(true) }; notify(!user ? 'No encontramos una sesión activa. Inicia sesión para sincronizar tus datos.' : 'Selecciona la fecha de vencimiento.'); return }
     const {data,error} = await supabase.from('motorcycle_documents').insert({motorcycle_id:motorcycleId,user_id:user.id,document_type:documentType,expiry_date:documentExpiry}).select('*').single()
     if (error) { notify('Error al guardar documento: ' + error.message); return }
     setDocuments(items => [...items,data].sort((a,b)=>a.expiry_date.localeCompare(b.expiry_date))); setDocumentExpiry(''); notify('Vencimiento registrado.')
