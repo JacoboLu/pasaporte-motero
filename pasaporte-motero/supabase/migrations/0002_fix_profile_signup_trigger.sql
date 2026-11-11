@@ -28,13 +28,16 @@ begin
     'Nuevo viajero'
   );
 
-  insert into public.profiles (id, username, full_name, country, city)
+  insert into public.profiles (id, username, full_name, country, city, motorcycle_brand, motorcycle_model, motorcycle_year)
   values (
     new.id,
     base_username,
     display_name_value,
     coalesce(nullif(trim(new.raw_user_meta_data->>'country'), ''), 'Perú'),
-    nullif(trim(new.raw_user_meta_data->>'city'), '')
+    nullif(trim(new.raw_user_meta_data->>'city'), ''),
+    nullif(trim(new.raw_user_meta_data->>'motorcycle_brand'), ''),
+    nullif(trim(new.raw_user_meta_data->>'motorcycle_model'), ''),
+    nullif(trim(new.raw_user_meta_data->>'motorcycle_year'), '')::integer
   )
   on conflict (id) do nothing;
 

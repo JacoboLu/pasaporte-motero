@@ -7,7 +7,7 @@ import {
   Images, X, LocateFixed, CalendarDays, Bookmark, SlidersHorizontal,
   ArrowLeft, Clock3, Send, ImagePlus, Globe2, Settings, LogOut, QrCode,
   BadgeCheck, AlertCircle, CloudOff, MoreHorizontal, Flag, UserPlus, Stamp,
-  MapPinned, Trophy, Sparkles, FileCheck2, ScanLine, Wrench, CalendarClock, FileText, ChevronDown
+  MapPinned, Trophy, Sparkles, FileCheck2, ScanLine, Wrench, CalendarClock, FileText, ChevronDown, Eye, EyeOff
 } from 'lucide-react'
 import { allRegions, regions } from './data'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
@@ -17,7 +17,7 @@ type VisitStatus = 'validated' | 'pending' | 'rejected'
 type Destination = { id: number; title: string; region: string; province: string; city: string; category: string; distance: string; image: string; description: string; lat: number; lng: number; radius: number }
 type Post = { id: number; title: string; text: string; place: string; date: string; likes: number; liked?: boolean; saved?: boolean; visibility: 'public'|'followers'|'private'; image?: string; comments: string[] }
 type Visit = { id: number; destinationId: number; date: string; method: 'gps'|'photo'|'qr'; status: VisitStatus; note?: string; image?: string }
-type Trip = { id: number; name: string; start: string; end: string; description: string; destinationIds: number[]; visibility: 'public'|'private'; photos: string[] }
+type Trip = { id: number; name: string; start: string; end: string; description: string; destinationIds: number[]; visibility: 'public'|'followers'|'private'; photos: string[] }
 
 const destinations: Destination[] = [
   { id: 1, title: 'Abra Anticona (Ticlio)', region: 'Junín', province: 'Yauli', city: 'Morococha', category: 'Montañas', distance: '124 km', image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1100&q=85', description: 'Uno de los pasos de montaña más emblemáticos de la Carretera Central. Un recorrido de altura entre paisajes andinos.', lat: -11.609, lng: -76.193, radius: 350 },
@@ -97,7 +97,7 @@ export default function App() {
   const [tripStart, setTripStart] = useState(new Date().toISOString().slice(0,10))
   const [tripEnd, setTripEnd] = useState('')
   const [tripDescription, setTripDescription] = useState('')
-  const [tripVisibility, setTripVisibility] = useState<'public'|'private'>('private')
+  const [tripVisibility, setTripVisibility] = useState<'public'|'followers'|'private'>('private')
   const [tripDestinations, setTripDestinations] = useState<number[]>([])
   const [visitNote, setVisitNote] = useState('')
   const [visitPhoto, setVisitPhoto] = useState('')
@@ -116,6 +116,11 @@ export default function App() {
   const [authMode, setAuthMode] = useState<'login'|'register'>('login')
   const [authEmail, setAuthEmail] = useState('')
   const [authPassword, setAuthPassword] = useState('')
+  const [authConfirmPassword, setAuthConfirmPassword] = useState('')
+  const [authShowPassword, setAuthShowPassword] = useState(false)
+  const [authTerms, setAuthTerms] = useState(false)
+  const [authStep, setAuthStep] = useState(1)
+  const [authTravelerType, setAuthTravelerType] = useState('Motociclista')
   const [authBusy, setAuthBusy] = useState(false)
   const [authUser, setAuthUser] = useState<string | null>(null)
   const [authUserId, setAuthUserId] = useState<string | null>(null)
@@ -202,8 +207,8 @@ export default function App() {
       const meters = distanceMeters(position.coords, dest.lat, dest.lng)
       setBusy(false)
       if (meters <= dest.radius) {
-        setVisits(v => [{ id: Date.now(), destinationId: dest.id, date: new Date().toISOString(), method: 'gps', status: 'validated', note: visitNote }, ...v])
-        notify(`¡Visita GPS validada! Has conseguido el sello de ${dest.title}.`)
+        setVisits(v => [{ id: Date.now(), destinationId: dest.id, date: new Date().toISOString(), method: 'gps', status: 'pending', note: visitNote }, ...v])
+        notify(`Ubicación registrada para ${dest.title}. El sello quedará pendiente hasta verificarla en el servidor.`)
         closeModal(); setTab('passport')
       } else {
         notify(`Estás aproximadamente a ${(meters/1000).toFixed(1)} km de ${dest.title}. Puedes enviar una evidencia fotográfica.`)
@@ -334,15 +339,51 @@ export default function App() {
   }
 
   async function submitAuth() {
-    if (!authEmail.trim() || authPassword.length < 6) { notify('Ingresa un correo válido y una contraseña de al menos 6 caracteres.'); return }
-    if (!supabase) { notify('La autenticación real se activa al conectar Supabase. Puedes continuar explorando en modo demostración.'); setAuthOpen(false); return }
+    if (!supabase) { notify('No se pudo conectar con el servicio de cuentas.'); return }
+    if (authMode === 'register' && authStep === 1) {
+      const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, '')
+      if (displayName.trim().length < 2) { notify('Escribe tu nombre para mostrar.'); return }
+      if (cleanUsername.length < 3) { notify('El usuario debe tener al menos 3 caracteres.'); return }
+      if (!/^[a-z0-9_]+$/.test(cleanUsername)) { notify('Usa solo letras, números y guion bajo en tu usuario.'); return }
+      if (!homeCity.trim()) { notify('Indica tu ciudad o país.'); return }
+      setUsername(cleanUsername)
+      setAuthStep(2)
+      return
+    }
+    if (!authEmail.trim() || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(authEmail.trim())) { notify('Ingresa un correo electrónico válido.'); return }
+    if (authMode === 'register') {
+      const strongPassword = authPassword.length >= 8 && /[a-z]/.test(authPassword) && /[A-Z]/.test(authPassword) && /[0-9]/.test(authPassword) && /[^A-Za-z0-9]/.test(authPassword)
+      if (!strongPassword) { notify('La contraseña debe tener 8 caracteres e incluir mayúscula, minúscula, número y símbolo.'); return }
+      if (authPassword !== authConfirmPassword) { notify('Las contraseñas no coinciden.'); return }
+      if (!authTerms) { notify('Debes aceptar los términos y la política de privacidad.'); return }
+    } else if (authPassword.length < 8) { notify('La contraseña debe tener al menos 8 caracteres.'); return }
     setAuthBusy(true)
     const result = authMode === 'register'
-      ? await supabase.auth.signUp({ email: authEmail.trim(), password: authPassword, options: { data: { username: username.trim().toLowerCase().replace(/[^a-z0-9_]/g, ''), display_name: displayName, full_name: displayName, city: homeCity } } })
+      ? await supabase.auth.signUp({ email: authEmail.trim(), password: authPassword, options: { data: {
+          username: username.trim().toLowerCase().replace(/[^a-z0-9_]/g, ''),
+          display_name: displayName.trim(), full_name: displayName.trim(), city: homeCity.trim(),
+          traveler_type: authTravelerType, motorcycle_brand: motorcycleBrand.trim() || null,
+          motorcycle_model: motorcycleModel.trim() || null
+        } } })
       : await supabase.auth.signInWithPassword({ email: authEmail.trim(), password: authPassword })
     setAuthBusy(false)
-    if (result.error) { notify(result.error.message); return }
-    setAuthOpen(false); setAuthPassword(''); notify(authMode === 'register' ? 'Registro enviado. Revisa tu correo si la confirmación está habilitada.' : 'Sesión iniciada correctamente.')
+    if (result.error) {
+      const msg = result.error.message.toLowerCase().includes('already registered') ? 'Este correo ya tiene una cuenta. Inicia sesión.' :
+        result.error.message.toLowerCase().includes('password') ? 'La contraseña no cumple los requisitos de seguridad.' : result.error.message
+      notify(msg); return
+    }
+    setAuthOpen(false); setAuthPassword(''); setAuthConfirmPassword(''); setAuthStep(1); setAuthTerms(false)
+    if (authMode === 'register' && !result.data.session) {
+      notify('Cuenta creada. Confirma tu correo desde el mensaje que te enviamos para activar el acceso.')
+    } else {
+      notify(authMode === 'register' ? '¡Bienvenido a Pasaporte Motero!' : 'Sesión iniciada correctamente.')
+    }
+  }
+
+  async function sendPasswordReset() {
+    if (!supabase || !authEmail.trim()) { notify('Escribe primero tu correo electrónico.'); return }
+    const {error} = await supabase.auth.resetPasswordForEmail(authEmail.trim(), {redirectTo: window.location.origin})
+    notify(error ? 'No se pudo enviar el enlace: ' + error.message : 'Te enviamos un enlace para restablecer tu contraseña.')
   }
   async function signOut() {
     if (supabase) {
@@ -433,11 +474,37 @@ export default function App() {
 
     {action && <div className="modal-backdrop" onClick={closeModal}><div className="composer-modal" onClick={e => e.stopPropagation()}><div className="modal-head"><h2>{action === 'visit' ? 'Validar visita' : action === 'trip' ? 'Nuevo viaje' : action === 'memory' ? 'Nuevo recuerdo' : 'Nueva publicación'}</h2><button className="icon-button" onClick={closeModal}><X/></button></div>
       {action === 'visit' && <><p className="muted">Selecciona el destino y el método para registrar tu visita.</p><label>Destino<select value={visitDestination} onChange={e => setVisitDestination(Number(e.target.value))}>{destinations.map(d => <option key={d.id} value={d.id}>{d.title} · {d.region}</option>)}</select></label><div className="method-tabs"><button className={visitMethod==='gps'?'active':''} onClick={()=>setVisitMethod('gps')}><LocateFixed/> GPS</button><button className={visitMethod==='photo'?'active':''} onClick={()=>setVisitMethod('photo')}><Camera/> Foto</button><button className={visitMethod==='qr'?'active':''} onClick={()=>setVisitMethod('qr')}><QrCode/> QR</button></div>{visitMethod==='gps' && <div className="method-panel"><LocateFixed size={28}/><strong>Validación por ubicación</strong><p>Compararemos tu ubicación actual con el área permitida del destino. Activa el GPS y permite el acceso desde el navegador.</p><button className="primary full" disabled={busy} onClick={validateGps}>{busy ? 'Comprobando ubicación…' : 'Comprobar mi ubicación'}</button></div>}{visitMethod==='photo' && <div className="method-panel"><Camera size={28}/><strong>Validación fotográfica</strong><p>Adjunta una fotografía tomada en el destino. La visita quedará pendiente de revisión.</p><label className="file-pick"><ImagePlus/> Seleccionar fotografía<input type="file" accept="image/*" capture="environment" onChange={e=>fileToData(e.target.files?.[0])}/></label>{visitPhoto && <img className="preview-image" src={visitPhoto} alt="Vista previa"/>}<label>Descripción (opcional)<textarea rows={2} value={visitNote} onChange={e=>setVisitNote(e.target.value)} placeholder="Cuéntanos sobre esta visita"/></label><button className="primary full" onClick={submitPhotoVisit}>Enviar evidencia</button></div>}{visitMethod==='qr' && <div className="method-panel"><QrCode size={28}/><strong>Validación presencial</strong><p>Solicita al encargado autorizado que escanee tu QR. En esta versión de demostración puedes ingresar un código de prueba.</p><label>Código del establecimiento<input value={qrManual} onChange={e=>setQrManual(e.target.value)} placeholder="Código proporcionado por el encargado"/></label><button className="primary full" onClick={submitQrCode}>Enviar código</button></div>}</>}
-      {action === 'trip' && <><p className="muted">Agrupa tus destinos y recuerdos en una expedición.</p><label>Nombre del viaje<input value={tripName} onChange={e=>setTripName(e.target.value)} placeholder="Ej. Ruta a Huaraz"/></label><div className="form-grid"><label>Fecha de inicio<input type="date" value={tripStart} onChange={e=>setTripStart(e.target.value)}/></label><label>Fecha de fin<input type="date" value={tripEnd} onChange={e=>setTripEnd(e.target.value)}/></label></div><label>Descripción<textarea rows={3} value={tripDescription} onChange={e=>setTripDescription(e.target.value)} placeholder="¿Qué esperas descubrir?"/></label><label>Destinos del viaje</label><div className="select-destinations">{destinations.map(d=><label key={d.id} className="check-row"><input type="checkbox" checked={tripDestinations.includes(d.id)} onChange={e=>setTripDestinations(a=>e.target.checked?[...a,d.id]:a.filter(x=>x!==d.id))}/>{d.title}</label>)}</div><label>Privacidad<select value={tripVisibility} onChange={e=>setTripVisibility(e.target.value as 'public'|'private')}><option value="private">Privado · Solo yo</option><option value="public">Público · Compartir en comunidad</option></select></label><button className="primary full" onClick={createTrip}>Crear viaje <Route size={17}/></button></>}
+      {action === 'trip' && <><p className="muted">Agrupa tus destinos y recuerdos en una expedición.</p><label>Nombre del viaje<input value={tripName} onChange={e=>setTripName(e.target.value)} placeholder="Ej. Ruta a Huaraz"/></label><div className="form-grid"><label>Fecha de inicio<input type="date" value={tripStart} onChange={e=>setTripStart(e.target.value)}/></label><label>Fecha de fin<input type="date" value={tripEnd} onChange={e=>setTripEnd(e.target.value)}/></label></div><label>Descripción<textarea rows={3} value={tripDescription} onChange={e=>setTripDescription(e.target.value)} placeholder="¿Qué esperas descubrir?"/></label><label>Destinos del viaje</label><div className="select-destinations">{destinations.map(d=><label key={d.id} className="check-row"><input type="checkbox" checked={tripDestinations.includes(d.id)} onChange={e=>setTripDestinations(a=>e.target.checked?[...a,d.id]:a.filter(x=>x!==d.id))}/>{d.title}</label>)}</div><label>Privacidad<select value={tripVisibility} onChange={e=>setTripVisibility(e.target.value as 'public'|'followers'|'private')}><option value="private">Privado · Solo yo</option><option value="followers">Seguidores</option><option value="public">Público · Compartir en comunidad</option></select></label><button className="primary full" onClick={createTrip}>Crear viaje <Route size={17}/></button></>}
       {(action === 'post' || action === 'memory') && <><p className="muted">Comparte una experiencia con la comunidad o guarda un recuerdo privado.</p><label>Título<input value={postTitle} onChange={e=>setPostTitle(e.target.value)} placeholder="Ej. Una ruta inolvidable"/></label><label>Tu historia<textarea rows={4} value={postText} onChange={e=>setPostText(e.target.value)} placeholder="Describe el recorrido, los paisajes y lo que viviste…"/></label><label>Destino relacionado<select value={postPlace} onChange={e=>setPostPlace(e.target.value)}><option value="">Seleccionar destino</option>{destinations.map(d=><option key={d.id} value={`${d.city}, ${d.region}`}>{d.title}</option>)}</select></label><label className="file-pick"><ImagePlus/> Añadir fotografía<input type="file" accept="image/*" onChange={e=>postFileToData(e.target.files?.[0])}/></label>{postImage && <img className="preview-image" src={postImage} alt="Vista previa"/>}<label>Visibilidad<select value={postVisibility} onChange={e=>setPostVisibility(e.target.value as 'public'|'followers'|'private')}><option value="public">Pública · Comunidad</option><option value="followers">Seguidores</option><option value="private">Privada · Solo yo</option></select></label><button className="primary full" onClick={publishPost}>{postVisibility==='private'?'Guardar recuerdo':'Publicar experiencia'} <Send size={17}/></button></>}
     </div></div>}
 
-    {authOpen && <div className="modal-backdrop" onClick={() => setAuthOpen(false)}><div className="composer-modal" onClick={e => e.stopPropagation()}><div className="modal-head"><h2>{authMode === 'login' ? 'Bienvenido de nuevo' : 'Crear cuenta'}</h2><button className="icon-button" onClick={() => setAuthOpen(false)}><X/></button></div><p className="muted">Tu cuenta permitirá sincronizar el pasaporte, los viajes y las publicaciones entre dispositivos.</p><div className="feed-switch"><button className={authMode==='login'?'active':''} onClick={()=>setAuthMode('login')}>Iniciar sesión</button><button className={authMode==='register'?'active':''} onClick={()=>setAuthMode('register')}>Registrarme</button></div><label>Correo electrónico<input type="email" autoComplete="email" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} placeholder="correo@ejemplo.com"/></label><label>Contraseña<input type="password" autoComplete={authMode==='login'?'current-password':'new-password'} value={authPassword} onChange={e=>setAuthPassword(e.target.value)} placeholder="Mínimo 6 caracteres"/></label><button className="primary full" disabled={authBusy || !isSupabaseConfigured} onClick={submitAuth}>{authBusy ? 'Procesando…' : authMode==='login' ? 'Iniciar sesión' : 'Crear cuenta'}</button>{!isSupabaseConfigured && <p className="auth-note">Supabase todavía no está conectado. Esta pantalla queda preparada, pero el acceso real se habilitará al configurar la URL pública y la clave anon del proyecto.</p>}</div></div>}
+    {authOpen && <div className="modal-backdrop" onClick={() => {setAuthOpen(false);setAuthStep(1)}}><div className="composer-modal auth-modal" onClick={e => e.stopPropagation()}>
+      <div className="modal-head"><div><span className="eyebrow">PASAPORTE MOTERO</span><h2>{authMode === 'login' ? 'Bienvenido de nuevo' : 'Crea tu identidad viajera'}</h2></div><button className="icon-button" aria-label="Cerrar" onClick={() => {setAuthOpen(false);setAuthStep(1)}}><X/></button></div>
+      <p className="muted">{authMode === 'login' ? 'Accede para continuar tus rutas y sincronizar tus recuerdos.' : 'Dos pasos sencillos para formar parte de la comunidad motera.'}</p>
+      <div className="feed-switch"><button className={authMode==='login'?'active':''} onClick={()=>{setAuthMode('login');setAuthStep(1)}}>Iniciar sesión</button><button className={authMode==='register'?'active':''} onClick={()=>{setAuthMode('register');setAuthStep(1)}}>Registrarme</button></div>
+      {authMode === 'register' && <div className="auth-progress"><span className={authStep===1?'current':'done'}>1 <small>Tu perfil</small></span><i/><span className={authStep===2?'current': ''}>2 <small>Seguridad</small></span></div>}
+      {authMode === 'register' && authStep === 1 && <>
+        <label>Nombre para mostrar<input autoComplete="name" value={displayName} onChange={e=>setDisplayName(e.target.value)} placeholder="¿Cómo te llamamos?"/></label>
+        <label>Nombre de usuario<input autoComplete="username" value={username} onChange={e=>setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g,''))} placeholder="tu_usuario"/><small className="field-hint">Mínimo 3 caracteres. Letras, números y guion bajo.</small></label>
+        <label>Ciudad o país<input autoComplete="address-level2" value={homeCity} onChange={e=>setHomeCity(e.target.value)} placeholder="Ej. Huancayo, Perú"/></label>
+        <label>¿Cómo viajas?<select value={authTravelerType} onChange={e=>setAuthTravelerType(e.target.value)}>{['Motociclista','Motoviajero','Motoviajera','Acompañante','Entusiasta de las motos'].map(x=><option key={x}>{x}</option>)}</select></label>
+        <div className="form-grid"><label>Marca de tu moto <small className="field-hint">Opcional</small><input value={motorcycleBrand} onChange={e=>setMotorcycleBrand(e.target.value)} placeholder="Ej. Honda"/></label><label>Modelo <small className="field-hint">Opcional</small><input value={motorcycleModel} onChange={e=>setMotorcycleModel(e.target.value)} placeholder="Ej. CB 300"/></label></div>
+        <button className="primary full" onClick={()=>submitAuth()} disabled={authBusy}>Continuar <ChevronRight size={17}/></button>
+      </>}
+      {(authMode === 'login' || authStep === 2) && <>
+        <label>Correo electrónico<input type="email" autoComplete="email" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} placeholder="correo@ejemplo.com"/></label>
+        <label>Contraseña<span className="password-wrap"><input type={authShowPassword?'text':'password'} autoComplete={authMode==='login'?'current-password':'new-password'} value={authPassword} onChange={e=>setAuthPassword(e.target.value)} placeholder={authMode==='login'?'Tu contraseña':'Mínimo 8 caracteres'}/><button type="button" onClick={()=>setAuthShowPassword(v=>!v)} aria-label={authShowPassword?'Ocultar contraseña':'Mostrar contraseña'}>{authShowPassword?<EyeOff size={17}/>:<Eye size={17}/>}</button></span></label>
+        {authMode === 'register' && <>
+          <div className="password-rules"><small>La contraseña debe incluir:</small><span className={authPassword.length>=8?'valid':''}>8 caracteres</span><span className={/[A-Z]/.test(authPassword)?'valid':''}>Una mayúscula</span><span className={/[a-z]/.test(authPassword)?'valid':''}>Una minúscula</span><span className={/[0-9]/.test(authPassword)?'valid':''}>Un número</span><span className={/[^A-Za-z0-9]/.test(authPassword)?'valid':''}>Un símbolo</span></div>
+          <label>Confirmar contraseña<input type={authShowPassword?'text':'password'} autoComplete="new-password" value={authConfirmPassword} onChange={e=>setAuthConfirmPassword(e.target.value)} placeholder="Repite tu contraseña"/></label>
+          <label className="terms-check"><input type="checkbox" checked={authTerms} onChange={e=>setAuthTerms(e.target.checked)}/> <span>Acepto el uso de mis datos para crear mi perfil y prestar las funciones de Pasaporte Motero.</span></label>
+        </>}
+        <button className="primary full" disabled={authBusy || !isSupabaseConfigured} onClick={submitAuth}>{authBusy?'Procesando…':authMode==='login'?'Iniciar sesión':'Crear mi cuenta'}</button>
+        {authMode === 'login' && <button className="text-action auth-reset" onClick={sendPasswordReset}>¿Olvidaste tu contraseña?</button>}
+        {authMode === 'register' && <button className="secondary full" onClick={()=>setAuthStep(1)} disabled={authBusy}><ArrowLeft size={16}/> Volver a mis datos</button>}
+      </>}
+      {!isSupabaseConfigured && <p className="auth-note">La conexión con Supabase debe estar configurada para crear cuentas y sincronizar datos.</p>}
+    </div></div>}
 
     {commentPost !== null && <div className="modal-backdrop" onClick={()=>setCommentPost(null)}><div className="composer-modal" onClick={e=>e.stopPropagation()}><div className="modal-head"><h2>Comentarios</h2><button className="icon-button" onClick={()=>setCommentPost(null)}><X/></button></div><div className="comments-list">{posts.find(p=>p.id===commentPost)?.comments.map((c,i)=><p key={i}>{c}</p>)}</div><label>Escribe un comentario<textarea rows={3} value={commentText} onChange={e=>setCommentText(e.target.value)} placeholder="Tu comentario…"/></label><button className="primary full" onClick={addComment}>Enviar comentario <Send size={16}/></button></div></div>}
     {notice && <button className="toast" onClick={()=>setNotice('')}><CheckCircle2 size={16}/>{notice}<b>×</b></button>}

@@ -35,3 +35,34 @@
 .settings-card .secondary:active,.settings-card .primary:active{transform:scale(.985);filter:brightness(1.08)}
 @keyframes garageFade{from{opacity:.55;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.motorcycle-card,.settings-card,.collapsible-heading>svg,.motorcycle-file,.settings-card .secondary,.settings-card .primary{transition:none;animation:none}}
+
+/* Guided account creation */
+.auth-modal{padding-bottom:22px}
+.auth-modal .modal-head{align-items:flex-start}
+.auth-modal .modal-head .eyebrow{display:block;margin-bottom:5px}
+.auth-modal .modal-head h2{font-size:19px;line-height:1.25}
+.auth-progress{display:flex;align-items:center;gap:9px;margin:17px 0 14px}
+.auth-progress>span{display:flex;align-items:center;gap:7px;color:#777;font-size:10px}
+.auth-progress>span:before{content:'';width:23px;height:23px;border:1px solid #555;border-radius:50%;display:grid;place-items:center}
+.auth-progress>span.current{color:#ff9857;font-weight:700}
+.auth-progress>span.current:before,.auth-progress>span.done:before{background:#ff6b00;border-color:#ff6b00}
+.auth-progress>span.done{color:#9bd4ac}
+.auth-progress>span small{font-size:9px}
+.auth-progress>i{height:1px;flex:1;background:#444}
+.auth-modal label{margin:12px 0}
+.auth-modal label input,.auth-modal label select{min-height:45px}
+.auth-modal .field-hint{display:block;margin-top:5px;color:#858585;font-size:9px;font-weight:400}
+.password-wrap{display:flex;align-items:center;margin-top:7px;background:#242427;border:1px solid #444;border-radius:10px;padding-right:8px}
+.password-wrap input{flex:1;min-width:0;margin:0!important;border:0!important;background:transparent!important}
+.password-wrap button{border:0;background:transparent;color:#aaa;padding:8px;display:grid;place-items:center}
+.password-rules{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 13px}
+.password-rules small{width:100%;color:#999;font-size:9px}
+.password-rules span{border:1px solid #454545;border-radius:20px;padding:5px 8px;color:#999;font-size:8px}
+.password-rules span:before{content:'○ ';color:#777}
+.password-rules span.valid{color:#9bd4ac;border-color:#477a59;background:#1d3025}
+.password-rules span.valid:before{content:'✓ ';color:#9bd4ac}
+.auth-modal .terms-check{display:flex;align-items:flex-start;gap:9px;line-height:1.5;color:#aaa}
+.auth-modal .terms-check input{width:16px;height:16px;min-height:16px;margin:1px 0 0;accent-color:#ff6b00;flex-shrink:0}
+.auth-reset{width:100%;justify-content:center;margin:10px 0}
+.auth-modal .secondary.full{margin-top:9px}
+@media(prefers-reduced-motion:no-preference){.auth-modal{animation:authRise .22s ease-out both}@keyframes authRise{from{opacity:.7;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}}
