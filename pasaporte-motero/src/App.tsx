@@ -65,6 +65,10 @@ export default function App() {
   const [username, setUsername] = useState(() => readStore('pm_username', 'viajero_motero'))
   const [bio, setBio] = useState(() => readStore('pm_bio', 'Viajando y descubriendo nuevas rutas.'))
   const [homeCity, setHomeCity] = useState(() => readStore('pm_city', 'Perú'))
+  const [motorcycleBrand, setMotorcycleBrand] = useState('')
+  const [motorcycleModel, setMotorcycleModel] = useState('')
+  const [motorcycleYear, setMotorcycleYear] = useState('')
+  const [profileBusy, setProfileBusy] = useState(false)
   const [postTitle, setPostTitle] = useState('')
   const [postText, setPostText] = useState('')
   const [postPlace, setPostPlace] = useState('')
@@ -105,7 +109,38 @@ export default function App() {
   useEffect(() => { localStorage.setItem('pm_username', JSON.stringify(username)) }, [username])
   useEffect(() => { localStorage.setItem('pm_bio', JSON.stringify(bio)) }, [bio])
   useEffect(() => { localStorage.setItem('pm_city', JSON.stringify(homeCity)) }, [homeCity])
-  useEffect(() => { if (!supabase) return; supabase.auth.getSession().then(({data}) => setAuthUser(data.session?.user.email || null)); const {data:{subscription}} = supabase.auth.onAuthStateChange((_event, session) => setAuthUser(session?.user.email || null)); return () => subscription.unsubscribe() }, [])
+  useEffect(() => {
+    if (!supabase) return
+    let alive = true
+    const loadProfile = async (userId: string) => {
+      const { data, error } = await supabase!.from('profiles')
+        .select('username, full_name, bio, city, motorcycle_brand, motorcycle_model, motorcycle_year')
+        .eq('id', userId).maybeSingle()
+      if (!alive) return
+      if (error) { notify('No pudimos cargar tu perfil: ' + error.message); return }
+      if (data) {
+        setUsername(data.username || '')
+        setDisplayName(data.full_name || 'Viajero Motero')
+        setBio(data.bio || '')
+        setHomeCity(data.city || 'Perú')
+        setMotorcycleBrand(data.motorcycle_brand || '')
+        setMotorcycleModel(data.motorcycle_model || '')
+        setMotorcycleYear(data.motorcycle_year ? String(data.motorcycle_year) : '')
+      }
+    }
+    supabase.auth.getSession().then(({data}) => {
+      if (!alive) return
+      const user = data.session?.user
+      setAuthUser(user?.email || null)
+      if (user) void loadProfile(user.id)
+    })
+    const {data:{subscription}} = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthUser(session?.user.email || null)
+      if (session?.user) void loadProfile(session.user.id)
+      else { setMotorcycleBrand(''); setMotorcycleModel(''); setMotorcycleYear('') }
+    })
+    return () => { alive = false; subscription.unsubscribe() }
+  }, [])
   useEffect(() => { const on = () => setOffline(false); const off = () => setOffline(true); window.addEventListener('online', on); window.addEventListener('offline', off); return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off) } }, [])
 
   const visitedIds = useMemo(() => new Set(visits.filter(v => v.status === 'validated').map(v => v.destinationId)), [visits])
@@ -173,12 +208,41 @@ export default function App() {
   function openAction(which: 'visit'|'trip'|'post'|'memory') { setShowActions(false); setAction(which); if (which === 'visit') setVisitDestination(selected?.id || destinations[0].id) }
   function createMemory() { setAction('post'); setPostTitle('Un recuerdo de viaje'); setPostVisibility('private') }
 
+  async function saveProfile() {
+    if (!supabase) { notify('Supabase no está disponible.'); return }
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { notify('Inicia sesión para guardar tu perfil.'); return }
+    const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, '')
+    if (cleanUsername.length < 3) { notify('El nombre de usuario debe tener al menos 3 caracteres.'); return }
+    const year = motorcycleYear.trim() ? Number(motorcycleYear) : null
+    if (year !== null && (!Number.isInteger(year) || year < 1885 || year > new Date().getFullYear() + 1)) {
+      notify('Ingresa un año válido para tu motocicleta.'); return
+    }
+    setProfileBusy(true)
+    const { error } = await supabase.from('profiles').update({
+      username: cleanUsername,
+      full_name: displayName.trim() || 'Viajero Motero',
+      bio: bio.trim() || null,
+      city: homeCity.trim() || null,
+      motorcycle_brand: motorcycleBrand.trim() || null,
+      motorcycle_model: motorcycleModel.trim() || null,
+      motorcycle_year: year,
+      profile_completed: true,
+      updated_at: new Date().toISOString()
+    }).eq('id', user.id)
+    setProfileBusy(false)
+    if (error) { notify(error.code === '23505' ? 'Ese nombre de usuario ya está ocupado.' : 'No se pudo guardar el perfil: ' + error.message); return }
+    setUsername(cleanUsername)
+    setSubview('')
+    notify('Perfil guardado y sincronizado con tu cuenta.')
+  }
+
   async function submitAuth() {
     if (!authEmail.trim() || authPassword.length < 6) { notify('Ingresa un correo válido y una contraseña de al menos 6 caracteres.'); return }
     if (!supabase) { notify('La autenticación real se activa al conectar Supabase. Puedes continuar explorando en modo demostración.'); setAuthOpen(false); return }
     setAuthBusy(true)
     const result = authMode === 'register'
-      ? await supabase.auth.signUp({ email: authEmail.trim(), password: authPassword, options: { data: { username, display_name: displayName } } })
+      ? await supabase.auth.signUp({ email: authEmail.trim(), password: authPassword, options: { data: { username: username.trim().toLowerCase().replace(/[^a-z0-9_]/g, ''), display_name: displayName, full_name: displayName, city: homeCity } } })
       : await supabase.auth.signInWithPassword({ email: authEmail.trim(), password: authPassword })
     setAuthBusy(false)
     if (result.error) { notify(result.error.message); return }
@@ -244,7 +308,7 @@ export default function App() {
             <div className="profile-card"><div className="avatar large">{initials(displayName)}</div><h2>{displayName}</h2><span className="muted">@{username}</span><p className="muted">{bio}</p><span className="profile-location"><MapPin size={13}/> {homeCity}</span><div className="profile-stats"><span><b>{followed.length}</b> siguiendo</span><span><b>0</b> seguidores</span><span><b>{posts.length}</b> publicaciones</span></div></div>
             <div className="profile-menu"><button onClick={() => setSubview('trips')}><Route/><span><strong>Mis viajes y bitácoras</strong><small>{trips.length} viajes registrados</small></span><ChevronRight/></button><button onClick={() => setSubview('memories')}><Images/><span><strong>Fotos y recuerdos</strong><small>Tu galería personal</small></span><ChevronRight/></button><button onClick={makePersonalQr}><QrCode/><span><strong>Mi QR de viajero</strong><small>Identificación para validación presencial</small></span><ChevronRight/></button><button onClick={() => setSubview('settings')}><Settings/><span><strong>Configuración</strong><small>Datos personales y privacidad</small></span><ChevronRight/></button><button onClick={() => authUser ? signOut() : setAuthOpen(true)}>{authUser ? <LogOut/> : <ShieldCheck/>}<span><strong>{authUser ? 'Cerrar sesión' : 'Iniciar sesión / Registrarme'}</strong><small>{authUser || (isSupabaseConfigured ? 'Accede para sincronizar tus datos' : 'Modo demostración disponible')}</small></span><ChevronRight/></button></div>
             {qr && <div className="qr-card"><h3>Mi identificación QR</h3><img src={qr} alt="QR personal de demostración"/><p>QR de demostración. Para validar visitas reales se necesita un token temporal generado por el servidor.</p></div>}
-            {subview === 'settings' && <div className="settings-card"><div className="section-heading"><h2>Editar perfil</h2><button className="text-action" onClick={() => setSubview('')}>Cerrar</button></div><label>Nombre para mostrar<input value={displayName} onChange={e => setDisplayName(e.target.value)}/></label><label>Nombre de usuario<input value={username} onChange={e => setUsername(e.target.value.replace(/\s/g,'').replace('@',''))}/></label><label>Biografía<textarea rows={3} value={bio} onChange={e => setBio(e.target.value)}/></label><label>Ciudad o país<input value={homeCity} onChange={e => setHomeCity(e.target.value)}/></label><button className="primary full" onClick={() => { setSubview(''); notify('Perfil guardado en este dispositivo.') }}>Guardar cambios</button><button className="secondary full" onClick={() => setAdminMode(!adminMode)}>{adminMode ? 'Salir del modo encargado' : 'Vista de encargado / administrador (demo)'}</button>{adminMode && <div className="admin-demo"><h3>Panel de validaciones</h3><p>Solicitudes fotográficas pendientes: {visits.filter(v => v.status === 'pending').length}</p>{visits.filter(v => v.status === 'pending').map(v => <div className="admin-visit" key={v.id}><strong>{destinations.find(d=>d.id===v.destinationId)?.title}</strong>{v.image && <img src={v.image} alt="Evidencia"/>}<div><button className="primary" onClick={() => {setVisits(a=>a.map(x=>x.id===v.id?{...x,status:'validated'}:x));notify('Visita aprobada en modo local.')}}>Aprobar</button><button className="secondary" onClick={() => {setVisits(a=>a.map(x=>x.id===v.id?{...x,status:'rejected'}:x));notify('Visita rechazada en modo local.')}}>Rechazar</button></div></div>)}</div>}</div>}
+            {subview === 'settings' && <div className="settings-card"><div className="section-heading"><h2>Editar perfil</h2><button className="text-action" onClick={() => setSubview('')}>Cerrar</button></div><label>Nombre para mostrar<input value={displayName} onChange={e => setDisplayName(e.target.value)}/></label><label>Nombre de usuario<input value={username} onChange={e => setUsername(e.target.value.replace(/\s/g,'').replace('@',''))}/></label><label>Biografía<textarea rows={3} value={bio} onChange={e => setBio(e.target.value)}/></label><label>Ciudad o país<input value={homeCity} onChange={e => setHomeCity(e.target.value)}/></label><div className="form-grid"><label>Marca de motocicleta<input value={motorcycleBrand} onChange={e => setMotorcycleBrand(e.target.value)} placeholder="Ej. Honda"/></label><label>Modelo<input value={motorcycleModel} onChange={e => setMotorcycleModel(e.target.value)} placeholder="Ej. CB 300F"/></label></div><label>Año de fabricación<input type="number" inputMode="numeric" min="1885" max={new Date().getFullYear()+1} value={motorcycleYear} onChange={e => setMotorcycleYear(e.target.value)} placeholder="Ej. 2024"/></label>{authUser ? <button className="primary full" disabled={profileBusy} onClick={saveProfile}>{profileBusy ? 'Guardando…' : 'Guardar y sincronizar perfil'}</button> : <button className="primary full" onClick={() => { notify('Inicia sesión para sincronizar tus datos.'); setAuthOpen(true) }}>Iniciar sesión para guardar</button>}<button className="secondary full" onClick={() => setAdminMode(!adminMode)}>{adminMode ? 'Salir del modo encargado' : 'Vista de encargado / administrador (demo)'}</button>{adminMode && <div className="admin-demo"><h3>Panel de validaciones</h3><p>Solicitudes fotográficas pendientes: {visits.filter(v => v.status === 'pending').length}</p>{visits.filter(v => v.status === 'pending').map(v => <div className="admin-visit" key={v.id}><strong>{destinations.find(d=>d.id===v.destinationId)?.title}</strong>{v.image && <img src={v.image} alt="Evidencia"/>}<div><button className="primary" onClick={() => {setVisits(a=>a.map(x=>x.id===v.id?{...x,status:'validated'}:x));notify('Visita aprobada en modo local.')}}>Aprobar</button><button className="secondary" onClick={() => {setVisits(a=>a.map(x=>x.id===v.id?{...x,status:'rejected'}:x));notify('Visita rechazada en modo local.')}}>Rechazar</button></div></div>)}</div>}</div>}
           </>}
         </section>}
       </>}
