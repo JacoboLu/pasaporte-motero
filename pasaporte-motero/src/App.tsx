@@ -106,7 +106,7 @@ export default function App() {
   const [busy, setBusy] = useState(false)
   const [offline, setOffline] = useState(!navigator.onLine)
   const [feedMode, setFeedMode] = useState<'all'|'following'>('all')
-  const [commentPost, setCommentPost] = useState<number | null>(null)
+  const [commentPost, setCommentPost] = useState<string | number | null>(null)
   const [commentText, setCommentText] = useState('')
   const [followed, setFollowed] = useState<string[]>(() => readStore('pm_followed', []))
   const [qrManual, setQrManual] = useState('')
@@ -227,23 +227,97 @@ export default function App() {
     notify('Código recibido en modo demostración. La confirmación presencial requiere un escaneo autorizado y validación del servidor.')
     setQrManual('')
   }
-  function publishPost() {
+  async function publishPost() {
     if (!postText.trim()) { notify('Escribe algo sobre tu aventura antes de publicar.'); return }
-    setPosts(p => [{ id: Date.now(), title: postTitle.trim() || 'Una nueva aventura', text: postText.trim(), place: postPlace || 'Destino por agregar', date: 'Ahora', likes: 0, visibility: postVisibility, image: postImage || undefined, comments: [] }, ...p])
-    setPostTitle(''); setPostText(''); setPostPlace(''); setPostImage(''); setAction(''); setTab('community'); notify('Publicación guardada en este dispositivo.')
+    const user = await getCurrentAuthUser()
+    if (!supabase || !user) { setAuthMode('login'); setAuthOpen(true); notify('Inicia sesión para publicar y sincronizar.'); return }
+    setBusy(true)
+    const {data:post,error} = await supabase.from('posts').insert({
+      user_id:user.id,post_type:postImage?'photo':'diary',title:postTitle.trim() || 'Una nueva aventura',
+      body:postText.trim(),visibility:postVisibility
+    }).select('id,title,body,visibility,created_at').single()
+    if (error || !post) { setBusy(false); notify('No se pudo publicar: ' + (error?.message || 'Error desconocido')); return }
+    if (postImage) {
+      try {
+        const blob = await (await fetch(postImage)).blob()
+        const extension = blob.type.includes('png')?'png':blob.type.includes('webp')?'webp':'jpg'
+        const path = user.id + '/' + crypto.randomUUID() + '.' + extension
+        const {error:uploadError} = await supabase.storage.from('community').upload(path,blob,{contentType:blob.type || 'image/jpeg',upsert:false})
+        if (uploadError) { await supabase.from('posts').delete().eq('id',post.id); setBusy(false); notify('No se pudo subir la fotografía: '+uploadError.message); return }
+        const {error:photoError} = await supabase.from('post_photos').insert({post_id:post.id,user_id:user.id,storage_path:path,sort_order:0})
+        if (photoError) { setBusy(false); notify('Publicación creada, pero no se pudo asociar la fotografía: '+photoError.message); return }
+      } catch { setBusy(false); notify('No se pudo procesar la fotografía.'); return }
+    }
+    const image = postImage || undefined
+    setPosts(p=>[{id:post.id,title:post.title || 'Una nueva aventura',text:post.body,place:postPlace || 'Perú',date:'Ahora',likes:0,visibility:post.visibility,image,comments:[]},...p])
+    setBusy(false); setPostTitle(''); setPostText(''); setPostPlace(''); setPostImage(''); setAction(''); setTab('community')
+    notify('Publicación sincronizada con tu cuenta.')
   }
-  function createTrip() {
+  async function createTrip() {
     if (!tripName.trim()) { notify('Escribe un nombre para tu viaje.'); return }
-    const newTrip: Trip = { id: Date.now(), name: tripName.trim(), start: tripStart, end: tripEnd, description: tripDescription, destinationIds: tripDestinations, visibility: tripVisibility, photos: [] }
-    setTrips(t => [newTrip, ...t])
-    if (tripVisibility === 'public') setPosts(p => [{ id: Date.now() + 1, title: newTrip.name, text: newTrip.description || 'He creado una nueva bitácora de viaje.', place: newTrip.destinationIds.map(id => destinations.find(d => d.id === id)?.title).filter(Boolean).join(' · ') || 'Ruta por definir', date: 'Ahora', likes: 0, visibility: 'public', comments: [] }, ...p])
-    setTripName(''); setTripDescription(''); setTripDestinations([]); setAction(''); setTab('profile'); setSubview('trips'); notify('Viaje creado en este dispositivo.')
+    const user = await getCurrentAuthUser()
+    if (!supabase || !user) { setAuthMode('login'); setAuthOpen(true); notify('Inicia sesión para guardar tu bitácora.'); return }
+    setBusy(true)
+    const {data:trip,error} = await supabase.from('trips').insert({
+      user_id:user.id,name:tripName.trim(),description:tripDescription.trim() || null,
+      start_date:tripStart || null,end_date:tripEnd || null,visibility:tripVisibility
+    }).select('id').single()
+    if (error || !trip) { setBusy(false); notify('No se pudo guardar el viaje: '+(error?.message || 'Error desconocido')); return }
+    if (tripDestinations.length) {
+      const names = destinations.filter(d=>tripDestinations.includes(d.id)).map(d=>d.title)
+      const {data:places} = await supabase.from('tourist_places').select('id,name').in('name',names)
+      const links = (places||[]).map(p=>({trip_id:trip.id,tourist_place_id:p.id,sort_order:names.indexOf(p.name)}))
+      if (links.length) {
+        const {error:linkError}=await supabase.from('trip_destinations').insert(links)
+        if (linkError) notify('Viaje guardado, pero algunos destinos no se pudieron asociar.')
+      }
+    }
+    const newTrip:Trip={id:trip.id,name:tripName.trim(),start:tripStart,end:tripEnd,description:tripDescription,destinationIds:tripDestinations,visibility:tripVisibility,photos:[]}
+    setTrips(t=>[newTrip,...t]); setBusy(false); setTripName(''); setTripDescription(''); setTripDestinations([])
+    setAction(''); setTab('profile'); setSubview('trips'); notify('Viaje guardado y sincronizado.')
   }
-  function toggleLike(id: number) { setPosts(p => p.map(x => x.id === id ? { ...x, liked: !x.liked, likes: Math.max(0, x.likes + (x.liked ? -1 : 1)) } : x)) }
-  function addComment() { if (commentPost === null || !commentText.trim()) return; setPosts(p => p.map(x => x.id === commentPost ? { ...x, comments: [...x.comments, commentText.trim()] } : x)); setCommentText(''); setCommentPost(null); notify('Comentario añadido localmente.') }
-  function toggleSaved(id: number) { setSaved(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]); notify(saved.includes(id) ? 'Destino eliminado de guardados.' : 'Destino guardado para después.') }
-  function openAction(which: 'visit'|'trip'|'post'|'memory') { setShowActions(false); setAction(which); if (which === 'visit') setVisitDestination(selected?.id || destinations[0].id) }
-  function createMemory() { setAction('post'); setPostTitle('Un recuerdo de viaje'); setPostVisibility('private') }
+  async function toggleLike(id: string | number) {
+    const post=posts.find(x=>x.id===id); if(!post)return
+    const user=await getCurrentAuthUser()
+    if(!supabase || !user || typeof id!=='string'){notify('Inicia sesión para registrar tu reacción.');return}
+    if(post.liked){
+      const {error}=await supabase.from('post_likes').delete().eq('post_id',id).eq('user_id',user.id)
+      if(error){notify('No se pudo retirar el me gusta: '+error.message);return}
+    }else{
+      const {error}=await supabase.from('post_likes').insert({post_id:id,user_id:user.id})
+      if(error){notify('No se pudo registrar el me gusta: '+error.message);return}
+    }
+    setPosts(p=>p.map(x=>x.id===id?{...x,liked:!post.liked,likes:Math.max(0,x.likes+(post.liked?-1:1))}:x))
+  }
+  async function addComment() {
+    if(commentPost===null || !commentText.trim())return
+    const user=await getCurrentAuthUser()
+    if(!supabase || !user || typeof commentPost!=='string'){notify('Inicia sesión para comentar.');return}
+    const {data,error}=await supabase.from('comments').insert({post_id:commentPost,user_id:user.id,body:commentText.trim()}).select('body').single()
+    if(error){notify('No se pudo guardar el comentario: '+error.message);return}
+    setPosts(p=>p.map(x=>x.id===commentPost?{...x,comments:[...x.comments,data.body]}:x))
+    setCommentText('');setCommentPost(null);notify('Comentario publicado.')
+  }
+  async function toggleSaved(id:number) {
+    const user=await getCurrentAuthUser()
+    if(!supabase || !user){notify('Inicia sesión para sincronizar tus destinos guardados.');return}
+    const destination=destinations.find(d=>d.id===id)
+    if(!destination)return
+    const {data:place}=await supabase.from('tourist_places').select('id').eq('name',destination.title).maybeSingle()
+    if(!place){notify('Este destino aún no está sincronizado en el catálogo.');return}
+    if(saved.includes(id)){
+      const {error}=await supabase.from('saved_places').delete().eq('user_id',user.id).eq('tourist_place_id',place.id)
+      if(error){notify('No se pudo quitar de guardados: '+error.message);return}
+      setSaved(s=>s.filter(x=>x!==id))
+    }else{
+      const {error}=await supabase.from('saved_places').upsert({user_id:user.id,tourist_place_id:place.id})
+      if(error){notify('No se pudo guardar el destino: '+error.message);return}
+      setSaved(s=>[...s,id])
+    }
+    notify(saved.includes(id)?'Destino eliminado de guardados.':'Destino sincronizado en guardados.')
+  }
+  function openAction(which:'visit'|'trip'|'post'|'memory'){setShowActions(false);setAction(which);if(which==='visit')setVisitDestination(selected?.id||destinations[0].id)}
+  function createMemory(){setAction('post');setPostTitle('Un recuerdo de viaje');setPostVisibility('private')}
 
   async function loadUserContent(userId: string) {
     if (!supabase) return
