@@ -19,3 +19,19 @@
 .motorcycle-card .form-grid{gap:10px}
 .motorcycle-card .form-grid label{min-width:0}
 .motorcycle-card .motorcycle-photo{background:#202023}
+
+/* Subtle motion and expandable motorcycle panels */
+.motorcycle-card,.settings-card{transition:border-color .22s ease,box-shadow .22s ease,transform .22s ease}
+.motorcycle-card:focus-within,.settings-card:focus-within{border-color:#ff87384d}
+.collapsible-heading{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 0 14px;margin:0 0 12px;background:transparent;border:0;border-bottom:1px solid #ffffff12;color:#f5f5f5;text-align:left;font-size:15px;font-weight:750;cursor:pointer}
+.collapsible-heading span{display:flex;align-items:center;gap:9px}
+.collapsible-heading span svg{color:#ff8738}
+.collapsible-heading>svg{color:#ff9857;transition:transform .22s ease}
+.collapsible-heading>svg.chevron-open{transform:rotate(180deg)}
+.motorcycle-card>label,.motorcycle-card .form-grid,.motorcycle-card>.primary{animation:garageFade .24s ease both}
+.motorcycle-file{transition:background .2s ease,border-color .2s ease,transform .2s ease}
+.motorcycle-file:hover{background:#382316;border-color:#ff8738!important}
+.settings-card .secondary,.settings-card .primary{transition:transform .16s ease,filter .16s ease,box-shadow .16s ease}
+.settings-card .secondary:active,.settings-card .primary:active{transform:scale(.985);filter:brightness(1.08)}
+@keyframes garageFade{from{opacity:.55;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.motorcycle-card,.settings-card,.collapsible-heading>svg,.motorcycle-file,.settings-card .secondary,.settings-card .primary{transition:none;animation:none}}
