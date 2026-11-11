@@ -115,28 +115,6 @@ using (
   )
 );
 
-drop policy if exists "Read post photos" on public.post_photos;
-create policy "Read post photos" on public.post_photos
-for select to authenticated
-using (
-  exists (
-    select 1 from public.posts p
-    where p.id = post_id
-      and (
-        p.user_id = auth.uid()
-        or p.visibility = 'public'
-        or (
-          p.visibility = 'followers'
-          and exists (
-            select 1 from public.follows f
-            where f.follower_id = auth.uid()
-              and f.following_id = p.user_id
-          )
-        )
-      )
-  )
-);
-
 -- Compatibilidad con bases donde aún no existe la tabla de fotos de publicaciones.
 create table if not exists public.post_photos (
   id uuid primary key default gen_random_uuid(),
@@ -156,6 +134,28 @@ with check (
   and exists (
     select 1 from public.posts p
     where p.id = post_id and p.user_id = auth.uid()
+  )
+);
+
+drop policy if exists "Read post photos" on public.post_photos;
+create policy "Read post photos" on public.post_photos
+for select to authenticated
+using (
+  exists (
+    select 1 from public.posts p
+    where p.id = post_id
+      and (
+        p.user_id = auth.uid()
+        or p.visibility = 'public'
+        or (
+          p.visibility = 'followers'
+          and exists (
+            select 1 from public.follows f
+            where f.follower_id = auth.uid()
+              and f.following_id = p.user_id
+          )
+        )
+      )
   )
 );
 
