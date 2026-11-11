@@ -352,7 +352,7 @@ export default function App() {
     const [postResult, tripResult, followResult, visitResult, savedResult] = await Promise.all([
       supabase.from('posts').select('id,title,body,visibility,created_at,tourist_place_id').order('created_at',{ascending:false}).limit(100),
       supabase.from('trips').select('id,name,description,start_date,end_date,visibility,created_at,trip_destinations(tourist_places(name))').order('created_at',{ascending:false}).limit(100),
-      supabase.from('follows').select('followed_id').eq('follower_id',userId),
+      supabase.from('follows').select('following_id').eq('follower_id',userId),
       supabase.from('visits').select('id,visited_at,validation_method,validation_status,notes,tourist_places(name),visit_photos(storage_path)').order('visited_at',{ascending:false}).limit(200),
       supabase.from('saved_places').select('tourist_places(name)').eq('user_id',userId)
     ])
@@ -383,7 +383,7 @@ export default function App() {
       visibility:t.visibility,photos:[]
     })))
     if (followResult.error) notify('No pudimos cargar tus seguimientos: ' + followResult.error.message)
-    else setFollowed((followResult.data||[]).map(x=>x.followed_id))
+    else setFollowed((followResult.data||[]).map(x=>x.following_id))
     if (visitResult.error) notify('No pudimos cargar tus visitas: ' + visitResult.error.message)
     else if (visitResult.data) {
       const mapped=await Promise.all(visitResult.data.map(async (v:any)=>{
