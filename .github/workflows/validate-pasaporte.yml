@@ -1,0 +1,26 @@
+name: Validate Pasaporte Motero
+
+on:
+  push:
+    branches:
+      - feature/registro-integral-y-estabilidad
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: pasaporte-motero/package-lock.json
+      - name: Install dependencies
+        working-directory: pasaporte-motero
+        run: npm ci
+      - name: TypeScript and production build
+        working-directory: pasaporte-motero
+        run: npm run build
