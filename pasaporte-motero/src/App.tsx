@@ -15,9 +15,9 @@ import { isSupabaseConfigured, supabase } from './lib/supabase'
 type Tab = 'explore' | 'passport' | 'community' | 'profile'
 type VisitStatus = 'validated' | 'pending' | 'rejected'
 type Destination = { id: number; title: string; region: string; province: string; city: string; category: string; distance: string; image: string; description: string; lat: number; lng: number; radius: number }
-type Post = { id: number; title: string; text: string; place: string; date: string; likes: number; liked?: boolean; saved?: boolean; visibility: 'public'|'followers'|'private'; image?: string; comments: string[] }
-type Visit = { id: number; destinationId: number; date: string; method: 'gps'|'photo'|'qr'; status: VisitStatus; note?: string; image?: string }
-type Trip = { id: number; name: string; start: string; end: string; description: string; destinationIds: number[]; visibility: 'public'|'followers'|'private'; photos: string[] }
+type Post = { id: string | number; title: string; text: string; place: string; date: string; likes: number; liked?: boolean; saved?: boolean; visibility: 'public'|'followers'|'private'; image?: string; comments: string[] }
+type Visit = { id: string | number; destinationId: number; date: string; method: 'gps'|'photo'|'qr'; status: VisitStatus; note?: string; image?: string }
+type Trip = { id: string | number; name: string; start: string; end: string; description: string; destinationIds: number[]; visibility: 'public'|'followers'|'private'; photos: string[] }
 
 const destinations: Destination[] = [
   { id: 1, title: 'Abra Anticona (Ticlio)', region: 'Junín', province: 'Yauli', city: 'Morococha', category: 'Montañas', distance: '124 km', image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1100&q=85', description: 'Uno de los pasos de montaña más emblemáticos de la Carretera Central. Un recorrido de altura entre paisajes andinos.', lat: -11.609, lng: -76.193, radius: 350 },
@@ -157,12 +157,12 @@ export default function App() {
       const user = data.session?.user
       setAuthUser(user?.email || null)
       setAuthUserId(user?.id || null)
-      if (user) { void loadProfile(user.id); void loadMotorcycle(user.id) }
+      if (user) { void loadProfile(user.id); void loadMotorcycle(user.id); void loadUserContent(user.id) }
     })
     const {data:{subscription}} = supabase.auth.onAuthStateChange((_event, session) => {
       setAuthUser(session?.user.email || null)
       setAuthUserId(session?.user.id || null)
-      if (session?.user) { void loadProfile(session.user.id); void loadMotorcycle(session.user.id) }
+      if (session?.user) { void loadProfile(session.user.id); void loadMotorcycle(session.user.id); void loadUserContent(session.user.id) }
       else { resetSignedOutData() }
     })
     return () => { alive = false; subscription.unsubscribe() }
@@ -244,6 +244,43 @@ export default function App() {
   function toggleSaved(id: number) { setSaved(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]); notify(saved.includes(id) ? 'Destino eliminado de guardados.' : 'Destino guardado para después.') }
   function openAction(which: 'visit'|'trip'|'post'|'memory') { setShowActions(false); setAction(which); if (which === 'visit') setVisitDestination(selected?.id || destinations[0].id) }
   function createMemory() { setAction('post'); setPostTitle('Un recuerdo de viaje'); setPostVisibility('private') }
+
+  async function loadUserContent(userId: string) {
+    if (!supabase) return
+    const [postResult, tripResult, followResult] = await Promise.all([
+      supabase.from('posts').select('id,title,body,visibility,created_at,tourist_place_id').order('created_at',{ascending:false}).limit(100),
+      supabase.from('trips').select('id,name,description,start_date,end_date,visibility,created_at,trip_destinations(tourist_places(name))').order('created_at',{ascending:false}).limit(100),
+      supabase.from('follows').select('followed_id').eq('follower_id',userId)
+    ])
+    if (postResult.error) notify('No pudimos cargar la comunidad: ' + postResult.error.message)
+    else if (postResult.data) {
+      const ids = postResult.data.map(p=>p.id)
+      const [likes,comments,photos] = ids.length ? await Promise.all([
+        supabase.from('post_likes').select('post_id,user_id').in('post_id',ids),
+        supabase.from('comments').select('id,post_id,body').in('post_id',ids).order('created_at',{ascending:true}),
+        supabase.from('post_photos').select('post_id,storage_path').in('post_id',ids).order('sort_order',{ascending:true})
+      ]) : [{data:[]},{data:[]},{data:[]}] as any
+      const mapped = await Promise.all(postResult.data.map(async p => {
+        const photo = photos.data?.find((x:any)=>x.post_id===p.id)
+        let image: string | undefined
+        if (photo?.storage_path) {
+          const {data:signed} = await supabase!.storage.from('community').createSignedUrl(photo.storage_path,3600)
+          image = signed?.signedUrl
+        }
+        const postLikes = likes.data?.filter((x:any)=>x.post_id===p.id) || []
+        return {id:p.id,title:p.title || 'Una nueva aventura',text:p.body,place:'Perú',date:new Date(p.created_at).toLocaleDateString('es-PE'),likes:postLikes.length,liked:postLikes.some((x:any)=>x.user_id===userId),visibility:p.visibility,image,comments:(comments.data||[]).filter((x:any)=>x.post_id===p.id).map((x:any)=>x.body)} as Post
+      }))
+      setPosts(mapped)
+    }
+    if (tripResult.error) notify('No pudimos cargar tus viajes: ' + tripResult.error.message)
+    else if (tripResult.data) setTrips(tripResult.data.map((t:any)=>({
+      id:t.id,name:t.name,start:t.start_date || '',end:t.end_date || '',description:t.description || '',
+      destinationIds:(t.trip_destinations||[]).map((x:any)=>destinations.find(d=>d.title===x.tourist_places?.name)?.id).filter(Boolean),
+      visibility:t.visibility,photos:[]
+    })))
+    if (followResult.error) notify('No pudimos cargar tus seguimientos: ' + followResult.error.message)
+    else setFollowed((followResult.data||[]).map(x=>x.followed_id))
+  }
 
   async function loadMotorcycle(userId: string) {
     if (!supabase) return
