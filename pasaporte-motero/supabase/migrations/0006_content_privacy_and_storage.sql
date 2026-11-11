@@ -16,7 +16,7 @@ using (
   or visibility = 'public'
   or (visibility = 'followers' and exists (
     select 1 from public.follows f
-    where f.follower_id = auth.uid() and f.followed_id = trips.user_id
+    where f.follower_id = auth.uid() and f.following_id = trips.user_id
   ))
 );
 
@@ -26,7 +26,7 @@ using (exists (
   select 1 from public.trips t where t.id = trip_id and (
     t.user_id = auth.uid() or t.visibility = 'public'
     or (t.visibility = 'followers' and exists (
-      select 1 from public.follows f where f.follower_id = auth.uid() and f.followed_id = t.user_id
+      select 1 from public.follows f where f.follower_id = auth.uid() and f.following_id = t.user_id
     ))
   )
 ));
@@ -37,7 +37,7 @@ using (exists (
   select 1 from public.trips t where t.id = trip_id and (
     t.user_id = auth.uid() or t.visibility = 'public'
     or (t.visibility = 'followers' and exists (
-      select 1 from public.follows f where f.follower_id = auth.uid() and f.followed_id = t.user_id
+      select 1 from public.follows f where f.follower_id = auth.uid() and f.following_id = t.user_id
     ))
   )
 ));
@@ -48,7 +48,7 @@ using (exists (
   select 1 from public.posts p where p.id = post_id and (
     p.user_id = auth.uid() or p.visibility = 'public'
     or (p.visibility = 'followers' and exists (
-      select 1 from public.follows f where f.follower_id = auth.uid() and f.followed_id = p.user_id
+      select 1 from public.follows f where f.follower_id = auth.uid() and f.following_id = p.user_id
     ))
   )
 ));
@@ -82,7 +82,7 @@ using (
     where pp.storage_path = name and (
       p.user_id = auth.uid() or p.visibility = 'public'
       or (p.visibility = 'followers' and exists (
-        select 1 from public.follows f where f.follower_id = auth.uid() and f.followed_id = p.user_id
+        select 1 from public.follows f where f.follower_id = auth.uid() and f.following_id = p.user_id
       ))
     )
   )
