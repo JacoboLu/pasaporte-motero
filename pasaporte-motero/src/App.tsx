@@ -467,3 +467,4 @@ export default function App() {
     {notice && <button className="toast" onClick={()=>setNotice('')}><CheckCircle2 size={16}/>{notice}<b>×</b></button>}
   </div>
 }
+}
