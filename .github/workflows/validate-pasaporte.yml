@@ -16,11 +16,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: pasaporte-motero/package-lock.json
       - name: Install dependencies
         working-directory: pasaporte-motero
-        run: npm ci
+        run: npm install
       - name: TypeScript and production build
         working-directory: pasaporte-motero
         run: npm run build
