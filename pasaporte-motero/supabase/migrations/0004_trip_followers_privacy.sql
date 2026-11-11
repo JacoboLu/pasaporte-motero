@@ -1,6 +1,20 @@
 -- Pasaporte Motero · privacidad de viajes y fotografías.
 -- Añade el nivel "followers" y aplica el mismo control a fotos y destinos asociados.
 
+-- Compatibilidad: el catálogo de lugares aún no existe en algunas bases.
+-- Se crea la tabla mínima esperada por visitas, publicaciones y viajes.
+create table if not exists public.tourist_places (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  description text,
+  latitude double precision,
+  longitude double precision,
+  geofence_radius_m integer not null default 250,
+  cover_image_url text,
+  is_active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
 -- Compatibilidad con bases existentes donde faltan tablas auxiliares del diario.
 -- Las claves foráneas mantienen la integridad y no eliminan registros.
 create table if not exists public.trip_destinations (
