@@ -1,5 +1,11 @@
 -- Pasaporte Motero · alinear el trigger de registro con la tabla profiles existente.
--- La tabla profiles usa full_name (no display_name).
+-- Normaliza perfiles creados desde el esquema inicial o desde el proyecto ya activo.
+alter table public.profiles add column if not exists full_name text;
+alter table public.profiles add column if not exists country text default 'Perú';
+alter table public.profiles add column if not exists city text;
+alter table public.profiles add column if not exists motorcycle text;
+alter table public.profiles add column if not exists role text default 'user';
+alter table public.profiles add column if not exists updated_at timestamptz not null default now();
 create table if not exists public.user_qr_codes (
   user_id uuid primary key references auth.users(id) on delete cascade,
   public_code uuid not null unique default gen_random_uuid(),
@@ -28,10 +34,11 @@ begin
     'Nuevo viajero'
   );
 
-  insert into public.profiles (id, username, full_name, country, city)
+  insert into public.profiles (id, username, display_name, full_name, country, city)
   values (
     new.id,
     base_username,
+    display_name_value,
     display_name_value,
     coalesce(nullif(trim(new.raw_user_meta_data->>'country'), ''), 'Perú'),
     nullif(trim(new.raw_user_meta_data->>'city'), '')
