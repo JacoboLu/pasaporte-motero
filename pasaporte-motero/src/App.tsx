@@ -349,10 +349,12 @@ export default function App() {
 
   async function loadUserContent(userId: string) {
     if (!supabase) return
-    const [postResult, tripResult, followResult] = await Promise.all([
+    const [postResult, tripResult, followResult, visitResult, savedResult] = await Promise.all([
       supabase.from('posts').select('id,title,body,visibility,created_at,tourist_place_id').order('created_at',{ascending:false}).limit(100),
       supabase.from('trips').select('id,name,description,start_date,end_date,visibility,created_at,trip_destinations(tourist_places(name))').order('created_at',{ascending:false}).limit(100),
-      supabase.from('follows').select('followed_id').eq('follower_id',userId)
+      supabase.from('follows').select('followed_id').eq('follower_id',userId),
+      supabase.from('visits').select('id,visited_at,validation_method,validation_status,notes,tourist_places(name),visit_photos(storage_path)').order('visited_at',{ascending:false}).limit(200),
+      supabase.from('saved_places').select('tourist_places(name)').eq('user_id',userId)
     ])
     if (postResult.error) notify('No pudimos cargar la comunidad: ' + postResult.error.message)
     else if (postResult.data) {
@@ -382,6 +384,19 @@ export default function App() {
     })))
     if (followResult.error) notify('No pudimos cargar tus seguimientos: ' + followResult.error.message)
     else setFollowed((followResult.data||[]).map(x=>x.followed_id))
+    if (visitResult.error) notify('No pudimos cargar tus visitas: ' + visitResult.error.message)
+    else if (visitResult.data) {
+      const mapped=await Promise.all(visitResult.data.map(async (v:any)=>{
+        const dest=destinations.find(d=>d.title===v.tourist_places?.name)
+        const photo=v.visit_photos?.[0]?.storage_path
+        let image:string|undefined
+        if(photo){const {data:signed}=await supabase!.storage.from('visit-evidence').createSignedUrl(photo,3600);image=signed?.signedUrl}
+        return dest?{id:v.id,destinationId:dest.id,date:v.visited_at,method:v.validation_method,status:v.validation_status,note:v.notes,image} as Visit:null
+      }))
+      setVisits(mapped.filter(Boolean) as Visit[])
+    }
+    if(savedResult.error) notify('No pudimos cargar tus destinos guardados: '+savedResult.error.message)
+    else setSaved((savedResult.data||[]).map((x:any)=>destinations.find(d=>d.title===x.tourist_places?.name)?.id).filter(Boolean) as number[])
   }
 
   async function loadMotorcycle(userId: string) {
