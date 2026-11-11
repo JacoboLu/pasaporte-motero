@@ -1,6 +1,9 @@
 -- Pasaporte Motero · sincronización y seguridad de contenido privado.
 -- Idempotente: puede ejecutarse más de una vez sin duplicar políticas.
 
+-- Compatibilidad con proyectos donde trips se creó antes de incorporar visibilidad.
+alter table public.trips add column if not exists visibility text not null default 'private';
+
 alter table public.trips drop constraint if exists trips_visibility_check;
 alter table public.trips add constraint trips_visibility_check
   check (visibility in ('public','followers','private'));
