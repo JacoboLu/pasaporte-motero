@@ -1,6 +1,27 @@
 -- Pasaporte Motero · privacidad de viajes y fotografías.
 -- Añade el nivel "followers" y aplica el mismo control a fotos y destinos asociados.
 
+-- Compatibilidad con bases existentes donde faltan tablas auxiliares del diario.
+-- Las claves foráneas mantienen la integridad y no eliminan registros.
+create table if not exists public.trip_destinations (
+  trip_id uuid not null references public.trips(id) on delete cascade,
+  tourist_place_id uuid not null references public.tourist_places(id) on delete cascade,
+  sort_order integer not null default 0,
+  primary key (trip_id, tourist_place_id)
+);
+
+create table if not exists public.trip_photos (
+  id uuid primary key default gen_random_uuid(),
+  trip_id uuid not null references public.trips(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  storage_path text not null,
+  caption text,
+  created_at timestamptz not null default now()
+);
+
+alter table public.trip_destinations enable row level security;
+alter table public.trip_photos enable row level security;
+
 -- Compatibilidad con proyectos donde trips se creó antes de incorporar visibilidad.
 alter table public.trips add column if not exists visibility text not null default 'private';
 
