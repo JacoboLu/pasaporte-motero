@@ -235,3 +235,100 @@ create policy "Create own reports" on public.reports for insert with check (auth
 
 -- NOTE: staff QR validation must be implemented through a server-side Edge Function.
 -- Do not grant client-side update permissions to visits.validation_status or validators.
+
+-- Additional travel diary and saved-destination modules.
+create table if not exists public.trips (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  name text not null,
+  description text,
+  start_date date,
+  end_date date,
+  visibility text not null default 'private' check (visibility in ('public','private')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.trip_destinations (
+  trip_id uuid not null references public.trips(id) on delete cascade,
+  tourist_place_id uuid not null references public.tourist_places(id) on delete cascade,
+  sort_order integer not null default 0,
+  primary key (trip_id, tourist_place_id)
+);
+
+create table if not exists public.trip_photos (
+  id uuid primary key default gen_random_uuid(),
+  trip_id uuid not null references public.trips(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  storage_path text not null,
+  caption text,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.saved_places (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  tourist_place_id uuid not null references public.tourist_places(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (user_id, tourist_place_id)
+);
+
+create table if not exists public.achievements (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  description text,
+  badge_image_url text,
+  rule jsonb not null default '{}'::jsonb,
+  is_active boolean not null default true
+);
+
+create table if not exists public.user_achievements (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  achievement_id uuid not null references public.achievements(id) on delete cascade,
+  earned_at timestamptz not null default now(),
+  primary key (user_id, achievement_id)
+);
+
+alter table public.trips enable row level security;
+alter table public.trip_destinations enable row level security;
+alter table public.trip_photos enable row level security;
+alter table public.saved_places enable row level security;
+alter table public.achievements enable row level security;
+alter table public.user_achievements enable row level security;
+
+create policy "Read public or own trips" on public.trips for select using (visibility = 'public' or auth.uid() = user_id);
+create policy "Create own trips" on public.trips for insert with check (auth.uid() = user_id);
+create policy "Update own trips" on public.trips for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "Delete own trips" on public.trips for delete using (auth.uid() = user_id);
+create policy "Read trip destinations for visible trips" on public.trip_destinations for select using (exists(select 1 from public.trips t where t.id = trip_id and (t.visibility = 'public' or t.user_id = auth.uid())));
+create policy "Manage destinations in own trips" on public.trip_destinations for all using (exists(select 1 from public.trips t where t.id = trip_id and t.user_id = auth.uid())) with check (exists(select 1 from public.trips t where t.id = trip_id and t.user_id = auth.uid()));
+create policy "Read trip photos for visible trips" on public.trip_photos for select using (exists(select 1 from public.trips t where t.id = trip_id and (t.visibility = 'public' or t.user_id = auth.uid())));
+create policy "Add own trip photos" on public.trip_photos for insert with check (auth.uid() = user_id and exists(select 1 from public.trips t where t.id = trip_id and t.user_id = auth.uid()));
+create policy "Manage own saved places" on public.saved_places for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "Read active achievements" on public.achievements for select using (is_active);
+create policy "Read own achievements" on public.user_achievements for select using (auth.uid() = user_id);
+
+-- IMPORTANT: QR validation, GPS verification, photo review, and achievement awarding
+-- must be completed by trusted Edge Functions or privileged server-side workflows.
+-- Never mark a visit as validated directly from an untrusted browser client.
+
+-- Private media bucket: each authenticated user writes only inside their own UUID folder.
+insert into storage.buckets (id, name, public)
+values ('travel-media', 'travel-media', false)
+on conflict (id) do nothing;
+
+create policy "Read own travel media" on storage.objects
+for select to authenticated
+using (bucket_id = 'travel-media' and (storage.foldername(name))[1] = auth.uid()::text);
+
+create policy "Upload own travel media" on storage.objects
+for insert to authenticated
+with check (bucket_id = 'travel-media' and (storage.foldername(name))[1] = auth.uid()::text);
+
+create policy "Update own travel media" on storage.objects
+for update to authenticated
+using (bucket_id = 'travel-media' and (storage.foldername(name))[1] = auth.uid()::text)
+with check (bucket_id = 'travel-media' and (storage.foldername(name))[1] = auth.uid()::text);
+
+create policy "Delete own travel media" on storage.objects
+for delete to authenticated
+using (bucket_id = 'travel-media' and (storage.foldername(name))[1] = auth.uid()::text);

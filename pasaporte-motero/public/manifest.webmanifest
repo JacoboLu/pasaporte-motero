@@ -4,7 +4,14 @@
   "description": "Tu pasaporte de aventuras por el Perú",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f4f0e5",
-  "theme_color": "#102c25",
-  "icons": []
+  "background_color": "#111111",
+  "theme_color": "#111111",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
