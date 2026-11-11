@@ -21,7 +21,7 @@ using (
     and exists (
       select 1 from public.follows f
       where f.follower_id = auth.uid()
-        and f.followed_id = trips.user_id
+        and f.following_id = trips.user_id
     )
   )
 );
@@ -41,7 +41,7 @@ using (
           and exists (
             select 1 from public.follows f
             where f.follower_id = auth.uid()
-              and f.followed_id = t.user_id
+              and f.following_id = t.user_id
           )
         )
       )
@@ -63,7 +63,7 @@ using (
           and exists (
             select 1 from public.follows f
             where f.follower_id = auth.uid()
-              and f.followed_id = t.user_id
+              and f.following_id = t.user_id
           )
         )
       )
@@ -85,7 +85,7 @@ using (
           and exists (
             select 1 from public.follows f
             where f.follower_id = auth.uid()
-              and f.followed_id = p.user_id
+              and f.following_id = p.user_id
           )
         )
       )
