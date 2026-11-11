@@ -88,6 +88,18 @@ using (
   )
 );
 
+-- Compatibilidad con bases donde visits fue creada sin el estado de validación.
+-- Las visitas existentes se conservan y reciben estado pending.
+alter table public.visits
+  add column if not exists validation_status text not null default 'pending';
+
+alter table public.visits
+  drop constraint if exists visits_validation_status_check;
+
+alter table public.visits
+  add constraint visits_validation_status_check
+  check (validation_status in ('pending','validated','rejected'));
+
 -- Permite al usuario cancelar únicamente visitas aún pendientes.
 drop policy if exists "Delete own pending visits" on public.visits;
 create policy "Delete own pending visits" on public.visits
