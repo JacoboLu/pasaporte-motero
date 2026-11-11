@@ -241,7 +241,7 @@ export default function App() {
     setTripName(''); setTripDescription(''); setTripDestinations([]); setAction(''); setTab('profile'); setSubview('trips')
     notify('Viaje creado y sincronizado con tu cuenta.')
   }
-  function toggleLike  function toggleLike(id: number) { setPosts(p => p.map(x => x.id === id ? { ...x, liked: !x.liked, likes: Math.max(0, x.likes + (x.liked ? -1 : 1)) } : x)) }
+  function toggleLike(id: number) { setPosts(p => p.map(x => x.id === id ? { ...x, liked: !x.liked, likes: Math.max(0, x.likes + (x.liked ? -1 : 1)) } : x)) }
   function addComment() { if (commentPost === null || !commentText.trim()) return; setPosts(p => p.map(x => x.id === commentPost ? { ...x, comments: [...x.comments, commentText.trim()] } : x)); setCommentText(''); setCommentPost(null); notify('Comentario añadido localmente.') }
   function toggleSaved(id: number) { setSaved(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]); notify(saved.includes(id) ? 'Destino eliminado de guardados.' : 'Destino guardado para después.') }
   function openAction(which: 'visit'|'trip'|'post'|'memory') { setShowActions(false); setAction(which); if (which === 'visit') setVisitDestination(selected?.id || destinations[0].id) }
