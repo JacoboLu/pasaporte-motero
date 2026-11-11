@@ -234,7 +234,7 @@ export default function App() {
     if (!data) return
     setMotorcycleId(data.id); setMotorcyclePhoto(data.photo_url || '')
     if (data.photo_url?.startsWith('motorcycles/')) {
-      const {data: signed} = await supabase.storage.from('motorcycles').createSignedUrl(data.photo_url.replace(/^motorcycles\\//,''), 3600)
+      const {data: signed} = await supabase.storage.from('motorcycles').createSignedUrl(data.photo_url.slice('motorcycles/'.length), 3600)
       setMotorcyclePhotoPreview(signed?.signedUrl || '')
     } else { setMotorcyclePhotoPreview(data.photo_url || '') }
     setMotorcyclePhotoFile(null); setMotorcycleCc(data.displacement_cc ? String(data.displacement_cc) : '')
@@ -261,7 +261,7 @@ export default function App() {
     const payload = {user_id:user.id,brand:motorcycleBrand.trim(),model:motorcycleModel.trim(),year:motorcycleYear ? Number(motorcycleYear) : null,photo_url:photoPath,displacement_cc:cc,motorcycle_type:motorcycleType,fuel_type:motorcycleFuel,odometer_km:km,notes:motorcycleNotes.trim() || null,updated_at:new Date().toISOString()}
     const {data,error} = await supabase.from('motorcycles').upsert(payload,{onConflict:'user_id'}).select('id').single()
     setMotorcycleBusy(false); if (error) { notify('No se pudo guardar: ' + error.message); return }
-    setMotorcycleId(data.id); setMotorcyclePhoto(photoPath || ''); setMotorcyclePhotoFile(null); if (photoPath?.startsWith('motorcycles/')) { const {data:signed}=await supabase.storage.from('motorcycles').createSignedUrl(photoPath.replace(/^motorcycles\\//,''),3600); setMotorcyclePhotoPreview(signed?.signedUrl || '') } notify('Ficha de motocicleta sincronizada.')
+    setMotorcycleId(data.id); setMotorcyclePhoto(photoPath || ''); setMotorcyclePhotoFile(null); if (photoPath?.startsWith('motorcycles/')) { const {data:signed}=await supabase.storage.from('motorcycles').createSignedUrl(photoPath.slice('motorcycles/'.length),3600); setMotorcyclePhotoPreview(signed?.signedUrl || '') } notify('Ficha de motocicleta sincronizada.')
   }
   async function addMaintenance() {
     if (!supabase || !motorcycleId) { notify('Primero guarda la ficha de tu motocicleta.'); return }
