@@ -279,15 +279,44 @@ export default function App() {
     setBusy(false); notify('Fotografía añadida a tu bitácora.')
   }
 
-  async function loadMotorcycle(userId: string) {  async function getCurrentAuthUser() {
+  async function getCurrentAuthUser() {
     if (!supabase) return null
-    const {data:{session},error:sessionError} = await supabase.auth.getSession()
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
     if (session?.user) return session.user
-    const {data:{user},error:userError} = await supabase.auth.getUser()
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
     if (user) return user
-    if (authUserId) return {id:authUserId} as {id:string}
+    if (authUserId) return { id: authUserId } as { id: string }
     if (sessionError || userError) console.warn('Supabase auth state:', sessionError || userError)
     return null
+  }
+
+  async function loadMotorcycle(userId: string) {
+    if (!supabase) return
+    const { data: bike, error } = await supabase.from('motorcycles').select('*').eq('user_id', userId).maybeSingle()
+    if (error) { notify('No pudimos cargar tu motocicleta: ' + error.message); return }
+    if (!bike) { setMotorcycleId(null); setMaintenance([]); setDocuments([]); return }
+    setMotorcycleId(bike.id)
+    setMotorcycleBrand(bike.brand || '')
+    setMotorcycleModel(bike.model || '')
+    setMotorcycleYear(bike.year ? String(bike.year) : '')
+    setMotorcycleCc(bike.displacement_cc ? String(bike.displacement_cc) : '')
+    setMotorcycleType(bike.motorcycle_type || 'Adventure')
+    setMotorcycleFuel(bike.fuel_type || 'Gasolina')
+    setMotorcycleOdometer(bike.odometer_km != null ? String(bike.odometer_km) : '')
+    setMotorcycleNotes(bike.notes || '')
+    setMotorcyclePhoto(bike.photo_url || '')
+    if (bike.photo_url?.startsWith('motorcycles/')) {
+      const { data: signed } = await supabase.storage.from('motorcycles').createSignedUrl(bike.photo_url.slice('motorcycles/'.length), 3600)
+      setMotorcyclePhotoPreview(signed?.signedUrl || '')
+    } else setMotorcyclePhotoPreview('')
+    const [{ data: services, error: servicesError }, { data: docs, error: docsError }] = await Promise.all([
+      supabase.from('motorcycle_maintenance').select('*').eq('motorcycle_id', bike.id).eq('user_id', userId).order('service_date', { ascending: false }),
+      supabase.from('motorcycle_documents').select('*').eq('motorcycle_id', bike.id).eq('user_id', userId).order('expiry_date', { ascending: true })
+    ])
+    if (servicesError) notify('No pudimos cargar el mantenimiento: ' + servicesError.message)
+    else setMaintenance(services || [])
+    if (docsError) notify('No pudimos cargar los documentos: ' + docsError.message)
+    else setDocuments(docs || [])
   }
 
   async function saveMotorcycle() {
