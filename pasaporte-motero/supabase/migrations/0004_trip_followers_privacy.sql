@@ -15,6 +15,16 @@ create table if not exists public.tourist_places (
   created_at timestamptz not null default now()
 );
 
+-- El catálogo solo es legible públicamente para mostrar destinos activos.
+-- No se concede escritura directa desde el cliente; la gestión administrativa
+-- deberá realizarse mediante operaciones de servidor autorizadas.
+alter table public.tourist_places enable row level security;
+grant select on public.tourist_places to anon, authenticated;
+drop policy if exists "Read active tourist places" on public.tourist_places;
+create policy "Read active tourist places" on public.tourist_places
+for select to anon, authenticated
+using (is_active = true);
+
 -- Compatibilidad con bases existentes donde faltan tablas auxiliares del diario.
 -- Las claves foráneas mantienen la integridad y no eliminan registros.
 create table if not exists public.trip_destinations (
