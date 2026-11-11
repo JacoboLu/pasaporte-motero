@@ -500,12 +500,12 @@ export default function App() {
       if (cleanUsername.length < 3) { notify('El usuario debe tener al menos 3 caracteres.'); return }
       if (!/^[a-z0-9_]+$/.test(cleanUsername)) { notify('Usa solo letras, números y guion bajo en tu usuario.'); return }
       if (!homeCity.trim()) { notify('Indica tu ciudad o país.'); return }
-      if (motorcycleYear.trim() && (!/^\\d{4}$/.test(motorcycleYear.trim()) || Number(motorcycleYear) < 1950 || Number(motorcycleYear) > new Date().getFullYear() + 1)) { notify('Revisa el año de tu motocicleta.'); return }
+      if (motorcycleYear.trim() && (!/^\d{4}$/.test(motorcycleYear.trim()) || Number(motorcycleYear) < 1950 || Number(motorcycleYear) > new Date().getFullYear() + 1)) { notify('Revisa el año de tu motocicleta.'); return }
       setUsername(cleanUsername)
       setAuthStep(2)
       return
     }
-    if (!authEmail.trim() || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(authEmail.trim())) { notify('Ingresa un correo electrónico válido.'); return }
+    if (!authEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(authEmail.trim())) { notify('Ingresa un correo electrónico válido.'); return }
     if (authMode === 'register') {
       const strongPassword = authPassword.length >= 8 && /[a-z]/.test(authPassword) && /[A-Z]/.test(authPassword) && /[0-9]/.test(authPassword) && /[^A-Za-z0-9]/.test(authPassword)
       if (!strongPassword) { notify('La contraseña debe tener 8 caracteres e incluir mayúscula, minúscula, número y símbolo.'); return }
