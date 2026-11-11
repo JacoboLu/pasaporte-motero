@@ -137,4 +137,26 @@ using (
   )
 );
 
+-- Compatibilidad con bases donde aún no existe la tabla de fotos de publicaciones.
+create table if not exists public.post_photos (
+  id uuid primary key default gen_random_uuid(),
+  post_id uuid not null references public.posts(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  storage_path text not null,
+  caption text,
+  created_at timestamptz not null default now()
+);
+
+alter table public.post_photos enable row level security;
+drop policy if exists "Add own post photos" on public.post_photos;
+create policy "Add own post photos" on public.post_photos
+for insert to authenticated
+with check (
+  auth.uid() = user_id
+  and exists (
+    select 1 from public.posts p
+    where p.id = post_id and p.user_id = auth.uid()
+  )
+);
+
 -- Los cambios de visibilidad nunca conceden permisos de escritura sobre viajes ajenos.
