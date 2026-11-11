@@ -198,6 +198,31 @@ export default function App() {
     catch { notify('No se pudo generar el QR.') }
   }
 
+  async function persistPendingVisit(destination:Destination,method:'gps'|'photo',note:string,coords?:{latitude:number;longitude:number},photoData?:string) {
+    const user=await getCurrentAuthUser()
+    if(!supabase || !user){setAuthMode('login');setAuthOpen(true);notify('Inicia sesión para guardar y sincronizar tu visita.');return false}
+    const {data:place,error:placeError}=await supabase.from('tourist_places').select('id').eq('name',destination.title).maybeSingle()
+    if(placeError || !place){notify('El destino aún no está disponible en el catálogo sincronizado.');return false}
+    const {data:visit,error}=await supabase.from('visits').insert({
+      user_id:user.id,tourist_place_id:place.id,validation_method:method,validation_status:'pending',
+      latitude:coords?.latitude ?? null,longitude:coords?.longitude ?? null,notes:note.trim() || null
+    }).select('id,visited_at,validation_method,validation_status').single()
+    if(error || !visit){notify('No se pudo guardar la visita: '+(error?.message || 'Error desconocido'));return false}
+    if(photoData){
+      try{
+        const blob=await (await fetch(photoData)).blob()
+        const extension=blob.type.includes('png')?'png':blob.type.includes('webp')?'webp':'jpg'
+        const path=user.id+'/'+crypto.randomUUID()+'.'+extension
+        const {error:uploadError}=await supabase.storage.from('visit-evidence').upload(path,blob,{contentType:blob.type || 'image/jpeg',upsert:false})
+        if(uploadError){await supabase.from('visits').delete().eq('id',visit.id);notify('No se pudo subir la evidencia: '+uploadError.message);return false}
+        const {error:photoError}=await supabase.from('visit_photos').insert({visit_id:visit.id,user_id:user.id,storage_path:path})
+        if(photoError){notify('Visita pendiente guardada, pero no se pudo asociar la fotografía: '+photoError.message)}
+      }catch{notify('No se pudo procesar la fotografía de evidencia.');return false}
+    }
+    setVisits(v=>[{id:visit.id,destinationId:destination.id,date:visit.visited_at,method,status:'pending',note,image:photoData},...v])
+    return true
+  }
+
   async function validateGps() {
     const dest = destinations.find(d => d.id === visitDestination)
     if (!dest) return
@@ -207,20 +232,23 @@ export default function App() {
       const meters = distanceMeters(position.coords, dest.lat, dest.lng)
       setBusy(false)
       if (meters <= dest.radius) {
-        setVisits(v => [{ id: Date.now(), destinationId: dest.id, date: new Date().toISOString(), method: 'gps', status: 'pending', note: visitNote }, ...v])
-        notify(`Ubicación registrada para ${dest.title}. El sello quedará pendiente hasta verificarla en el servidor.`)
-        closeModal(); setTab('passport')
+        void persistPendingVisit(dest,'gps',visitNote,{latitude:position.coords.latitude,longitude:position.coords.longitude}).then(ok=>{
+          if(ok){notify(`Ubicación registrada para ${dest.title}. El sello quedará pendiente de revisión.`);closeModal();setTab('passport')}
+        })
       } else {
         notify(`Estás aproximadamente a ${(meters/1000).toFixed(1)} km de ${dest.title}. Puedes enviar una evidencia fotográfica.`)
         setVisitMethod('photo')
       }
     }, error => { setBusy(false); notify(error.code === 1 ? 'Permiso de ubicación denegado. Actívalo en tu navegador o utiliza fotografía.' : 'No pudimos obtener tu ubicación. Intenta nuevamente o utiliza fotografía.') }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 })
   }
-  function submitPhotoVisit() {
+  async function submitPhotoVisit() {
     if (!visitPhoto) { notify('Adjunta una fotografía para continuar.'); return }
-    setVisits(v => [{ id: Date.now(), destinationId: visitDestination, date: new Date().toISOString(), method: 'photo', status: 'pending', note: visitNote, image: visitPhoto }, ...v])
-    notify('Evidencia guardada como pendiente de revisión. El sello se activará cuando sea aprobada.')
-    closeModal()
+    const dest=destinations.find(d=>d.id===visitDestination)
+    if(!dest){notify('Selecciona un destino válido.');return}
+    setBusy(true)
+    const ok=await persistPendingVisit(dest,'photo',visitNote,undefined,visitPhoto)
+    setBusy(false)
+    if(ok){notify('Evidencia sincronizada y pendiente de revisión.');closeModal()}
   }
   function submitQrCode() {
     if (!qrManual.trim()) { notify('Ingresa el código proporcionado por el establecimiento autorizado.'); return }
