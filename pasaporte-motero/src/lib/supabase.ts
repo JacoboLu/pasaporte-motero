@@ -1,7 +1,15 @@
+
 import { createClient } from '@supabase/supabase-js'
 
-const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
-const anon = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
+// Configuración pública de Supabase.
+// Sustituye estos valores por los de tu proyecto.
+const supabaseUrl = 'https://vngbrvfvoqdrhnxcnmdu.supabase.co'
+const supabasePublishableKey = 'sb_publishable_KLOPofxxzkpLRJOwrS95sQ_2j8e7k7o'
 
-export const isSupabaseConfigured = Boolean(url && anon)
-export const supabase = isSupabaseConfigured ? createClient(url!, anon!) : null
+export const isSupabaseConfigured = Boolean(
+  supabaseUrl && supabasePublishableKey
+)
+
+export const supabase = isSupabaseConfigured
+  ? createClient(supabaseUrl, supabasePublishableKey)
+  : null
