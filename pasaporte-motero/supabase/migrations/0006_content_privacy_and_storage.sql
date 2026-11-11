@@ -84,3 +84,9 @@ using (
     )
   )
 );
+
+-- Permite al usuario cancelar únicamente visitas aún pendientes.
+drop policy if exists "Delete own pending visits" on public.visits;
+create policy "Delete own pending visits" on public.visits
+for delete to authenticated
+using (auth.uid() = user_id and validation_status = 'pending');
