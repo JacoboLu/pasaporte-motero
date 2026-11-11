@@ -7,7 +7,7 @@ import {
   Images, X, LocateFixed, CalendarDays, Bookmark, SlidersHorizontal,
   ArrowLeft, Clock3, Send, ImagePlus, Globe2, Settings, LogOut, QrCode,
   BadgeCheck, AlertCircle, CloudOff, MoreHorizontal, Flag, UserPlus, Stamp,
-  MapPinned, Trophy, Sparkles, FileCheck2, ScanLine
+  MapPinned, Trophy, Sparkles, FileCheck2, ScanLine, Wrench, CalendarClock, FileText
 } from 'lucide-react'
 import { allRegions, regions } from './data'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
@@ -69,6 +69,23 @@ export default function App() {
   const [motorcycleModel, setMotorcycleModel] = useState('')
   const [motorcycleYear, setMotorcycleYear] = useState('')
   const [profileBusy, setProfileBusy] = useState(false)
+  const [motorcycleId, setMotorcycleId] = useState<string | null>(null)
+  const [motorcyclePhoto, setMotorcyclePhoto] = useState('')
+  const [motorcycleCc, setMotorcycleCc] = useState('')
+  const [motorcycleType, setMotorcycleType] = useState('Adventure')
+  const [motorcycleFuel, setMotorcycleFuel] = useState('Gasolina')
+  const [motorcycleOdometer, setMotorcycleOdometer] = useState('')
+  const [motorcycleNotes, setMotorcycleNotes] = useState('')
+  const [motorcycleBusy, setMotorcycleBusy] = useState(false)
+  const [maintenance, setMaintenance] = useState<any[]>([])
+  const [maintenanceDate, setMaintenanceDate] = useState(new Date().toISOString().slice(0,10))
+  const [maintenanceType, setMaintenanceType] = useState('Cambio de aceite')
+  const [maintenanceKm, setMaintenanceKm] = useState('')
+  const [maintenanceCost, setMaintenanceCost] = useState('')
+  const [maintenanceNotes, setMaintenanceNotes] = useState('')
+  const [documentType, setDocumentType] = useState('SOAT')
+  const [documentExpiry, setDocumentExpiry] = useState('')
+  const [documents, setDocuments] = useState<any[]>([])
   const [postTitle, setPostTitle] = useState('')
   const [postText, setPostText] = useState('')
   const [postPlace, setPostPlace] = useState('')
@@ -132,12 +149,12 @@ export default function App() {
       if (!alive) return
       const user = data.session?.user
       setAuthUser(user?.email || null)
-      if (user) void loadProfile(user.id)
+      if (user) { void loadProfile(user.id); void loadMotorcycle(user.id) }
     })
     const {data:{subscription}} = supabase.auth.onAuthStateChange((_event, session) => {
       setAuthUser(session?.user.email || null)
-      if (session?.user) void loadProfile(session.user.id)
-      else { setMotorcycleBrand(''); setMotorcycleModel(''); setMotorcycleYear('') }
+      if (session?.user) { void loadProfile(session.user.id); void loadMotorcycle(session.user.id) }
+      else { setMotorcycleBrand(''); setMotorcycleModel(''); setMotorcycleYear(''); setMotorcycleId(null); setMaintenance([]); setDocuments([]) }
     })
     return () => { alive = false; subscription.unsubscribe() }
   }, [])
@@ -207,6 +224,46 @@ export default function App() {
   function toggleSaved(id: number) { setSaved(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]); notify(saved.includes(id) ? 'Destino eliminado de guardados.' : 'Destino guardado para después.') }
   function openAction(which: 'visit'|'trip'|'post'|'memory') { setShowActions(false); setAction(which); if (which === 'visit') setVisitDestination(selected?.id || destinations[0].id) }
   function createMemory() { setAction('post'); setPostTitle('Un recuerdo de viaje'); setPostVisibility('private') }
+
+  async function loadMotorcycle(userId: string) {
+    if (!supabase) return
+    const { data, error } = await supabase.from('motorcycles').select('*').eq('user_id', userId).maybeSingle()
+    if (error) { notify('No pudimos cargar tu ficha: ' + error.message); return }
+    if (!data) return
+    setMotorcycleId(data.id); setMotorcyclePhoto(data.photo_url || ''); setMotorcycleCc(data.displacement_cc ? String(data.displacement_cc) : '')
+    setMotorcycleType(data.motorcycle_type || 'Adventure'); setMotorcycleFuel(data.fuel_type || 'Gasolina'); setMotorcycleOdometer(data.odometer_km != null ? String(data.odometer_km) : ''); setMotorcycleNotes(data.notes || '')
+    const [m,d] = await Promise.all([supabase.from('motorcycle_maintenance').select('*').eq('motorcycle_id',data.id).order('service_date',{ascending:false}),supabase.from('motorcycle_documents').select('*').eq('motorcycle_id',data.id).order('expiry_date',{ascending:true})])
+    setMaintenance(m.data || []); setDocuments(d.data || [])
+  }
+  async function saveMotorcycle() {
+    if (!supabase) return
+    const {data:{user}} = await supabase.auth.getUser()
+    if (!user) { notify('Inicia sesión para guardar tu motocicleta.'); return }
+    if (!motorcycleBrand.trim() || !motorcycleModel.trim()) { notify('Completa marca y modelo en Configuración.'); return }
+    const cc = motorcycleCc.trim() ? Number(motorcycleCc) : null, km = motorcycleOdometer.trim() ? Number(motorcycleOdometer) : null
+    if ((cc !== null && (!Number.isInteger(cc) || cc < 1 || cc > 3000)) || (km !== null && (!Number.isFinite(km) || km < 0))) { notify('Revisa cilindrada y kilometraje.'); return }
+    setMotorcycleBusy(true)
+    const payload = {user_id:user.id,brand:motorcycleBrand.trim(),model:motorcycleModel.trim(),year:motorcycleYear ? Number(motorcycleYear) : null,photo_url:motorcyclePhoto.trim() || null,displacement_cc:cc,motorcycle_type:motorcycleType,fuel_type:motorcycleFuel,odometer_km:km,notes:motorcycleNotes.trim() || null,updated_at:new Date().toISOString()}
+    const {data,error} = await supabase.from('motorcycles').upsert(payload,{onConflict:'user_id'}).select('id').single()
+    setMotorcycleBusy(false); if (error) { notify('No se pudo guardar: ' + error.message); return }
+    setMotorcycleId(data.id); notify('Ficha de motocicleta sincronizada.')
+  }
+  async function addMaintenance() {
+    if (!supabase || !motorcycleId) { notify('Primero guarda la ficha de tu motocicleta.'); return }
+    const {data:{user}} = await supabase.auth.getUser(); if (!user) return
+    const km = maintenanceKm.trim() ? Number(maintenanceKm) : null, cost = maintenanceCost.trim() ? Number(maintenanceCost) : null
+    if ((km !== null && km < 0) || (cost !== null && cost < 0)) { notify('Ingresa valores válidos.'); return }
+    const {data,error} = await supabase.from('motorcycle_maintenance').insert({motorcycle_id:motorcycleId,user_id:user.id,service_date:maintenanceDate,service_type:maintenanceType,odometer_km:km,cost_pen:cost,notes:maintenanceNotes.trim() || null}).select('*').single()
+    if (error) { notify('Error al registrar mantenimiento: ' + error.message); return }
+    setMaintenance(items => [data,...items]); setMaintenanceKm(''); setMaintenanceCost(''); setMaintenanceNotes(''); notify('Mantenimiento registrado.')
+  }
+  async function addMotorcycleDocument() {
+    if (!supabase || !motorcycleId) { notify('Primero guarda la ficha de tu motocicleta.'); return }
+    const {data:{user}} = await supabase.auth.getUser(); if (!user || !documentExpiry) { notify('Selecciona la fecha de vencimiento.'); return }
+    const {data,error} = await supabase.from('motorcycle_documents').insert({motorcycle_id:motorcycleId,user_id:user.id,document_type:documentType,expiry_date:documentExpiry}).select('*').single()
+    if (error) { notify('Error al guardar documento: ' + error.message); return }
+    setDocuments(items => [...items,data].sort((a,b)=>a.expiry_date.localeCompare(b.expiry_date))); setDocumentExpiry(''); notify('Vencimiento registrado.')
+  }
 
   async function saveProfile() {
     if (!supabase) { notify('Supabase no está disponible.'); return }
