@@ -128,10 +128,6 @@ export default function App() {
   useEffect(() => { localStorage.setItem('pm_trips', JSON.stringify(trips)) }, [trips])
   useEffect(() => { localStorage.setItem('pm_saved', JSON.stringify(saved)) }, [saved])
   useEffect(() => { localStorage.setItem('pm_followed', JSON.stringify(followed)) }, [followed])
-  useEffect(() => { localStorage.setItem('pm_name', JSON.stringify(displayName)) }, [displayName])
-  useEffect(() => { localStorage.setItem('pm_username', JSON.stringify(username)) }, [username])
-  useEffect(() => { localStorage.setItem('pm_bio', JSON.stringify(bio)) }, [bio])
-  useEffect(() => { localStorage.setItem('pm_city', JSON.stringify(homeCity)) }, [homeCity])
   useEffect(() => {
     if (!supabase) return
     let alive = true
@@ -162,7 +158,7 @@ export default function App() {
       setAuthUser(session?.user.email || null)
       setAuthUserId(session?.user.id || null)
       if (session?.user) { void loadProfile(session.user.id); void loadMotorcycle(session.user.id) }
-      else { setMotorcycleBrand(''); setMotorcycleModel(''); setMotorcycleYear(''); setMotorcycleId(null); setMaintenance([]); setDocuments([]) }
+      else { resetSignedOutData() }
     })
     return () => { alive = false; subscription.unsubscribe() }
   }, [])
@@ -177,6 +173,17 @@ export default function App() {
 
   function openTab(next: Tab) { setSubview(''); setSelected(null); setTab(next) }
   function notify(message: string) { setNotice(message); window.setTimeout(() => setNotice(''), 4200) }
+  function resetSignedOutData() {
+    ;['pm_name','pm_username','pm_bio','pm_city','pm_visits','pm_posts','pm_trips','pm_saved','pm_followed'].forEach(key => localStorage.removeItem(key))
+    setDisplayName('Viajero Motero'); setUsername('viajero_motero'); setBio(''); setHomeCity('Perú')
+    setVisits([]); setPosts(initialPosts); setTrips([]); setSaved([]); setFollowed([])
+    setMotorcycleBrand(''); setMotorcycleModel(''); setMotorcycleYear(''); setMotorcycleId(null)
+    setMotorcyclePhoto(''); setMotorcyclePhotoFile(null); setMotorcyclePhotoPreview('')
+    setMotorcycleCc(''); setMotorcycleType('Adventure'); setMotorcycleFuel('Gasolina')
+    setMotorcycleOdometer(''); setMotorcycleNotes(''); setMaintenance([]); setDocuments([])
+    setQr(''); setAdminMode(false); setAuthUser(null); setAuthUserId(null)
+    setSubview(''); setSelected(null); setAction(''); setShowActions(false); setTab('profile')
+  }
   function closeModal() { setAction(''); setVisitPhoto(''); setVisitNote(''); setPostImage(''); setCommentPost(null) }
   function fileToData(file?: File) { if (!file) return; if (file.size > 2_500_000) { notify('La imagen supera 2.5 MB. Selecciona una más ligera.'); return } const reader = new FileReader(); reader.onload = () => setVisitPhoto(String(reader.result || '')); reader.readAsDataURL(file) }
   function postFileToData(file?: File) { if (!file) return; if (file.size > 2_500_000) { notify('La imagen supera 2.5 MB. Selecciona una más ligera.'); return } const reader = new FileReader(); reader.onload = () => setPostImage(String(reader.result || '')); reader.readAsDataURL(file) }
@@ -337,7 +344,14 @@ export default function App() {
     if (result.error) { notify(result.error.message); return }
     setAuthOpen(false); setAuthPassword(''); notify(authMode === 'register' ? 'Registro enviado. Revisa tu correo si la confirmación está habilitada.' : 'Sesión iniciada correctamente.')
   }
-  async function signOut() { if (supabase) await supabase.auth.signOut(); setAuthUser(null); notify('Sesión cerrada.') }
+  async function signOut() {
+    if (supabase) {
+      const {error} = await supabase.auth.signOut()
+      if (error) { notify('No se pudo cerrar la sesión: ' + error.message); return }
+    }
+    resetSignedOutData()
+    notify('Sesión cerrada. Los datos personales se ocultaron en este dispositivo.')
+  }
 
   const navItems: {id: Tab; label: string; icon: typeof Compass}[] = [
     { id: 'explore', label: 'Explorar', icon: Compass }, { id: 'passport', label: 'Pasaporte', icon: BookOpen },
