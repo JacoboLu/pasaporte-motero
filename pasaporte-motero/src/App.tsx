@@ -346,6 +346,7 @@ export default function App() {
       if (cleanUsername.length < 3) { notify('El usuario debe tener al menos 3 caracteres.'); return }
       if (!/^[a-z0-9_]+$/.test(cleanUsername)) { notify('Usa solo letras, números y guion bajo en tu usuario.'); return }
       if (!homeCity.trim()) { notify('Indica tu ciudad o país.'); return }
+      if (motorcycleYear.trim() && (!/^\\d{4}$/.test(motorcycleYear.trim()) || Number(motorcycleYear) < 1950 || Number(motorcycleYear) > new Date().getFullYear() + 1)) { notify('Revisa el año de tu motocicleta.'); return }
       setUsername(cleanUsername)
       setAuthStep(2)
       return
@@ -363,7 +364,7 @@ export default function App() {
           username: username.trim().toLowerCase().replace(/[^a-z0-9_]/g, ''),
           display_name: displayName.trim(), full_name: displayName.trim(), city: homeCity.trim(),
           traveler_type: authTravelerType, motorcycle_brand: motorcycleBrand.trim() || null,
-          motorcycle_model: motorcycleModel.trim() || null
+          motorcycle_model: motorcycleModel.trim() || null, motorcycle_year: motorcycleYear.trim() || null
         } } })
       : await supabase.auth.signInWithPassword({ email: authEmail.trim(), password: authPassword })
     setAuthBusy(false)
@@ -489,6 +490,7 @@ export default function App() {
         <label>Ciudad o país<input autoComplete="address-level2" value={homeCity} onChange={e=>setHomeCity(e.target.value)} placeholder="Ej. Huancayo, Perú"/></label>
         <label>¿Cómo viajas?<select value={authTravelerType} onChange={e=>setAuthTravelerType(e.target.value)}>{['Motociclista','Motoviajero','Motoviajera','Acompañante','Entusiasta de las motos'].map(x=><option key={x}>{x}</option>)}</select></label>
         <div className="form-grid"><label>Marca de tu moto <small className="field-hint">Opcional</small><input value={motorcycleBrand} onChange={e=>setMotorcycleBrand(e.target.value)} placeholder="Ej. Honda"/></label><label>Modelo <small className="field-hint">Opcional</small><input value={motorcycleModel} onChange={e=>setMotorcycleModel(e.target.value)} placeholder="Ej. CB 300"/></label></div>
+        <label>Año de tu motocicleta <small className="field-hint">Opcional</small><input inputMode="numeric" maxLength={4} value={motorcycleYear} onChange={e=>setMotorcycleYear(e.target.value.replace(/[^0-9]/g,''))} placeholder="Ej. 2025"/></label>
         <button className="primary full" onClick={()=>submitAuth()} disabled={authBusy}>Continuar <ChevronRight size={17}/></button>
       </>}
       {(authMode === 'login' || authStep === 2) && <>
