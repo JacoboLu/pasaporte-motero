@@ -7,7 +7,7 @@ import {
   Images, X, LocateFixed, CalendarDays, Bookmark, SlidersHorizontal,
   ArrowLeft, Clock3, Send, ImagePlus, Globe2, Settings, LogOut, QrCode,
   BadgeCheck, AlertCircle, CloudOff, MoreHorizontal, Flag, UserPlus, Stamp,
-  MapPinned, Trophy, Sparkles, FileCheck2, ScanLine, Wrench, CalendarClock, FileText, ChevronDown
+  MapPinned, Trophy, Sparkles, FileCheck2, ScanLine, Wrench, CalendarClock, FileText, ChevronDown, Sun, Moon
 } from 'lucide-react'
 import { allRegions, regions } from './data'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
@@ -114,6 +114,11 @@ export default function App() {
   const [mapMode, setMapMode] = useState(false)
   const [authOpen, setAuthOpen] = useState(false)
   const [authMode, setAuthMode] = useState<'login'|'register'>('login')
+  const [theme, setTheme] = useState<'dark'|'light'>(() => (localStorage.getItem('pm_theme') as 'dark'|'light') || 'dark')
+  const [registerName, setRegisterName] = useState('')
+  const [registerUsername, setRegisterUsername] = useState('')
+  const [registerCity, setRegisterCity] = useState('')
+  const [registerMotorcycle, setRegisterMotorcycle] = useState('')
   const [authEmail, setAuthEmail] = useState('')
   const [authPassword, setAuthPassword] = useState('')
   const [authBusy, setAuthBusy] = useState(false)
@@ -123,6 +128,7 @@ export default function App() {
   const [maintenanceOpen, setMaintenanceOpen] = useState(true)
   const [documentsOpen, setDocumentsOpen] = useState(true)
 
+  useEffect(() => { localStorage.setItem('pm_theme', theme); document.documentElement.dataset.theme = theme }, [theme])
   useEffect(() => { localStorage.setItem('pm_visits', JSON.stringify(visits)) }, [visits])
   useEffect(() => { localStorage.setItem('pm_posts', JSON.stringify(posts)) }, [posts])
   useEffect(() => { localStorage.setItem('pm_trips', JSON.stringify(trips)) }, [trips])
@@ -387,11 +393,12 @@ export default function App() {
   }
 
   async function submitAuth() {
-    if (!authEmail.trim() || authPassword.length < 6) { notify('Ingresa un correo válido y una contraseña de al menos 6 caracteres.'); return }
+    if (!authEmail.trim() || authPassword.length < 8) { notify('Ingresa un correo válido y una contraseña de al menos 8 caracteres.'); return }
+    if (authMode === 'register' && (!registerName.trim() || registerUsername.trim().length < 3)) { notify('Completa tu nombre y un usuario de al menos 3 caracteres.'); return }
     if (!supabase) { notify('La autenticación real se activa al conectar Supabase. Puedes continuar explorando en modo demostración.'); setAuthOpen(false); return }
     setAuthBusy(true)
     const result = authMode === 'register'
-      ? await supabase.auth.signUp({ email: authEmail.trim(), password: authPassword, options: { data: { username: username.trim().toLowerCase().replace(/[^a-z0-9_]/g, ''), display_name: displayName, full_name: displayName, city: homeCity } } })
+      ? await supabase.auth.signUp({ email: authEmail.trim(), password: authPassword, options: { data: { username: registerUsername.trim().toLowerCase().replace(/[^a-z0-9_]/g, ''), display_name: registerName.trim(), full_name: registerName.trim(), city: registerCity.trim(), motorcycle: registerMotorcycle.trim() } } })
       : await supabase.auth.signInWithPassword({ email: authEmail.trim(), password: authPassword })
     setAuthBusy(false)
     if (result.error) { notify(result.error.message); return }
@@ -411,10 +418,10 @@ export default function App() {
     { id: 'community', label: 'Comunidad', icon: Users }, { id: 'profile', label: 'Perfil', icon: UserRound },
   ]
 
-  return <div className="app-shell">
+  return <div className={`app-shell theme-${theme}`}>
     <header className="topbar">
       <button className="brand" onClick={() => openTab('explore')} aria-label="Ir a inicio"><span className="brand-mark"><Bike size={21}/></span><span><strong>PASAPORTE MOTERO</strong><small>RUTAS · HISTORIAS · DESTINOS</small></span></button>
-      <div className="top-actions"><span className={`connection-dot ${offline ? 'off' : ''}`} title={offline ? 'Sin conexión' : 'Con conexión'}/><button className="icon-button" aria-label="Notificaciones" onClick={() => notify('No tienes notificaciones nuevas.')}><Bell size={19}/></button></div>
+      <div className="top-actions"><span className={`connection-dot ${offline ? 'off' : ''}`} title={offline ? 'Sin conexión' : 'Con conexión'}/><button className="icon-button theme-toggle" aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'} title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'} onClick={() => setTheme(v => v === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? <Sun size={18}/> : <Moon size={18}/>}</button><button className="icon-button" aria-label="Notificaciones" onClick={() => notify('No tienes notificaciones nuevas.')}><Bell size={19}/></button></div>
     </header>
     {offline && <div className="offline-banner"><CloudOff size={15}/> Modo sin conexión. Tus cambios se guardan en este dispositivo.</div>}
 
@@ -490,7 +497,7 @@ export default function App() {
       {(action === 'post' || action === 'memory') && <><p className="muted">Comparte una experiencia con la comunidad o guarda un recuerdo privado.</p><label>Título<input value={postTitle} onChange={e=>setPostTitle(e.target.value)} placeholder="Ej. Una ruta inolvidable"/></label><label>Tu historia<textarea rows={4} value={postText} onChange={e=>setPostText(e.target.value)} placeholder="Describe el recorrido, los paisajes y lo que viviste…"/></label><label>Destino relacionado<select value={postPlace} onChange={e=>setPostPlace(e.target.value)}><option value="">Seleccionar destino</option>{destinations.map(d=><option key={d.id} value={`${d.city}, ${d.region}`}>{d.title}</option>)}</select></label><label className="file-pick"><ImagePlus/> Añadir fotografía<input type="file" accept="image/*" onChange={e=>postFileToData(e.target.files?.[0])}/></label>{postImage && <img className="preview-image" src={postImage} alt="Vista previa"/>}<label>Visibilidad<select value={postVisibility} onChange={e=>setPostVisibility(e.target.value as 'public'|'followers'|'private')}><option value="public">Pública · Comunidad</option><option value="followers">Seguidores</option><option value="private">Privada · Solo yo</option></select></label><button className="primary full" onClick={publishPost}>{postVisibility==='private'?'Guardar recuerdo':'Publicar experiencia'} <Send size={17}/></button></>}
     </div></div>}
 
-    {authOpen && <div className="modal-backdrop" onClick={() => setAuthOpen(false)}><div className="composer-modal" onClick={e => e.stopPropagation()}><div className="modal-head"><h2>{authMode === 'login' ? 'Bienvenido de nuevo' : 'Crear cuenta'}</h2><button className="icon-button" onClick={() => setAuthOpen(false)}><X/></button></div><p className="muted">Tu cuenta permitirá sincronizar el pasaporte, los viajes y las publicaciones entre dispositivos.</p><div className="feed-switch"><button className={authMode==='login'?'active':''} onClick={()=>setAuthMode('login')}>Iniciar sesión</button><button className={authMode==='register'?'active':''} onClick={()=>setAuthMode('register')}>Registrarme</button></div><label>Correo electrónico<input type="email" autoComplete="email" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} placeholder="correo@ejemplo.com"/></label><label>Contraseña<input type="password" autoComplete={authMode==='login'?'current-password':'new-password'} value={authPassword} onChange={e=>setAuthPassword(e.target.value)} placeholder="Mínimo 6 caracteres"/></label><button className="primary full" disabled={authBusy || !isSupabaseConfigured} onClick={submitAuth}>{authBusy ? 'Procesando…' : authMode==='login' ? 'Iniciar sesión' : 'Crear cuenta'}</button>{!isSupabaseConfigured && <p className="auth-note">Supabase todavía no está conectado. Esta pantalla queda preparada, pero el acceso real se habilitará al configurar la URL pública y la clave anon del proyecto.</p>}</div></div>}
+    {authOpen && <div className="modal-backdrop" onClick={() => setAuthOpen(false)}><div className="composer-modal" onClick={e => e.stopPropagation()}><div className="modal-head"><h2>{authMode === 'login' ? 'Bienvenido de nuevo' : 'Crear cuenta'}</h2><button className="icon-button" onClick={() => setAuthOpen(false)}><X/></button></div><p className="muted">Tu cuenta permitirá sincronizar el pasaporte, los viajes y las publicaciones entre dispositivos.</p><div className="feed-switch"><button className={authMode==='login'?'active':''} onClick={()=>setAuthMode('login')}>Iniciar sesión</button><button className={authMode==='register'?'active':''} onClick={()=>setAuthMode('register')}>Registrarme</button></div><label>Correo electrónico<input type="email" autoComplete="email" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} placeholder="correo@ejemplo.com"/></label>{authMode === 'register' && <><label>Nombre completo<input autoComplete="name" value={registerName} onChange={e=>setRegisterName(e.target.value)} placeholder="Tu nombre y apellidos"/></label><label>Nombre de usuario<input autoComplete="username" value={registerUsername} onChange={e=>setRegisterUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g,''))} placeholder="Ej. viajero_motero"/></label><label>Ciudad o región<input autoComplete="address-level2" value={registerCity} onChange={e=>setRegisterCity(e.target.value)} placeholder="Ej. Huancayo, Junín"/></label><label>Motocicleta (opcional)<input value={registerMotorcycle} onChange={e=>setRegisterMotorcycle(e.target.value)} placeholder="Marca y modelo"/></label></>}<label>Contraseña<input type="password" autoComplete={authMode==='login'?'current-password':'new-password'} minLength={8} value={authPassword} onChange={e=>setAuthPassword(e.target.value)} placeholder="Mínimo 8 caracteres"/></label><button className="primary full" disabled={authBusy || !isSupabaseConfigured} onClick={submitAuth}>{authBusy ? 'Procesando…' : authMode==='login' ? 'Iniciar sesión' : 'Crear cuenta'}</button>{!isSupabaseConfigured && <p className="auth-note">Supabase todavía no está conectado. Esta pantalla queda preparada, pero el acceso real se habilitará al configurar la URL pública y la clave anon del proyecto.</p>}</div></div>}
 
     {commentPost !== null && <div className="modal-backdrop" onClick={()=>setCommentPost(null)}><div className="composer-modal" onClick={e=>e.stopPropagation()}><div className="modal-head"><h2>Comentarios</h2><button className="icon-button" onClick={()=>setCommentPost(null)}><X/></button></div><div className="comments-list">{posts.find(p=>p.id===commentPost)?.comments.map((c,i)=><p key={i}>{c}</p>)}</div><label>Escribe un comentario<textarea rows={3} value={commentText} onChange={e=>setCommentText(e.target.value)} placeholder="Tu comentario…"/></label><button className="primary full" onClick={addComment}>Enviar comentario <Send size={16}/></button></div></div>}
     {notice && <button className="toast" onClick={()=>setNotice('')}><CheckCircle2 size={16}/>{notice}<b>×</b></button>}
