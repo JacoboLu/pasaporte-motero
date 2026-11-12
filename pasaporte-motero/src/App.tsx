@@ -343,13 +343,13 @@ export default function App() {
     const { data, error } = await supabase.from('trips').insert({ user_id: user.id, name: tripName.trim(), description: tripDescription.trim() || null, start_date: tripStart || null, end_date: tripEnd || null, visibility: tripVisibility }).select('id,name,description,start_date,end_date,visibility').single()
     setBusy(false)
     if (error) { notify('No se pudo crear el viaje: ' + error.message); return }
-    if (tripDestinations.length) {
-      const {error:stopsError}=await supabase.from('trip_destinations').insert(tripDestinations.map((destinationId,index)=>({trip_id:data.id,tourist_place_id:String(destinationId),sort_order:index})))
-      if (stopsError) { await supabase.from('trips').delete().eq('id',data.id); setBusy(false); notify('No se pudieron guardar las paradas del catálogo: '+stopsError.message); return }
-    }
-    if (tripManualStops.length) {
-      const {error:manualError}=await supabase.from('trip_custom_stops').insert(tripManualStops.map((name,index)=>({trip_id:data.id,user_id:user.id,name,sort_order:tripDestinations.length+index})))
-      if (manualError) { await supabase.from('trips').delete().eq('id',data.id); setBusy(false); notify('No se pudieron guardar las paradas manuales. Ejecuta la migración 0003 y vuelve a intentarlo.'); return }
+    const allStops=[
+      ...tripDestinations.map((id,index)=>({trip_id:data.id,user_id:user.id,name:destinations.find(d=>d.id===id)?.title || 'Destino',catalog_destination_id:id,sort_order:index})),
+      ...tripManualStops.map((name,index)=>({trip_id:data.id,user_id:user.id,name,catalog_destination_id:null,sort_order:tripDestinations.length+index}))
+    ]
+    if (allStops.length) {
+      const {error:stopsError}=await supabase.from('trip_custom_stops').insert(allStops)
+      if (stopsError) { await supabase.from('trips').delete().eq('id',data.id); setBusy(false); notify('No se pudieron guardar las paradas. Ejecuta la migración 0003 y vuelve a intentarlo.'); return }
     }
     const newTrip: Trip = { id: data.id, name: data.name, start: data.start_date || '', end: data.end_date || '', description: data.description || '', destinationIds: tripDestinations, visibility: data.visibility, photos: [] }
     setTrips(items => [newTrip, ...items])
