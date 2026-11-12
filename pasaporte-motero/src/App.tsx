@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { allRegions, regions } from './data'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
+import { clearPrivateCache, migrateLegacyPrivateCache, readPrivateCache, writePrivateCache } from './lib/secure-storage'
 
 type Tab = 'explore' | 'passport' | 'community' | 'profile'
 type VisitStatus = 'validated' | 'pending' | 'rejected'
@@ -92,9 +93,6 @@ const initialPosts: Post[] = [
 ]
 const initialTrips: Trip[] = []
 
-function readStore<T>(key: string, fallback: T): T {
-  try { const value = localStorage.getItem(key); return value ? JSON.parse(value) as T : fallback } catch { return fallback }
-}
 function distanceMeters(a: GeolocationCoordinates, lat: number, lng: number) {
   const rad = (v: number) => v * Math.PI / 180
   const dLat = rad(lat - a.latitude), dLng = rad(lng - a.longitude)
@@ -115,15 +113,15 @@ export default function App() {
   const [action, setAction] = useState<'visit'|'trip'|'post'|'memory'|''>('')
   const [visitMethod, setVisitMethod] = useState<'gps'|'photo'|'qr'>('gps')
   const [visitDestination, setVisitDestination] = useState<number>(1)
-  const [visits, setVisits] = useState<Visit[]>(() => readStore('pm_visits', []))
+  const [visits, setVisits] = useState<Visit[]>([])
   const [departmentStamps, setDepartmentStamps] = useState<{department_code:string;earned_at:string}[]>([])
-  const [posts, setPosts] = useState<Post[]>(() => readStore('pm_posts', initialPosts))
-  const [trips, setTrips] = useState<Trip[]>(() => readStore('pm_trips', initialTrips))
-  const [saved, setSaved] = useState<number[]>(() => readStore('pm_saved', []))
-  const [displayName, setDisplayName] = useState(() => readStore('pm_name', 'Viajero Motero'))
-  const [username, setUsername] = useState(() => readStore('pm_username', 'viajero_motero'))
-  const [bio, setBio] = useState(() => readStore('pm_bio', 'Viajando y descubriendo nuevas rutas.'))
-  const [homeCity, setHomeCity] = useState(() => readStore('pm_city', 'Perú'))
+  const [posts, setPosts] = useState<Post[]>(initialPosts)
+  const [trips, setTrips] = useState<Trip[]>(initialTrips)
+  const [saved, setSaved] = useState<number[]>([])
+  const [displayName, setDisplayName] = useState('Viajero Motero')
+  const [username, setUsername] = useState('viajero_motero')
+  const [bio, setBio] = useState('Viajando y descubriendo nuevas rutas.')
+  const [homeCity, setHomeCity] = useState('Perú')
   const [motorcycleBrand, setMotorcycleBrand] = useState('')
   const [motorcycleModel, setMotorcycleModel] = useState('')
   const [motorcycleYear, setMotorcycleYear] = useState('')
@@ -177,7 +175,7 @@ export default function App() {
   const [feedMode, setFeedMode] = useState<'all'|'following'>('all')
   const [commentPost, setCommentPost] = useState<string | number | null>(null)
   const [commentText, setCommentText] = useState('')
-  const [followed, setFollowed] = useState<string[]>(() => readStore('pm_followed', []))
+  const [followed, setFollowed] = useState<string[]>([])
   const [qrManual, setQrManual] = useState('')
   const [qrChallengeExpires, setQrChallengeExpires] = useState('')
   const [qrScanning, setQrScanning] = useState(false)
@@ -202,6 +200,7 @@ export default function App() {
   const [authBusy, setAuthBusy] = useState(false)
   const [authUser, setAuthUser] = useState<string | null>(null)
   const [authUserId, setAuthUserId] = useState<string | null>(null)
+  const [secureCacheReady, setSecureCacheReady] = useState(false)
   const [motorcycleOpen, setMotorcycleOpen] = useState(true)
   const [maintenanceOpen, setMaintenanceOpen] = useState(true)
   const [documentsOpen, setDocumentsOpen] = useState(true)
@@ -225,11 +224,45 @@ export default function App() {
       })
     return () => { active = false }
   }, [])
-  useEffect(() => { localStorage.setItem('pm_visits', JSON.stringify(visits)) }, [visits])
-  useEffect(() => { localStorage.setItem('pm_posts', JSON.stringify(posts)) }, [posts])
-  useEffect(() => { localStorage.setItem('pm_trips', JSON.stringify(trips)) }, [trips])
-  useEffect(() => { localStorage.setItem('pm_saved', JSON.stringify(saved)) }, [saved])
-  useEffect(() => { localStorage.setItem('pm_followed', JSON.stringify(followed)) }, [followed])
+  useEffect(() => {
+    let active = true
+    const hydratePrivateCache = async () => {
+      await migrateLegacyPrivateCache()
+      const { data } = supabase ? await supabase.auth.getSession() : { data: { session: null } }
+      if (active && !data.session) {
+        const [cachedVisits, cachedPosts, cachedTrips, cachedSaved, cachedFollowed, cachedName, cachedUsername, cachedBio, cachedCity] = await Promise.all([
+          readPrivateCache<Visit[]>('pm_visits', []),
+          readPrivateCache<Post[]>('pm_posts', initialPosts),
+          readPrivateCache<Trip[]>('pm_trips', []),
+          readPrivateCache<number[]>('pm_saved', []),
+          readPrivateCache<string[]>('pm_followed', []),
+          readPrivateCache<string>('pm_name', 'Viajero Motero'),
+          readPrivateCache<string>('pm_username', 'viajero_motero'),
+          readPrivateCache<string>('pm_bio', 'Viajando y descubriendo nuevas rutas.'),
+          readPrivateCache<string>('pm_city', 'Perú')
+        ])
+        if (!active) return
+        setVisits(cachedVisits); setPosts(cachedPosts); setTrips(cachedTrips); setSaved(cachedSaved); setFollowed(cachedFollowed)
+        setDisplayName(cachedName); setUsername(cachedUsername); setBio(cachedBio); setHomeCity(cachedCity)
+      }
+      if (active) setSecureCacheReady(true)
+    }
+    void hydratePrivateCache().catch(error => {
+      console.error('No se pudo inicializar la caché privada cifrada:', error)
+      if (active) setSecureCacheReady(true)
+    })
+    return () => { active = false }
+  }, [])
+  useEffect(() => { if (secureCacheReady && authUserId) void writePrivateCache('pm_visits', visits) }, [secureCacheReady, authUserId, visits])
+  useEffect(() => { if (secureCacheReady && authUserId) void writePrivateCache('pm_posts', posts) }, [secureCacheReady, authUserId, posts])
+  useEffect(() => { if (secureCacheReady && authUserId) void writePrivateCache('pm_trips', trips) }, [secureCacheReady, authUserId, trips])
+  useEffect(() => { if (secureCacheReady && authUserId) void writePrivateCache('pm_saved', saved) }, [secureCacheReady, authUserId, saved])
+  useEffect(() => { if (secureCacheReady && authUserId) void writePrivateCache('pm_followed', followed) }, [secureCacheReady, authUserId, followed])
+  useEffect(() => {
+    if (!secureCacheReady || !authUserId) return
+    void writePrivateCache('pm_name', displayName); void writePrivateCache('pm_username', username)
+    void writePrivateCache('pm_bio', bio); void writePrivateCache('pm_city', homeCity)
+  }, [secureCacheReady, authUserId, displayName, username, bio, homeCity])
   useEffect(() => {
     if (!supabase) return
     let alive = true
@@ -298,6 +331,7 @@ export default function App() {
   function endMotorcycleCrop(){cropDrag.current=null}
   function notify(message: string) { setNotice(message); window.setTimeout(() => setNotice(''), 4200) }
   function resetSignedOutData() {
+    void clearPrivateCache()
     ;['pm_name','pm_username','pm_bio','pm_city','pm_visits','pm_posts','pm_trips','pm_saved','pm_followed'].forEach(key => localStorage.removeItem(key))
     setDisplayName('Viajero Motero'); setUsername('viajero_motero'); setBio(''); setHomeCity('Perú')
     setVisits([]); setDepartmentStamps([]); setPosts([]); setTrips([]); setSaved([]); setFollowed([])
