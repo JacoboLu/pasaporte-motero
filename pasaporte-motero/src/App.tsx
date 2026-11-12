@@ -328,12 +328,14 @@ export default function App() {
 
   const visitedIds = useMemo(() => new Set(visits.filter(v => v.status === 'validated').map(v => v.destinationId)), [visits])
   const departmentPages = useMemo(() => allRegions.map(name => {
-    const places = destinations.filter(destination => destination.region === name)
+    // El pasaporte utiliza el catálogo sincronizado de Supabase, no una lista local incompleta.
+    const places = mapDestinations.filter(destination => destination.region === name)
     const visitedPlaces = places.filter(destination => visitedIds.has(destination.id))
     const pendingPlaces = places.filter(destination => visits.some(visit => visit.destinationId === destination.id && visit.status === 'pending'))
     const stamp = departmentStamps.find(item => item.department_code === departmentCodes[name])
-    return { name, code: departmentCodes[name], places, visitedPlaces, pendingPlaces, stamp, earned: visitedPlaces.length > 0, earnedAt: stamp?.earned_at || visitedPlaces[0]?.date || null }
-  }), [visits, visitedIds, departmentStamps])
+    const firstVisit = visits.find(visit => visit.destinationId === visitedPlaces[0]?.id && visit.status === 'validated')
+    return { name, code: departmentCodes[name], places, visitedPlaces, pendingPlaces, stamp, earned: visitedPlaces.length > 0, earnedAt: stamp?.earned_at || firstVisit?.date || null }
+  }), [mapDestinations, visits, visitedIds, departmentStamps])
   const selectedDepartmentPage = selectedDepartment ? departmentPages.find(page => page.name === selectedDepartment) : undefined
   const visitedCount = authUserId ? visitedIds.size : 0
   const visitedRegionCount = authUserId ? departmentPages.filter(page => page.earned).length : 0
