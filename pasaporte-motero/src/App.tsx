@@ -115,6 +115,7 @@ export default function App() {
   const [visitMethod, setVisitMethod] = useState<'gps'|'photo'|'qr'>('gps')
   const [visitDestination, setVisitDestination] = useState<number>(1)
   const [visits, setVisits] = useState<Visit[]>(() => readStore('pm_visits', []))
+  const [departmentStamps, setDepartmentStamps] = useState<{department_code:string;earned_at:string}[]>([])
   const [posts, setPosts] = useState<Post[]>(() => readStore('pm_posts', initialPosts))
   const [trips, setTrips] = useState<Trip[]>(() => readStore('pm_trips', initialTrips))
   const [saved, setSaved] = useState<number[]>(() => readStore('pm_saved', []))
@@ -246,8 +247,8 @@ export default function App() {
 
   const visitedIds = useMemo(() => new Set(visits.filter(v => v.status === 'validated').map(v => v.destinationId)), [visits])
   const visitedCount = visitedIds.size
-  const visitedRegionCount = new Set(visits.filter(v => v.status === 'validated').map(v => destinations.find(d => d.id === v.destinationId)?.region).filter(Boolean)).size
-  const progress = Math.round(visitedRegionCount / allRegions.length * 100)
+  const visitedRegionCount = departmentStamps.length
+  const progress = Math.round(visitedRegionCount / 25 * 100)
   const filteredDestinations = destinations.filter(d => (category === 'Todos' || d.category === category) && (regionFilter === 'Todos' || d.region === regionFilter) && `${d.title} ${d.region} ${d.province} ${d.city}`.toLowerCase().includes(query.toLowerCase()))
   const visiblePosts = posts.filter(p => p.visibility !== 'private').filter(p => feedMode === 'all' || followed.length === 0 || followed.includes('motero_viajero'))
 
@@ -274,7 +275,7 @@ export default function App() {
   function resetSignedOutData() {
     ;['pm_name','pm_username','pm_bio','pm_city','pm_visits','pm_posts','pm_trips','pm_saved','pm_followed'].forEach(key => localStorage.removeItem(key))
     setDisplayName('Viajero Motero'); setUsername('viajero_motero'); setBio(''); setHomeCity('Perú')
-    setVisits([]); setPosts([]); setTrips([]); setSaved([]); setFollowed([])
+    setVisits([]); setDepartmentStamps([]); setPosts([]); setTrips([]); setSaved([]); setFollowed([])
     setMotorcycleBrand(''); setMotorcycleModel(''); setMotorcycleYear(''); setMotorcycleId(null)
     setAvatarUrl(''); setAvatarFile(null); setDocumentFile(null)
     setMotorcyclePhoto(''); setMotorcyclePhotoFile(null); setMotorcyclePhotoPreview('')
@@ -491,6 +492,10 @@ export default function App() {
       return { ...visit, image: signed?.signedUrl || undefined }
     }))
     setVisits(withImages)
+    const { data: earnedDepartments, error: stampsError } = await supabase
+      .from('passport_department_stamps').select('department_code,earned_at').eq('user_id', userId)
+    if (stampsError) { notify('No pudimos cargar los sellos departamentales: ' + stampsError.message); return }
+    setDepartmentStamps(earnedDepartments || [])
   }
 
   async function loadCommunityPosts() {
@@ -843,9 +848,9 @@ export default function App() {
         {tab === 'passport' && <section>
           <div className="page-heading"><div><span className="eyebrow">DOCUMENTA CADA AVENTURA</span><h1>Mi pasaporte</h1><p className="muted">Cada destino visitado deja una historia y un sello.</p></div><div className="heading-icon"><ShieldCheck size={23}/></div></div>
           <div className="passport-cover"><div className="cover-top">REPÚBLICA DEL PERÚ</div><div className="cover-emblem"><Bike size={35}/></div><div className="cover-title">PASAPORTE<br/>MOTERO</div><div className="cover-bottom">TRAVEL · EXPLORE · REPEAT</div></div>
-          <div className="stats-grid"><div className="stat"><strong>{visitedCount}</strong><span>Lugares visitados</span></div><div className="stat"><strong>{visits.filter(v => v.status === 'validated').length}</strong><span>Sellos obtenidos</span></div><div className="stat"><strong>{trips.length}</strong><span>Viajes</span></div></div>
+          <div className="stats-grid"><div className="stat"><strong>{visitedCount}</strong><span>Lugares visitados</span></div><div className="stat"><strong>{departmentStamps.length}</strong><span>Sellos departamentales</span></div><div className="stat"><strong>{trips.length}</strong><span>Viajes</span></div></div>
           <div className="section-heading"><h2>Exploración del Perú</h2><span className="muted tiny">{progress}% · {visitedRegionCount}/25 departamentos</span></div><div className="progress"><span style={{width: `${progress}%`}}/></div>
-          <div className="stamp-grid">{allRegions.map((name, i) => { const reg = regions.find(r => r.name === name); const hasVisit = visits.some(v => v.status === 'validated' && destinations.find(d => d.id === v.destinationId)?.region === name); const Icon = [Map,Mountain,Tent,Sunrise][i%4]; return <button className={`stamp-tile ${hasVisit ? 'earned' : ''}`} key={name} onClick={() => { setQuery(name); setTab('explore') }}><span className="stamp-art">{hasVisit ? <CheckCircle2 size={22}/> : <Icon size={22}/>}</span><strong>{name}</strong><small>{hasVisit ? 'Visitado' : reg ? 'Por descubrir' : 'Próximamente'}</small></button> })}</div>
+          <div className="stamp-grid">{allRegions.map((name, i) => { const reg = regions.find(r => r.name === name); const code = ['AMA','ANC','APU','ARE','AYA','CAJ','CAL','CUS','HUV','HUC','ICA','JUN','LAL','LAM','LIM','LOR','MDD','MOQ','PAS','PIU','PUN','SAM','TAC','TUM','UCA'][i]; const stamp = departmentStamps.find(item => item.department_code === code); const Icon = [Map,Mountain,Tent,Sunrise][i%4]; return <button className={`stamp-tile ${stamp ? 'earned' : ''}`} key={name} onClick={() => { setQuery(name); setTab('explore') }} aria-label={`Sello de ${name}: ${stamp ? 'obtenido' : 'pendiente'}`}><span className="stamp-art">{stamp ? <CheckCircle2 size={22}/> : <Icon size={22}/>}<small>{code}</small></span><strong>{name}</strong><small>{stamp ? `Obtenido · ${new Date(stamp.earned_at).toLocaleDateString('es-PE')}` : reg ? 'Por descubrir' : 'Sello disponible'}</small></button> })}</div>
           <div className="section-heading"><h2>Historial de validaciones</h2><span className="muted tiny">{visits.length} registros</span></div>
           {visits.length === 0 ? <div className="empty-card compact"><Stamp size={28}/><h3>Tu pasaporte está en blanco</h3><p>Descubre un destino y registra tu primera visita para conseguir un sello.</p><button className="primary" onClick={() => setTab('explore')}>Explorar destinos <Compass size={16}/></button></div> : <div className="history-list">{visits.map(v => { const d = destinations.find(x => x.id === v.destinationId); return <div className="history-row" key={v.id}><span className={`history-icon ${v.status}`}><Stamp size={18}/></span><div><strong>{d?.title || 'Destino'}</strong><small>{new Date(v.date).toLocaleDateString('es-PE')} · {v.method === 'gps' ? 'GPS' : v.method === 'photo' ? 'Fotografía' : 'QR presencial'}</small></div><span className={`state-pill ${v.status}`}>{v.status === 'validated' ? 'Validado' : v.status === 'pending' ? 'Pendiente' : 'Rechazado'}</span></div> })}</div>}
         </section>}
