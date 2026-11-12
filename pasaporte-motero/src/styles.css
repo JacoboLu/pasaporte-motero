@@ -985,3 +985,20 @@ html[data-theme="light"] .community-author-open small,.theme-light .community-au
 .department-detail-stamp.ink-pun{--stamp-ink:#416b8d}.department-detail-stamp.ink-sam{--stamp-ink:#4f8058}.department-detail-stamp.ink-tac{--stamp-ink:#9a554b}.department-detail-stamp.ink-tum{--stamp-ink:#378477}.department-detail-stamp.ink-uca{--stamp-ink:#397b6b}
 @media(max-width:360px){.passport-ink-stamp{margin:10px 0 6px}.passport-ink-stamp>strong{font-size:7px}.passport-ink-stamp .ink-stamp-top{font-size:4px}.department-detail-stamp{transform:scale(.88)}}
 @media(prefers-reduced-motion:reduce){.passport-ink-stamp.earned,.department-detail-stamp.earned{animation:none}}
+
+
+/* Notification inbox */
+.notification-trigger{position:relative}
+.notification-dot{display:block;width:8px;height:8px;border-radius:50%;background:#b64b3d;flex:0 0 8px}
+.notification-trigger .notification-dot{position:absolute;top:7px;right:7px;border:1.5px solid var(--surface,#111)}
+.notifications-modal{max-height:min(82dvh,720px);display:flex;flex-direction:column;overflow:hidden}
+.notification-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 0 12px;border-bottom:1px solid var(--border,rgba(128,128,128,.2))}
+.notification-list{overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column}
+.notification-item{width:100%;display:flex;align-items:center;gap:12px;padding:14px 4px;text-align:left;border:0;border-bottom:1px solid var(--border,rgba(128,128,128,.16));background:transparent;color:inherit;cursor:pointer}
+.notification-item.unread{background:rgba(160,125,75,.08)}
+.notification-icon{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:rgba(160,125,75,.13);flex:0 0 36px}
+.notification-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
+.notification-copy strong{font-size:13px;font-weight:600;line-height:1.4}
+.notification-copy small{font-size:11px;opacity:.65}
+.notification-item:focus-visible,.notification-trigger:focus-visible{outline:2px solid #b28a53;outline-offset:3px}
+@media(max-width:520px){.notifications-modal{width:calc(100vw - 24px);max-height:calc(100dvh - 32px);padding:18px}.notification-item{padding:13px 2px}}
