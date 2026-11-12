@@ -118,6 +118,13 @@ function distanceMeters(a: GeolocationCoordinates, lat: number, lng: number) {
   return 6371000 * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x))
 }
 function initials(name: string) { return name.split(' ').filter(Boolean).slice(0,2).map(x => x[0]).join('').toUpperCase() || 'VM' }
+function distanceKmBetween(lat1: number, lng1: number, lat2: number, lng2: number) {
+  const rad = (value: number) => value * Math.PI / 180
+  const dLat = rad(lat2 - lat1), dLng = rad(lng2 - lng1)
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(dLng / 2) ** 2
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+function formatDistanceKm(km: number) { return km < 1 ? `${Math.max(50, Math.round(km * 1000 / 50) * 50)} m` : `${km.toFixed(1).replace('.', ',')} km` }
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('explore')
@@ -222,6 +229,9 @@ export default function App() {
   const [mapDestinations, setMapDestinations] = useState<Destination[]>(destinations)
   const [destinationView, setDestinationView] = useState<'list'|'grid'|'compact'>(() => { try { const saved = localStorage.getItem('pm_destination_view'); return saved === 'list' || saved === 'grid' || saved === 'compact' ? saved : 'list' } catch { return 'list' } })
   const [destinationPage, setDestinationPage] = useState(1)
+  const [exploreLocation, setExploreLocation] = useState<{lat:number;lng:number} | null>(null)
+  const [locationBusy, setLocationBusy] = useState(false)
+  const [showAllDestinations, setShowAllDestinations] = useState(false)
   const [passportSpread, setPassportSpread] = useState(0)
   const passportTouchStartX = useRef<number | null>(null)
   const [authOpen, setAuthOpen] = useState(false)
@@ -398,10 +408,29 @@ export default function App() {
   const passportSpreadCount = Math.ceil(departmentPages.length / 2)
   const filteredDestinations = mapDestinations.filter(d => (category === 'Todos' || d.category === category) && (regionFilter === 'Todos' || d.region === regionFilter) && `${d.title} ${d.region} ${d.province} ${d.city}`.toLowerCase().includes(query.toLowerCase()))
   const visibleDestinations = filteredDestinations.slice(0, destinationPage * 8)
+  const nearbyDestinations = useMemo(() => mapDestinations
+    .filter(destination => !visitedIds.has(destination.id) && !visits.some(visit => visit.destinationId === destination.id && visit.status === 'pending'))
+    .map(destination => ({ ...destination, distanceFromUser: exploreLocation ? distanceKmBetween(exploreLocation.lat, exploreLocation.lng, destination.lat, destination.lng) : null }))
+    .sort((a, b) => exploreLocation ? (a.distanceFromUser ?? Infinity) - (b.distanceFromUser ?? Infinity) : a.id - b.id)
+    .slice(0, 4), [mapDestinations, visitedIds, visits, exploreLocation])
+  const catalogOpen = showAllDestinations || !!query.trim() || regionFilter !== 'Todos' || category !== 'Todos'
   const filteredMapDestinations = mapDestinations.filter(d => (category === 'Todos' || d.category === category) && (regionFilter === 'Todos' || d.region === regionFilter) && `${d.title} ${d.region} ${d.province} ${d.city}`.toLowerCase().includes(query.toLowerCase()))
   const visiblePosts = posts.filter(p => p.visibility !== 'private').filter(p => feedMode === 'all' || (!!p.authorId && followed.includes(p.authorId)))
 
   function openTab(next: Tab) { setSubview(''); setSelected(null); setSelectedDepartment(null); setTab(next) }
+  function requestExploreLocation() {
+    if (!navigator.geolocation) { notify('Este dispositivo no ofrece geolocalización. Puedes explorar los destinos sin distancia personalizada.'); return }
+    setLocationBusy(true)
+    navigator.geolocation.getCurrentPosition(position => {
+      setExploreLocation({ lat: position.coords.latitude, lng: position.coords.longitude })
+      setLocationBusy(false)
+      notify('Ubicación actualizada. Ordenamos los destinos por cercanía.')
+    }, error => {
+      setLocationBusy(false)
+      const message = error.code === error.PERMISSION_DENIED ? 'No se concedió permiso de ubicación. Puedes activarlo desde los ajustes del navegador.' : error.code === error.POSITION_UNAVAILABLE ? 'No pudimos determinar tu ubicación. Inténtalo en un lugar con mejor señal.' : 'La solicitud de ubicación tardó demasiado. Inténtalo nuevamente.'
+      notify(message)
+    }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 })
+  }
   function formatDisplayDate(value: string) {
     if (!value) return 'Sin fecha'
     const [year, month, day] = value.slice(0,10).split('-').map(Number)
@@ -1308,16 +1337,19 @@ export default function App() {
           <div className="page-heading"><div><span className="eyebrow">DESCUBRE EL PERÚ</span><h1>Tu próxima aventura te espera.</h1><p className="muted">Encuentra rutas, paisajes y lugares para sumar a tu pasaporte.</p></div><div className="heading-icon"><Compass size={23}/></div></div>
           <div className="search-row"><div className="searchbox"><Search size={18}/><input aria-label="Buscar destinos" placeholder="Buscar destinos, ciudades..." value={query} onChange={e => setQuery(e.target.value)}/></div><button className={`filter-button ${showFilters ? 'selected' : ''}`} onClick={() => setShowFilters(!showFilters)} aria-label="Filtros"><SlidersHorizontal size={18}/></button></div>
           {showFilters && <div className="filter-panel"><label>Departamento<select value={regionFilter} onChange={e => setRegionFilter(e.target.value)}><option>Todos</option>{allRegions.map(r => <option key={r}>{r}</option>)}</select></label><label>Categoría<select value={category} onChange={e => setCategory(e.target.value)}>{categories.map(c => <option key={c}>{c}</option>)}</select></label></div>}
-          <div className="chips">{categories.map(cat => <button key={cat} className={category === cat ? 'chip active' : 'chip'} onClick={() => setCategory(cat)}>{cat}</button>)}</div>
-          <div className="section-heading"><h2>Destinos para descubrir</h2><button className="text-action" onClick={() => setMapMode(!mapMode)}><Map size={15}/> {mapMode ? 'Ver lista' : 'Ver mapa'}</button></div>
-           <div className="explore-shortcuts"><button className={regionFilter==='Arequipa'?'active':''} onClick={()=>{setRegionFilter('Arequipa');setShowFilters(false)}}><MapPin size={14}/> Arequipa · {mapDestinations.filter(d=>d.region==='Arequipa').length} destinos</button><button onClick={()=>{setRegionFilter('Todos');setCategory('Todos');setQuery('');setShowFilters(false)}}>Ver todo el Perú</button></div>
-           <div className="destination-results-meta"><span>{filteredDestinations.length} destinos encontrados</span><span>Mostrando {Math.min(visibleDestinations.length,filteredDestinations.length)} de {filteredDestinations.length}</span></div>
+          <div className="explore-location-panel"><div className="explore-location-copy"><span className="explore-location-icon"><LocateFixed size={17}/></span><div><strong>{exploreLocation ? 'Ubicación activa' : 'Descubre destinos cerca de ti'}</strong><small>{exploreLocation ? 'Distancias aproximadas en línea recta' : 'Activa el GPS para ordenar los lugares por cercanía'}</small></div></div><button className="explore-location-button" onClick={requestExploreLocation} disabled={locationBusy}><LocateFixed size={15}/>{locationBusy ? 'Localizando…' : exploreLocation ? 'Actualizar' : 'Usar mi ubicación'}</button></div>
+          <div className="section-heading explore-section-heading"><div><h2>{exploreLocation ? 'Cerca de tu ubicación' : 'Destinos recomendados'}</h2><small>{exploreLocation ? 'Los más próximos a tu posición actual' : 'Activa tu ubicación para ver distancias y ordenar por cercanía'}</small></div><button className="text-action" onClick={() => setMapMode(!mapMode)}><Map size={15}/>{mapMode ? 'Ver lista' : 'Ver mapa'}</button></div>
+          {!mapMode && <div className="nearby-destination-list">{nearbyDestinations.map(dest => <button className="nearby-destination-card" key={dest.id} onClick={() => setSelected(dest)}><img src={dest.image} alt=""/><span className="nearby-destination-copy"><strong>{dest.title}</strong><small><MapPin size={12}/> {dest.city}, {dest.region}</small><span className="nearby-destination-meta"><i>{dest.category}</i>{dest.distanceFromUser !== null ? <b>{formatDistanceKm(dest.distanceFromUser)}</b> : <em>Activa GPS para ver distancia</em>}</span></span><ChevronRight size={17}/></button>)}</div>
+          <button className="catalog-toggle" onClick={() => { setShowAllDestinations(value => !value); setMapMode(false); setDestinationPage(1) }}><span><Compass size={16}/>{catalogOpen ? 'Ocultar catálogo completo' : 'Explorar todos los destinos'}</span><span>{mapDestinations.length} lugares <ChevronDown size={15} className={catalogOpen ? 'rotated' : ''}/></span></button>
           {mapMode && <div className="map-placeholder map-frame"><iframe title="Mapa de destinos registrados en Pasaporte Motero" srcDoc={`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>html,body,#map{height:100%;margin:0;font-family:Arial} .leaflet-popup-content{font-size:13px}</style></head><body><div id="map"></div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>const map=L.map('map').setView([-9.19,-75.02],5);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);const points=${JSON.stringify(filteredMapDestinations.map(d=>({name:d.title,city:d.city,region:d.region,lat:d.lat,lng:d.lng})))};const valid=points.filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lng));valid.forEach(p=>{const marker=L.marker([p.lat,p.lng]).addTo(map);marker.bindPopup('<strong>'+String(p.name).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))+'</strong><br>'+p.city+', '+p.region)});if(valid.length){const bounds=L.latLngBounds(valid.map(p=>[p.lat,p.lng]));if(bounds.isValid())map.fitBounds(bounds.pad(.12));}setTimeout(()=>map.invalidateSize(),180)</script></body></html>`} loading="lazy"/><span>{filteredMapDestinations.length} destinos registrados en el catálogo · Selecciona un marcador para ver su nombre.</span><button className="text-action" onClick={() => setMapMode(false)}>Volver a la lista</button></div>}
-          {!mapMode && <><div className="destination-view-switch" aria-label="Forma de visualizar destinos"><button className={destinationView==='list'?'active':''} onClick={()=>setDestinationView('list')} aria-label="Vista lista"><BookOpen size={16}/> Lista</button><button className={destinationView==='grid'?'active':''} onClick={()=>setDestinationView('grid')} aria-label="Vista cuadrícula"><Images size={16}/> Cuadrícula</button><button className={destinationView==='compact'?'active':''} onClick={()=>setDestinationView('compact')} aria-label="Vista compacta"><ListIcon size={16}/> Compacta</button></div><div className={`destination-list destination-${destinationView}`}>{visibleDestinations.map(dest => <button className="destination-card" key={dest.id} onClick={() => setSelected(dest)}><img src={dest.image} alt=""/><span className="destination-overlay"/><span className="destination-tag">{dest.category}</span><span className="destination-copy"><strong>{dest.title}</strong><small><MapPin size={13}/> {dest.city}, {dest.region}</small></span><span className="destination-distance">{dest.distance}</span></button>)}</div></>}
-          {filteredDestinations.length > visibleDestinations.length && !mapMode && <button className="destination-load-more" onClick={()=>setDestinationPage(page=>page+1)}>Mostrar 8 destinos más <span>{filteredDestinations.length-visibleDestinations.length} restantes</span></button>}
-           {filteredDestinations.length === 0 && <div className="empty-card"><Search size={30}/><h3>No encontramos destinos</h3><p>Prueba con otro nombre o cambia los filtros.</p></div>}
-          <div className="section-heading"><h2>Explora por departamento</h2><span className="muted tiny">25 territorios</span></div><div className="region-pills">{allRegions.map(r => <button key={r} onClick={() => { setRegionFilter(r); setShowFilters(true); window.scrollTo({top:0,behavior:'smooth'}) }}>{r}<ChevronRight size={13}/></button>)}</div>
-        </section>}
+          {catalogOpen && <div className="explore-catalog-panel"><div className="catalog-filter-row"><label>Departamento<select value={regionFilter} onChange={e => {setRegionFilter(e.target.value);setDestinationPage(1)}}><option value="Todos">Todo el Perú</option>{allRegions.map(region => <option key={region} value={region}>{region}</option>)}</select></label><label>Categoría<select value={category} onChange={e => {setCategory(e.target.value);setDestinationPage(1)}}>{categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}</select></label></div>
+            <div className="chips">{categories.map(cat => <button key={cat} className={category === cat ? 'chip active' : 'chip'} onClick={() => {setCategory(cat);setDestinationPage(1)}}>{cat}</button>)}</div>
+            <div className="destination-results-meta"><span>{filteredDestinations.length} destinos encontrados</span><span>Mostrando {Math.min(visibleDestinations.length,filteredDestinations.length)} de {filteredDestinations.length}</span></div>
+            {!mapMode && <div className="destination-view-switch" aria-label="Forma de visualizar destinos"><button className={destinationView==='list'?'active':''} onClick={() => setDestinationView('list')} aria-label="Vista lista"><BookOpen size={16}/> Lista</button><button className={destinationView==='grid'?'active':''} onClick={() => setDestinationView('grid')} aria-label="Vista cuadrícula"><Images size={16}/> Cuadrícula</button><button className={destinationView==='compact'?'active':''} onClick={() => setDestinationView('compact')} aria-label="Vista compacta"><ListIcon size={16}/> Compacta</button></div>}
+            <div className={`destination-list destination-${destinationView}`}>{visibleDestinations.map(dest => <button className="destination-card" key={dest.id} onClick={() => setSelected(dest)}><img src={dest.image} alt=""/><span className="destination-overlay"/><span className="destination-tag">{dest.category}</span><span className="destination-copy"><strong>{dest.title}</strong><small><MapPin size={13}/> {dest.city}, {dest.region}</small></span><span className="destination-distance">{exploreLocation ? formatDistanceKm(distanceKmBetween(exploreLocation.lat, exploreLocation.lng, dest.lat, dest.lng)) : '—'}</span></button>)}</div>
+            {filteredDestinations.length > visibleDestinations.length && !mapMode && <button className="destination-load-more" onClick={() => setDestinationPage(page => page + 1)}>Mostrar 8 destinos más <span>{filteredDestinations.length-visibleDestinations.length} restantes</span></button>}
+            {filteredDestinations.length === 0 && <div className="empty-card"><Search size={30}/><h3>No encontramos destinos</h3><p>Prueba con otro nombre o cambia los filtros.</p></div>}
+          </div>}
 
         {tab === 'passport' && <section>
           <div className="page-heading"><div><span className="eyebrow">DOCUMENTA CADA AVENTURA</span><h1>Mi pasaporte</h1><p className="muted">Cada destino visitado deja una historia y un sello.</p></div><div className="heading-icon"><ShieldCheck size={23}/></div></div>
