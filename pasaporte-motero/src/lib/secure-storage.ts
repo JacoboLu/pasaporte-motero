@@ -85,7 +85,8 @@ export async function migrateLegacyPrivateCache(): Promise<void> {
     const encryptedKey = `pm_secure_${key}`
     if (!localStorage.getItem(encryptedKey)) {
       try { localStorage.setItem(encryptedKey, await encryptValue(plaintext)) } catch {
-        // Fail closed: never keep a private value in plaintext if Web Crypto is unavailable.
+        // If encryption is unavailable, preserve the original data rather than destroy it.
+        continue
       }
     }
     localStorage.removeItem(key)
