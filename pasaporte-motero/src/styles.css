@@ -590,3 +590,15 @@ html[data-theme="light"] .community-author-open small,.theme-light .community-au
 .community-author-avatar{padding:0;border:0;cursor:pointer}
 .community-author-open{border:0;background:transparent;color:inherit;cursor:pointer}
 .community-author-open:focus-visible{outline:2px solid #ff8b42;outline-offset:3px;border-radius:8px}
+
+/* Perfil simplificado: actividad al frente y ajustes agrupados */
+.profile-title-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}
+.profile-title-row h1{margin-bottom:0}
+.profile-settings-button{width:44px;height:44px;flex:0 0 44px;display:grid;place-items:center;border:1px solid var(--line,#d8e0e8);border-radius:14px;background:var(--surface,#fff);color:var(--ink,#202b38);box-shadow:0 2px 8px rgba(20,35,50,.05)}
+.profile-settings-button:active{transform:scale(.97)}
+.profile-activity-entry{width:100%;display:flex;align-items:center;gap:13px;text-align:left;margin-top:16px;padding:17px 16px;border:1px solid var(--line,#d8e0e8);border-radius:17px;background:var(--surface,#fff);color:var(--ink,#202b38);box-shadow:0 5px 18px rgba(20,35,50,.04)}
+.profile-activity-entry>span:nth-child(2){display:grid;gap:4px;flex:1;min-width:0}
+.profile-activity-entry strong{font-size:14px;font-weight:700}
+.profile-activity-entry small{font-size:11px;color:var(--muted,#68788b);line-height:1.4}
+.profile-activity-icon{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:rgba(255,105,0,.09);color:var(--accent,#f56600)}
+.settings-menu{margin-top:18px}
