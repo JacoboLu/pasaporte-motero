@@ -79,6 +79,7 @@ create table if not exists public.trip_custom_stops (
   trip_id uuid not null references public.trips(id) on delete cascade,
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null check (char_length(trim(name)) between 1 and 160),
+  catalog_destination_id integer,
   sort_order integer not null default 0,
   created_at timestamptz not null default now()
 );
