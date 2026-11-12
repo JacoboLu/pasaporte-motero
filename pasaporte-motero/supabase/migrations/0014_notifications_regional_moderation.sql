@@ -120,3 +120,31 @@ create policy "Admins review content reports" on public.content_reports
   for all to authenticated
   using (exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin'))
   with check (exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin'));
+
+
+-- Notify riders when a submitted visit is approved or rejected.
+create or replace function public.notify_on_visit_review()
+returns trigger language plpgsql security definer set search_path = public
+as $$
+begin
+  if old.validation_status is distinct from new.validation_status
+     and new.validation_status in ('validated', 'rejected') then
+    insert into public.user_notifications(recipient_id, actor_id, event_type, entity_type, entity_id, message)
+    values (
+      new.user_id,
+      new.reviewed_by,
+      case when new.validation_status = 'validated' then 'visit_approved' else 'visit_rejected' end,
+      'visit',
+      new.id,
+      case when new.validation_status = 'validated'
+        then 'Tu visita fue aprobada y tu pasaporte ha sido actualizado.'
+        else 'Tu visita fue rechazada. Revisa el motivo en el detalle de la visita.'
+      end
+    );
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists notify_app_visit_reviewed on public.app_visits;
+create trigger notify_app_visit_reviewed after update of validation_status on public.app_visits
+for each row execute function public.notify_on_visit_review();
