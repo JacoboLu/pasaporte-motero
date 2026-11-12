@@ -300,7 +300,7 @@ export default function App() {
     if (error) { notify('No pudimos cargar el feed: '+error.message); return }
     const userIds=[...new Set((data || []).map((row:any)=>row.user_id))]
     const {data:profiles}=userIds.length ? await supabase.from('profiles').select('id,username,full_name,avatar_url').in('id',userIds) : {data:[] as any[]}
-    const profileById = new Map<string, any>((profiles || []).map((profile: any): [string, any] => [profile.id, profile]))
+    const profileById = new globalThis.Map<string, any>((profiles || []).map((profile: any): [string, any] => [profile.id, profile]))
     const rows = await Promise.all((data || []).map(async (row:any) => {
       const photo = row.post_photos?.[0]?.storage_path
       let image: string | undefined
