@@ -295,13 +295,16 @@ export default function App() {
   }
   async function loadCommunityPosts() {
     if (!supabase) return
-    const { data, error } = await supabase.from('posts').select('id,user_id,title,body,visibility,created_at,profiles(username,full_name,avatar_url),post_photos(storage_path)').eq('visibility','public').order('created_at',{ascending:false}).limit(50)
+    const { data, error } = await supabase.from('posts').select('id,user_id,title,body,visibility,created_at,post_photos(storage_path)').eq('visibility','public').order('created_at',{ascending:false}).limit(50)
     if (error) { notify('No pudimos cargar el feed: '+error.message); return }
+    const userIds=[...new Set((data || []).map((row:any)=>row.user_id))]
+    const {data:profiles}=userIds.length ? await supabase.from('profiles').select('id,username,full_name,avatar_url').in('id',userIds) : {data:[] as any[]}
+    const profileById=new Map((profiles || []).map((profile:any)=>[profile.id,profile]))
     const rows = await Promise.all((data || []).map(async (row:any) => {
       const photo = row.post_photos?.[0]?.storage_path
       let image: string | undefined
       if (photo) { const {data:signed} = await supabase!.storage.from('community').createSignedUrl(photo,3600); image=signed?.signedUrl || undefined }
-      const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
+      const profile = profileById.get(row.user_id)
       return {id:row.id,title:row.title || 'Una nueva aventura',text:row.body,place:'Comunidad motera',date:new Intl.DateTimeFormat('es-PE',{dateStyle:'medium'}).format(new Date(row.created_at)),likes:0,visibility:row.visibility,image,comments:[],authorName:profile?.full_name || 'Motero',authorUsername:profile?.username || 'viajero'} as Post & {authorName:string;authorUsername:string}
     }))
     setPosts(rows)
@@ -340,7 +343,15 @@ export default function App() {
     const { data, error } = await supabase.from('trips').insert({ user_id: user.id, name: tripName.trim(), description: tripDescription.trim() || null, start_date: tripStart || null, end_date: tripEnd || null, visibility: tripVisibility }).select('id,name,description,start_date,end_date,visibility').single()
     setBusy(false)
     if (error) { notify('No se pudo crear el viaje: ' + error.message); return }
-    const newTrip: Trip = { id: data.id, name: data.name, start: data.start_date || '', end: data.end_date || '', description: data.description || '', destinationIds: [], visibility: data.visibility, photos: [] }
+    if (tripDestinations.length) {
+      const {error:stopsError}=await supabase.from('trip_destinations').insert(tripDestinations.map((destinationId,index)=>({trip_id:data.id,tourist_place_id:String(destinationId),sort_order:index})))
+      if (stopsError) { await supabase.from('trips').delete().eq('id',data.id); setBusy(false); notify('No se pudieron guardar las paradas del catálogo: '+stopsError.message); return }
+    }
+    if (tripManualStops.length) {
+      const {error:manualError}=await supabase.from('trip_custom_stops').insert(tripManualStops.map((name,index)=>({trip_id:data.id,user_id:user.id,name,sort_order:tripDestinations.length+index})))
+      if (manualError) { await supabase.from('trips').delete().eq('id',data.id); setBusy(false); notify('No se pudieron guardar las paradas manuales. Ejecuta la migración 0003 y vuelve a intentarlo.'); return }
+    }
+    const newTrip: Trip = { id: data.id, name: data.name, start: data.start_date || '', end: data.end_date || '', description: data.description || '', destinationIds: tripDestinations, visibility: data.visibility, photos: [] }
     setTrips(items => [newTrip, ...items])
     setTripName(''); setTripDescription(''); setTripDestinations([]); setTripManualStops([]); setTripStopSelection(''); setTripManualStop(''); setAction(''); setTab('profile'); setSubview('trips')
     notify('Viaje creado y sincronizado con tu cuenta.')
