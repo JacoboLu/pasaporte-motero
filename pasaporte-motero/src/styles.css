@@ -66,3 +66,22 @@
 .settings-card label input[type="date"],.settings-card label input[type="number"]{width:100%;min-width:0;max-width:100%;box-sizing:border-box;padding-left:12px;padding-right:10px}
 .composer-modal label input,.composer-modal label textarea,.composer-modal label select,.settings-card label input,.settings-card label textarea,.settings-card label select,.filter-panel select{font-size:16px!important}
 @media(max-width:700px){input,select,textarea{font-size:16px!important}}
+
+
+/* Final mobile controls: consistent date/km fields and image framing */
+.form-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:start}
+.form-grid>label{display:block;min-width:0;width:100%;max-width:100%}
+.form-grid>label input,.form-grid>label select{display:block;width:100%;min-width:0;max-width:100%;height:48px;box-sizing:border-box}
+.form-grid>label input[type="date"],.form-grid>label input[type="number"]{appearance:none;-webkit-appearance:none;width:100%;min-width:0;max-width:100%;padding:0 10px;box-sizing:border-box}
+.motorcycle-crop-frame{width:100%;height:210px;overflow:hidden;border-radius:16px;background:#242426;border:1px solid #ffffff20;margin:8px 0 12px}
+.motorcycle-photo{display:block;width:100%;height:100%;object-fit:cover;max-width:none}
+.crop-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0 14px}
+.crop-controls label{display:flex;flex-direction:column;gap:8px;min-width:0}
+.crop-controls input[type="range"]{width:100%;accent-color:#ff7900}
+.avatar.large{overflow:hidden;display:grid;place-items:center}
+.avatar.large img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.profile-photo-pick{margin:8px 0 14px}
+.history-row .text-action{display:inline-flex;align-items:center;gap:5px;margin-top:6px}
+.theme-light .motorcycle-crop-frame{background:#edf0f3;border-color:#d9dfe5}
+.theme-light .history-row .text-action{color:#b65a1b}
+@media(max-width:360px){.form-grid{gap:7px}.form-grid>label input[type="date"],.form-grid>label input[type="number"]{font-size:16px;padding-left:7px;padding-right:7px}.crop-controls{grid-template-columns:1fr}}
