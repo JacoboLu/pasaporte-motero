@@ -242,6 +242,47 @@ export default function App() {
   const [documentsOpen, setDocumentsOpen] = useState(true)
 
   useEffect(() => { localStorage.setItem('pm_theme', theme); document.documentElement.dataset.theme = theme; const color = theme === 'light' ? '#f5f6f7' : '#111111'; document.querySelector('meta[name="theme-color"]')?.setAttribute('content', color); document.documentElement.style.backgroundColor = color; document.body.style.backgroundColor = color }, [theme])
+  useEffect(() => {
+    if (!qrScanning) return
+    const video = qrVideoRef.current
+    if (!video) {
+      setQrScanning(false)
+      notify('No se pudo preparar el lector QR. Inténtalo nuevamente.')
+      return
+    }
+    let cancelled = false
+    const reader = new BrowserQRCodeReader()
+    void reader.decodeFromVideoDevice(undefined, video, (result) => {
+      if (!result || cancelled) return
+      const raw = result.getText()
+      cancelled = true
+      qrScannerControls.current?.stop()
+      qrScannerControls.current = null
+      setQrScanning(false)
+      setQrManual(raw)
+      notify('QR detectado. Ahora puedes validar la visita.')
+    }).then((controls) => {
+      if (cancelled) controls.stop()
+      else qrScannerControls.current = controls
+    }).catch((error: any) => {
+      if (cancelled) return
+      setQrScanning(false)
+      const name = error?.name || ''
+      const message = name === 'NotAllowedError'
+        ? 'Permite el acceso a la cámara en los ajustes del navegador y vuelve a intentarlo.'
+        : name === 'NotFoundError'
+          ? 'No se encontró una cámara disponible en este dispositivo.'
+          : name === 'NotReadableError'
+            ? 'La cámara está siendo utilizada por otra aplicación. Ciérrala e inténtalo nuevamente.'
+            : (error?.message || 'Comprueba los permisos de cámara del navegador.')
+      notify('No pudimos abrir la cámara. ' + message)
+    })
+    return () => {
+      cancelled = true
+      qrScannerControls.current?.stop()
+      qrScannerControls.current = null
+    }
+  }, [qrScanning])
   useEffect(() => { try { localStorage.setItem('pm_destination_view', destinationView) } catch { /* La preferencia seguirá activa durante esta sesión */ } }, [destinationView])
   useEffect(() => { setDestinationPage(1) }, [query, category, regionFilter])
   useEffect(() => {
@@ -488,24 +529,13 @@ export default function App() {
     setQrScanning(false)
   }
 
-  async function startQrScanner() {
-    if (!qrVideoRef.current) { notify('No se pudo iniciar la cámara.'); return }
-    try {
-      setQrScanning(true)
-      const reader = new BrowserQRCodeReader()
-      qrScannerControls.current = await reader.decodeFromVideoDevice(undefined, qrVideoRef.current, (result) => {
-        if (!result) return
-        const raw = result.getText()
-        qrScannerControls.current?.stop()
-        qrScannerControls.current = null
-        setQrScanning(false)
-        setQrManual(raw)
-        notify('QR detectado. Elige la acción de validación correspondiente.')
-      })
-    } catch (error: any) {
-      setQrScanning(false)
-      notify('No pudimos abrir la cámara. Verifica el permiso del navegador: ' + (error?.message || 'Error'))
+  function startQrScanner() {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      notify('Este navegador no permite acceder a la cámara. Abre Pasaporte Motero en Safari o Chrome mediante HTTPS.')
+      return
     }
+    // El vídeo se monta después de cambiar qrScanning; el useEffect inicia el lector cuando el elemento ya existe.
+    setQrScanning(true)
   }
 
   async function validateRiderQr() {
