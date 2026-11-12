@@ -28,6 +28,36 @@ const departmentCodes: Record<string, string> = {
   'Puno':'PUN','San Martín':'SAM','Tacna':'TAC','Tumbes':'TUM','Ucayali':'UCA'
 }
 
+// Identidad gráfica propia para cada sello departamental: tinta, forma y emblema.
+const departmentStampThemes: Record<string, { ink: string; shape: string; symbol: string; route: string }> = {
+  'Amazonas': { ink:'#276b56', shape:'oval', symbol:'☼', route:'SELVA ALTA' },
+  'Áncash': { ink:'#315f91', shape:'round', symbol:'▲', route:'CORDILLERA BLANCA' },
+  'Apurímac': { ink:'#a34d37', shape:'rect', symbol:'✦', route:'CAÑONES ANDINOS' },
+  'Arequipa': { ink:'#a64c32', shape:'rect', symbol:'△', route:'TIERRA DE VOLCANES' },
+  'Ayacucho': { ink:'#9b4c62', shape:'oval', symbol:'✿', route:'RUTA DEL ARTE' },
+  'Cajamarca': { ink:'#9b7135', shape:'round', symbol:'☼', route:'TIERRA DEL CUMBE' },
+  'Callao': { ink:'#386f91', shape:'rect', symbol:'⚓', route:'PUERTO DEL PACÍFICO' },
+  'Cusco': { ink:'#8a5437', shape:'round', symbol:'✥', route:'CAPITAL DEL TAHUANTINSUYO' },
+  'Huancavelica': { ink:'#795c83', shape:'oval', symbol:'✦', route:'ANDES PROFUNDOS' },
+  'Huánuco': { ink:'#4d8064', shape:'round', symbol:'☼', route:'VALLE PRIMAVERAL' },
+  'Ica': { ink:'#b34f3f', shape:'oval', symbol:'≈', route:'DESIERTO Y OASIS' },
+  'Junín': { ink:'#3f786f', shape:'rect', symbol:'▲', route:'VALLE DEL MANTARO' },
+  'La Libertad': { ink:'#a35b37', shape:'rect', symbol:'☼', route:'RUTA MOCHE' },
+  'Lambayeque': { ink:'#9b783b', shape:'oval', symbol:'✥', route:'TIERRA SICÁN' },
+  'Lima': { ink:'#526b83', shape:'rect', symbol:'✦', route:'COSTA CENTRAL' },
+  'Loreto': { ink:'#397a61', shape:'oval', symbol:'≈', route:'RÍOS DEL AMAZONAS' },
+  'Madre de Dios': { ink:'#477d58', shape:'round', symbol:'❧', route:'BOSQUE AMAZÓNICO' },
+  'Moquegua': { ink:'#9a6541', shape:'oval', symbol:'☼', route:'VALLES DEL SUR' },
+  'Pasco': { ink:'#55765d', shape:'round', symbol:'▲', route:'RUTA DE ALTURA' },
+  'Piura': { ink:'#ad633d', shape:'oval', symbol:'☼', route:'PLAYAS DEL NORTE' },
+  'Puno': { ink:'#416b8d', shape:'round', symbol:'≈', route:'LAGO TITICACA' },
+  'San Martín': { ink:'#4f8058', shape:'oval', symbol:'❧', route:'RUTA DE LAS CATARATAS' },
+  'Tacna': { ink:'#9a554b', shape:'rect', symbol:'✦', route:'EXTREMO SUR' },
+  'Tumbes': { ink:'#378477', shape:'oval', symbol:'≈', route:'COSTA TROPICAL' },
+  'Ucayali': { ink:'#397b6b', shape:'round', symbol:'❧', route:'SELVA CENTRAL' }
+};
+
+
 
 const destinations: Destination[] = [
   { id: 1, title: 'Abra Anticona (Ticlio)', region: 'Junín', province: 'Yauli', city: 'Morococha', category: 'Montañas', distance: '124 km', image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1100&q=85', description: 'Uno de los pasos de montaña más emblemáticos de la Carretera Central. Un recorrido de altura entre paisajes andinos.', lat: -11.609, lng: -76.193, radius: 350 },
@@ -1311,7 +1341,7 @@ export default function App() {
           <span className="passport-page-ornament">✦ REPÚBLICA DEL PERÚ ✦</span>
           <span className="department-detail-kicker">PASAPORTE MOTERO · DEPARTAMENTO</span>
           <h1>{selectedDepartmentPage.name}</h1>
-          <div className={`department-detail-seal ${selectedDepartmentPage.earned ? 'earned' : ''}`}><Stamp size={36}/><strong>{selectedDepartmentPage.code}</strong><span>{selectedDepartmentPage.earned ? 'SELLO OBTENIDO' : 'SELLO PENDIENTE'}</span></div>
+          <div className={`department-detail-stamp ink-${selectedDepartmentPage.code.toLowerCase()} shape-${departmentStampThemes[selectedDepartmentPage.name]?.shape || 'round'} ${selectedDepartmentPage.earned ? 'earned' : 'unearned'}`}><span className="real-stamp-top">REPÚBLICA DEL PERÚ · PASAPORTE MOTERO</span><span className="real-stamp-symbol">{departmentStampThemes[selectedDepartmentPage.name]?.symbol || '✦'}</span><strong>{selectedDepartmentPage.code}</strong><b>{selectedDepartmentPage.name.toUpperCase()}</b><span className="real-stamp-route">{departmentStampThemes[selectedDepartmentPage.name]?.route || 'RUTA PERUANA'}</span><span className="real-stamp-date">{selectedDepartmentPage.earned && selectedDepartmentPage.earnedAt ? new Date(selectedDepartmentPage.earnedAt).toLocaleDateString('es-PE') : 'PENDIENTE DE VISITA'}</span></div>
           <div className="department-detail-counts">
             <div><strong>{selectedDepartmentPage.visitedPlaces.length}</strong><span>Lugares visitados</span></div>
             <div><strong>{selectedDepartmentPage.pendingPlaces.length}</strong><span>En validación</span></div>
@@ -1364,7 +1394,7 @@ export default function App() {
            <div className="passport-book-viewport" key={passportSpread} aria-label="Libro de pasaporte. Desliza o utiliza las flechas para pasar páginas" onTouchStart={event=>{passportTouchStartX.current=event.changedTouches[0]?.clientX ?? null}} onTouchEnd={event=>{const startX=passportTouchStartX.current;const endX=event.changedTouches[0]?.clientX;passportTouchStartX.current=null;if(startX===null||endX===undefined)return;const delta=endX-startX;if(Math.abs(delta)>45)setPassportSpread(page=>Math.max(0,Math.min(passportSpreadCount-1,page+(delta<0?1:-1))))}}>
              <div className="passport-book-spread">{departmentPages.slice(passportSpread*2,passportSpread*2+2).map((page,pageIndex)=>{const index=passportSpread*2+pageIndex;return <button type="button" className={`passport-book-page ${pageIndex===0?'left-page':'right-page'} ${page.earned?'has-stamp':''}`} key={page.name} onClick={()=>{setSelected(null);setSelectedDepartment(page.name)}} aria-label={`Abrir ${page.name}: ${page.visitedPlaces.length} de ${page.places.length} lugares visitados`}>
                <span className="passport-page-number">PÁGINA {String(index+1).padStart(2,'0')} / 25</span><span className="passport-page-ornament">✦ REPÚBLICA DEL PERÚ ✦</span><span className="passport-page-title">{page.name}</span><span className="passport-page-caption">DEPARTAMENTO</span>
-               <span className={`department-seal ${page.earned?'earned':''}`} style={{transform:`rotate(${(index%5-2)*2}deg)`}}><span className="seal-ring"><Stamp size={23}/><b>{page.code}</b><small>{page.earned?'VISITADO':'POR EXPLORAR'}</small></span></span>
+               <span className={`passport-ink-stamp ink-${page.code.toLowerCase()} shape-${departmentStampThemes[page.name]?.shape || 'round'} ${page.earned?'earned':'unearned'}`} style={{transform:`rotate(${(index%5-2)*2}deg)`}}><span className="ink-stamp-top">PASAPORTE MOTERO · PERÚ</span><span className="ink-stamp-symbol">{departmentStampThemes[page.name]?.symbol || '✦'}</span><b>{page.code}</b><strong>{page.name.toUpperCase()}</strong><small>{departmentStampThemes[page.name]?.route || 'RUTA PERUANA'}</small><em>{page.earned && page.earnedAt ? new Date(page.earnedAt).toLocaleDateString('es-PE') : 'POR VISITAR'}</em></span>
                <span className="passport-place-counter"><strong>{page.visitedPlaces.length}</strong><span> de {page.places.length} lugares visitados</span></span><span className="passport-page-status">{page.earned?`SELLO OBTENIDO · ${page.earnedAt?new Date(page.earnedAt).toLocaleDateString('es-PE'):'VISITADO'}`:page.places.length?'TU PRÓXIMO DESTINO TE ESPERA':'DESTINOS EN INCORPORACIÓN'}</span><span className="passport-page-footer">PASAPORTE MOTERO · PERÚ</span><span className="passport-page-open">Ver lugares <ChevronRight size={13}/></span>
              </button>})}{passportSpread*2+1>=departmentPages.length&&<div className="passport-book-page right-page passport-book-blank" aria-hidden="true"><span className="passport-page-ornament">✦ PASAPORTE MOTERO ✦</span><BookOpen size={34}/><strong>Tu próxima aventura</strong><small>Esta página espera tu próximo sello.</small><span className="passport-page-footer">PERÚ · TRAVEL · EXPLORE · REPEAT</span></div>}</div>
            </div>
