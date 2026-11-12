@@ -114,3 +114,47 @@ html,body,#root{background:var(--page-bg,#111);}
 @media(max-width:380px){.maintenance-fields{gap:7px;}.maintenance-fields .date-control{padding-left:5px!important;padding-right:5px!important;font-size:15px!important;}}
 
 html[data-theme="light"],html[data-theme="light"] body,html[data-theme="light"] #root{background:#f5f6f7!important;color-scheme:light;}html[data-theme="dark"],html[data-theme="dark"] body,html[data-theme="dark"] #root{background:#111!important;color-scheme:dark;}
+
+
+/* Refinamiento visual transversal: sin halo superior, imagen cuadrada y controles consistentes */
+:root{--page-bg:#f5f6f7;--shell-bg:#f5f6f7;--topbar-bg:#fff;--main-text:#20242a;--muted-text:#68717c;--card-bg:#fff;--field-bg:#fff;--field-border:#cbd1d8;--line-color:#e2e5e9}
+html,body,#root{margin:0!important;background:var(--page-bg)!important}
+body{background:var(--page-bg)!important}
+.app-shell{background:var(--shell-bg)!important;isolation:isolate}
+.topbar{position:relative;background:var(--topbar-bg)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;filter:none!important;box-shadow:none!important;border-bottom:1px solid var(--line-color)!important}
+.topbar:before,.topbar:after{content:none!important;display:none!important}
+.content{background:var(--page-bg)}
+.motorcycle-crop-frame{width:min(100%,360px)!important;aspect-ratio:1/1!important;height:auto!important;max-height:none!important;overflow:hidden!important;background:var(--field-bg)!important}
+.motorcycle-crop-frame .motorcycle-photo{display:block!important;width:100%!important;height:100%!important;max-height:none!important;min-height:100%!important;margin:0!important;border:0!important;border-radius:0!important;object-fit:cover!important;object-position:var(--bike-photo-position,center)!important}
+.maintenance-fields{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:10px!important}
+.maintenance-fields>label{min-width:0!important;width:100%!important;overflow:hidden}
+.maintenance-fields input[type=date],.maintenance-fields input[type=number],.settings-card label input[type=date]{width:100%!important;max-width:100%!important;min-width:0!important;height:52px!important;min-height:52px!important;box-sizing:border-box!important;padding:0 8px!important;text-align:center!important;font-size:16px!important;font-variant-numeric:tabular-nums}
+.settings-card label input[type=date]::-webkit-date-and-time-value{text-align:center}
+.document-history-row{min-width:0}
+.document-expiry-date{display:block;white-space:normal;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.theme-light{--page-bg:#f5f6f7;--shell-bg:#f5f6f7;--topbar-bg:#fff;--main-text:#20242a;--muted-text:#68717c;--card-bg:#fff;--field-bg:#fff;--field-border:#cbd1d8;--line-color:#e2e5e9;color:#20242a}
+.theme-light .topbar{background:#fff!important}
+.theme-light .brand{color:#20242a}
+.theme-light .content,.theme-light .app-shell{background:#f5f6f7!important;color:#20242a}
+.theme-light h1,.theme-light h2,.theme-light h3,.theme-light .collapsible-heading,.theme-light .history-row strong,.theme-light .document-summary strong{color:#20242a}
+.theme-light .settings-card,.theme-light .profile-card,.theme-light .profile-menu,.theme-light .post-card,.theme-light .trip-card,.theme-light .qr-card,.theme-light .history-row,.theme-light .empty-card,.theme-light .stat{background:#fff!important;color:#20242a!important;border-color:#e0e4e8!important}
+.theme-light .settings-card label,.theme-light .composer-modal label{color:#4d5661}
+.theme-light .settings-card label input,.theme-light .settings-card label textarea,.theme-light .settings-card label select,.theme-light .composer-modal input,.theme-light .composer-modal textarea,.theme-light .composer-modal select{background:#fff!important;color:#20242a!important;border-color:#cbd1d8!important;color-scheme:light}
+.theme-light .secondary,.theme-light .feed-switch button,.theme-light .method-tabs button,.theme-light .searchbox,.theme-light .filter-button,.theme-light .filter-panel{background:#f0f2f4!important;color:#3c4651!important;border-color:#dfe3e7!important}
+.theme-light .method-panel{background:#f6f7f8!important;color:#c66a28!important;border-color:#e0e4e8!important}
+.theme-light .method-panel p,.theme-light .post-body p,.theme-light .history-row small,.theme-light .profile-menu button small{color:#68717c!important}
+.theme-light .bottom-nav{background:#ffffff!important;border-top-color:#e0e4e8!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.theme-light .bottom-nav button{color:#727982}
+.theme-light .bottom-nav button.active{color:#d96a1d}
+.theme-light .bottom-nav .nav-plus{background:#ff6b00!important;color:#fff!important;border-color:#f5f6f7!important}
+.theme-light .dev-ribbon{background:#fff2e8!important;color:#98501f!important}
+.theme-light .document-expiry-date{color:#20242a!important}
+.theme-light .motorcycle-file{background:#fff5ed!important;color:#a9531b!important}
+.theme-light .crop-hint{background:#20242acc!important;color:#fff!important}
+.theme-light .passport-cover{color:#e4bd91}
+.theme-light .stamp-tile{background:#fff!important;border-color:#cbd1d8!important}
+.theme-light .stamp-tile strong{color:#3c4651!important}
+.theme-light .stamp-tile.earned{background:#fff2e8!important;border-color:#e58a4c!important}
+.theme-light .comments-list p{background:#f0f2f4;color:#3c4651}
+.theme-light .toast{background:#fff!important;color:#20242a!important;border-color:#dfe3e7!important}
+@media(max-width:380px){.maintenance-fields{gap:7px!important}.maintenance-fields input[type=date],.maintenance-fields input[type=number]{font-size:15px!important;padding:0 4px!important}}
