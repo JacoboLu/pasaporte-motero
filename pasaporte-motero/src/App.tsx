@@ -21,6 +21,14 @@ type Post = { id: string | number; title: string; text: string; place: string; d
 type Visit = { id: string | number; destinationId: number; date: string; method: 'gps'|'photo'|'qr'; status: VisitStatus; note?: string; image?: string }
 type TripStop = { name: string; catalogDestinationId: number | null; sortOrder: number }
 type Trip = { id: string; name: string; start: string; end: string; description: string; destinationIds: number[]; stops: TripStop[]; visibility: 'public'|'followers'|'private'; photos: string[] }
+const departmentCodes: Record<string, string> = {
+  'Amazonas':'AMA','Áncash':'ANC','Apurímac':'APU','Arequipa':'ARE','Ayacucho':'AYA',
+  'Cajamarca':'CAJ','Callao':'CAL','Cusco':'CUS','Huancavelica':'HUV','Huánuco':'HUC',
+  'Ica':'ICA','Junín':'JUN','La Libertad':'LAL','Lambayeque':'LAM','Lima':'LIM',
+  'Loreto':'LOR','Madre de Dios':'MDD','Moquegua':'MOQ','Pasco':'PAS','Piura':'PIU',
+  'Puno':'PUN','San Martín':'SAM','Tacna':'TAC','Tumbes':'TUM','Ucayali':'UCA'
+}
+
 
 const destinations: Destination[] = [
   { id: 1, title: 'Abra Anticona (Ticlio)', region: 'Junín', province: 'Yauli', city: 'Morococha', category: 'Montañas', distance: '124 km', image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1100&q=85', description: 'Uno de los pasos de montaña más emblemáticos de la Carretera Central. Un recorrido de altura entre paisajes andinos.', lat: -11.609, lng: -76.193, radius: 350 },
@@ -115,6 +123,7 @@ export default function App() {
   const [visitDestination, setVisitDestination] = useState<number>(1)
   const [visits, setVisits] = useState<Visit[]>([])
   const [departmentStamps, setDepartmentStamps] = useState<{department_code:string;earned_at:string}[]>([])
+  const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null)
   const [posts, setPosts] = useState<Post[]>(initialPosts)
   const [trips, setTrips] = useState<Trip[]>(initialTrips)
   const [saved, setSaved] = useState<number[]>([])
@@ -318,14 +327,22 @@ export default function App() {
   useEffect(() => { const on = () => setOffline(false); const off = () => setOffline(true); window.addEventListener('online', on); window.addEventListener('offline', off); return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off) } }, [])
 
   const visitedIds = useMemo(() => new Set(visits.filter(v => v.status === 'validated').map(v => v.destinationId)), [visits])
+  const departmentPages = useMemo(() => allRegions.map(name => {
+    const places = destinations.filter(destination => destination.region === name)
+    const visitedPlaces = places.filter(destination => visitedIds.has(destination.id))
+    const pendingPlaces = places.filter(destination => visits.some(visit => visit.destinationId === destination.id && visit.status === 'pending'))
+    const stamp = departmentStamps.find(item => item.department_code === departmentCodes[name])
+    return { name, code: departmentCodes[name], places, visitedPlaces, pendingPlaces, stamp, earned: visitedPlaces.length > 0, earnedAt: stamp?.earned_at || visitedPlaces[0]?.date || null }
+  }), [visits, visitedIds, departmentStamps])
+  const selectedDepartmentPage = selectedDepartment ? departmentPages.find(page => page.name === selectedDepartment) : undefined
   const visitedCount = authUserId ? visitedIds.size : 0
-  const visitedRegionCount = authUserId ? departmentStamps.length : 0
+  const visitedRegionCount = authUserId ? departmentPages.filter(page => page.earned).length : 0
   const progress = Math.round(visitedRegionCount / 25 * 100)
   const filteredDestinations = destinations.filter(d => (category === 'Todos' || d.category === category) && (regionFilter === 'Todos' || d.region === regionFilter) && `${d.title} ${d.region} ${d.province} ${d.city}`.toLowerCase().includes(query.toLowerCase()))
   const filteredMapDestinations = mapDestinations.filter(d => (category === 'Todos' || d.category === category) && (regionFilter === 'Todos' || d.region === regionFilter) && `${d.title} ${d.region} ${d.province} ${d.city}`.toLowerCase().includes(query.toLowerCase()))
   const visiblePosts = posts.filter(p => p.visibility !== 'private').filter(p => feedMode === 'all' || (!!p.authorId && followed.includes(p.authorId)))
 
-  function openTab(next: Tab) { setSubview(''); setSelected(null); setTab(next) }
+  function openTab(next: Tab) { setSubview(''); setSelected(null); setSelectedDepartment(null); setTab(next) }
   function formatDisplayDate(value: string) {
     if (!value) return 'Sin fecha'
     const [year, month, day] = value.slice(0,10).split('-').map(Number)
@@ -1208,7 +1225,29 @@ export default function App() {
     {offline && <div className="offline-banner"><CloudOff size={15}/> Modo sin conexión. Tus cambios se guardan en este dispositivo.</div>}
 
     <main className="content" key={`${tab}-${subview}`}>
-      {selected ? <section className="destination-detail">
+      {selectedDepartment && selectedDepartmentPage ? <section className="department-detail-view">
+        <button className="back-link" onClick={() => setSelectedDepartment(null)}><ArrowLeft size={17}/> Volver a mi pasaporte</button>
+        <div className="department-detail-paper">
+          <span className="passport-page-ornament">✦ REPÚBLICA DEL PERÚ ✦</span>
+          <span className="department-detail-kicker">PASAPORTE MOTERO · DEPARTAMENTO</span>
+          <h1>{selectedDepartmentPage.name}</h1>
+          <div className={`department-detail-seal ${selectedDepartmentPage.earned ? 'earned' : ''}`}><Stamp size={36}/><strong>{selectedDepartmentPage.code}</strong><span>{selectedDepartmentPage.earned ? 'SELLO OBTENIDO' : 'SELLO PENDIENTE'}</span></div>
+          <div className="department-detail-counts">
+            <div><strong>{selectedDepartmentPage.visitedPlaces.length}</strong><span>Lugares visitados</span></div>
+            <div><strong>{selectedDepartmentPage.pendingPlaces.length}</strong><span>En validación</span></div>
+            <div><strong>{Math.max(0, selectedDepartmentPage.places.length - selectedDepartmentPage.visitedPlaces.length - selectedDepartmentPage.pendingPlaces.length)}</strong><span>Pendientes</span></div>
+          </div>
+          <p>{selectedDepartmentPage.earned ? 'Este departamento ya forma parte de tu ruta. Sigue explorando para completar todos sus destinos.' : 'Visita y valida al menos un lugar de este departamento para conseguir tu sello oficial.'}</p>
+        </div>
+        {selectedDepartmentPage.places.length === 0 ? <div className="empty-card department-empty"><MapPinned size={28}/><h3>Estamos incorporando destinos</h3><p>Pronto añadiremos lugares para descubrir en este departamento.</p></div> : <>
+          <div className="section-heading"><h2>Lugares visitados</h2><span className="muted tiny">{selectedDepartmentPage.visitedPlaces.length}</span></div>
+          {selectedDepartmentPage.visitedPlaces.length ? <div className="department-place-list">{selectedDepartmentPage.visitedPlaces.map(place => <button className="department-place-row visited" key={place.id} onClick={() => { setSelected(place); setSelectedDepartment(null) }}><span className="place-status-icon"><BadgeCheck size={19}/></span><span><strong>{place.title}</strong><small>{place.city}, {place.province}</small></span><b>Visitado</b><ChevronRight size={16}/></button>)}</div> : <div className="department-list-empty">Aún no tienes lugares sellados en este departamento.</div>}
+          <div className="section-heading"><h2>Visitas en validación</h2><span className="muted tiny">{selectedDepartmentPage.pendingPlaces.length}</span></div>
+          {selectedDepartmentPage.pendingPlaces.length ? <div className="department-place-list">{selectedDepartmentPage.pendingPlaces.map(place => <button className="department-place-row pending" key={place.id} onClick={() => { setSelected(place); setSelectedDepartment(null) }}><span className="place-status-icon"><Clock3 size={19}/></span><span><strong>{place.title}</strong><small>{place.city}, {place.province}</small></span><b>En revisión</b><ChevronRight size={16}/></button>)}</div> : <div className="department-list-empty">No tienes visitas pendientes de aprobación.</div>}
+          <div className="section-heading"><h2>Por descubrir</h2><span className="muted tiny">{Math.max(0, selectedDepartmentPage.places.length - selectedDepartmentPage.visitedPlaces.length - selectedDepartmentPage.pendingPlaces.length)}</span></div>
+          <div className="department-place-list">{selectedDepartmentPage.places.filter(place => !visitedIds.has(place.id) && !selectedDepartmentPage.pendingPlaces.some(pending => pending.id === place.id)).map(place => <button className="department-place-row" key={place.id} onClick={() => { setSelected(place); setSelectedDepartment(null) }}><span className="place-status-icon"><MapPin size={18}/></span><span><strong>{place.title}</strong><small>{place.city}, {place.province}</small></span><b>Por visitar</b><ChevronRight size={16}/></button>)}</div>
+        </>}
+      </section> : selected ? <section className="destination-detail">
         <button className="back-link" onClick={() => setSelected(null)}><ArrowLeft size={17}/> Volver a destinos</button>
         <div className="destination-hero"><img src={selected.image} alt={selected.title}/><div className="hero-shade"/><span className="hero-category">{selected.category}</span><h1>{selected.title}</h1><p><MapPin size={14}/> {selected.city}, {selected.region}</p></div>
         <div className="detail-actions"><button className="primary" onClick={() => { setVisitDestination(selected.id); openAction('visit') }}><ShieldCheck size={17}/> Validar visita</button><button className="secondary" onClick={() => toggleSaved(selected.id)}><Bookmark size={17}/> {saved.includes(selected.id) ? 'Guardado' : 'Guardar'}</button></div>
@@ -1234,7 +1273,22 @@ export default function App() {
           <div className="passport-cover"><div className="passport-security passport-security-one"/><div className="passport-security passport-security-two"/><div className="passport-watermark"><Compass size={190}/></div><div className="cover-top"><span>✦</span> REPÚBLICA DEL PERÚ <span>✦</span></div><div className="cover-emblem"><Bike size={39}/><span className="emblem-orbit"/></div><div className="cover-title">PASAPORTE<br/>MOTERO</div><div className="cover-subtitle">DOCUMENTO DE RUTA Y AVENTURA</div><div className="cover-divider"><span/><i/><span/></div><div className="cover-bottom"><span>TRAVEL</span><i/> <span>EXPLORE</span><i/> <span>REPEAT</span></div><div className="passport-serial">PM · PER · 2026</div><div className="passport-microtext">RUTAS QUE NOS UNEN · PERÚ · LIBERTAD SOBRE RUEDAS</div></div>
           <div className="stats-grid"><div className="stat"><strong>{Math.max(0, Number(visitedCount) || 0)}</strong><span>Lugares visitados</span></div><div className="stat"><strong>{Math.max(0, Number(departmentStamps?.length) || 0)}</strong><span>Sellos obtenidos</span></div><div className="stat"><strong>{Math.max(0, authUserId ? Number(trips?.length) || 0 : 0)}</strong><span>Viajes</span></div></div>
           <div className="section-heading"><h2>Exploración del Perú</h2><span className="muted tiny">{progress}% · {visitedRegionCount}/25 departamentos</span></div><div className="progress"><span style={{width: `${progress}%`}}/></div>
-          <div className="stamp-grid">{allRegions.map((name, i) => { const reg = regions.find(r => r.name === name); const code = ['AMA','ANC','APU','ARE','AYA','CAJ','CAL','CUS','HUV','HUC','ICA','JUN','LAL','LAM','LIM','LOR','MDD','MOQ','PAS','PIU','PUN','SAM','TAC','TUM','UCA'][i]; const stamp = departmentStamps.find(item => item.department_code === code); const Icon = [Map,Mountain,Tent,Sunrise][i%4]; return <button className={`stamp-tile ${stamp ? 'earned' : ''}`} key={name} onClick={() => { setQuery(name); setTab('explore') }} aria-label={`Sello de ${name}: ${stamp ? 'obtenido' : 'pendiente'}`}><span className="stamp-art">{stamp ? <CheckCircle2 size={22}/> : <Icon size={22}/>}<small>{code}</small></span><strong>{name}</strong><small>{stamp ? `Obtenido · ${new Date(stamp.earned_at).toLocaleDateString('es-PE')}` : reg ? 'Por descubrir' : 'Sello disponible'}</small></button> })}</div>
+          <div className="passport-book-heading"><div><strong>SELLOS DE LOS 25 DEPARTAMENTOS</strong><span>Desliza las páginas para explorar tu recorrido por el Perú.</span></div><span className="book-page-count">{visitedRegionCount}/25</span></div>
+          <div className="passport-book-viewport" aria-label="Pasaporte por departamentos. Desliza horizontalmente para cambiar de página">
+            <div className="passport-book-track">{departmentPages.map((page, index) => <button type="button" className={`passport-book-page ${page.earned ? 'has-stamp' : ''}`} key={page.name} onClick={() => { setSelected(null); setSelectedDepartment(page.name) }} aria-label={`Abrir ${page.name}: ${page.visitedPlaces.length} de ${page.places.length} lugares visitados`}>
+              <span className="passport-page-number">PÁGINA ${String(index + 1).padStart(2,'0')} / 25</span>
+              <span className="passport-page-ornament">✦ REPÚBLICA DEL PERÚ ✦</span>
+              <span className="passport-page-title">${page.name}</span>
+              <span className="passport-page-caption">DEPARTAMENTO</span>
+              <span className={`department-seal ${page.earned ? 'earned' : ''}`} style={{transform:`rotate(${(index % 5 - 2) * 2}deg)`}}>
+                <span className="seal-ring"><Stamp size={25}/><b>${page.code}</b><small>${page.earned ? 'VISITADO' : 'POR EXPLORAR'}</small></span>
+              </span>
+              <span className="passport-place-counter"><strong>${page.visitedPlaces.length}</strong><span> de ${page.places.length} lugares visitados</span></span>
+              <span className="passport-page-status">${page.earned ? `SELLO OBTENIDO · ${page.earnedAt ? new Date(page.earnedAt).toLocaleDateString('es-PE') : 'VISITADO'}` : page.places.length ? 'TU PRÓXIMO DESTINO TE ESPERA' : 'DESTINOS EN INCORPORACIÓN'}</span>
+              <span className="passport-page-footer">PASAPORTE MOTERO · PERÚ</span>
+              <span className="passport-page-open">Ver lugares <ChevronRight size={14}/></span>
+            </button>)}</div>
+          </div>
           <div className="section-heading"><h2>Historial de validaciones</h2><span className="muted tiny">{visits.length} registros</span></div>
           {visits.length === 0 ? <div className="empty-card compact"><Stamp size={28}/><h3>Tu pasaporte está en blanco</h3><p>Descubre un destino y registra tu primera visita para conseguir un sello.</p><button className="primary" onClick={() => setTab('explore')}>Explorar destinos <Compass size={16}/></button></div> : <div className="history-list">{visits.map(v => { const d = destinations.find(x => x.id === v.destinationId); return <div className="history-row" key={v.id}><span className={`history-icon ${v.status}`}><Stamp size={18}/></span><div><strong>{d?.title || 'Destino'}</strong><small>{new Date(v.date).toLocaleDateString('es-PE')} · {v.method === 'gps' ? 'GPS' : v.method === 'photo' ? 'Fotografía' : 'QR presencial'}</small></div><span className={`state-pill ${v.status}`}>{v.status === 'validated' ? 'Validado' : v.status === 'pending' ? 'Pendiente' : 'Rechazado'}</span></div> })}</div>}
         </section>}
@@ -1277,7 +1331,7 @@ export default function App() {
       </>}
     </main>
 
-    <nav className="bottom-nav">{navItems.slice(0,2).map(item => {const Icon = item.icon; return <button key={item.id} onClick={() => openTab(item.id)} className={tab === item.id && !selected ? 'active' : ''}><Icon size={20}/><span>{item.label}</span></button>})}<button className="nav-plus" onClick={() => setShowActions(true)} aria-label="Crear o validar"><Plus size={25}/></button>{navItems.slice(2).map(item => {const Icon = item.icon; return <button key={item.id} onClick={() => openTab(item.id)} className={tab === item.id && !selected ? 'active' : ''}><Icon size={20}/><span>{item.label}</span></button>})}</nav>
+    <nav className="bottom-nav">{navItems.slice(0,2).map(item => {const Icon = item.icon; return <button key={item.id} onClick={() => openTab(item.id)} className={tab === item.id && !selected && !selectedDepartment ? 'active' : ''}><Icon size={20}/><span>{item.label}</span></button>})}<button className="nav-plus" onClick={() => setShowActions(true)} aria-label="Crear o validar"><Plus size={25}/></button>{navItems.slice(2).map(item => {const Icon = item.icon; return <button key={item.id} onClick={() => openTab(item.id)} className={tab === item.id && !selected ? 'active' : ''}><Icon size={20}/><span>{item.label}</span></button>})}</nav>
 
     {showActions && <div className="modal-backdrop" onClick={() => setShowActions(false)}><div className="action-sheet" onClick={e => e.stopPropagation()}><div className="sheet-handle"/><div className="modal-head"><h2>¿Qué quieres hacer?</h2><button className="icon-button" onClick={() => setShowActions(false)} aria-label="Cerrar"><X/></button></div><button className="action-option" onClick={() => openAction('visit')}><span><ShieldCheck/></span><div><strong>Validar una visita</strong><small>GPS, fotografía o QR presencial</small></div><ChevronRight/></button><button className="action-option" onClick={() => openAction('trip')}><span><Route/></span><div><strong>Crear un viaje</strong><small>Organiza destinos y bitácoras</small></div><ChevronRight/></button><button className="action-option" onClick={() => openAction('post')}><span><Users/></span><div><strong>Publicar en comunidad</strong><small>Comparte una historia o fotografía</small></div><ChevronRight/></button><button className="action-option" onClick={() => {setShowActions(false);setSubview('memories');setTab('profile')}}><span><Images/></span><div><strong>Ver mis recuerdos</strong><small>Revisa tus fotografías</small></div><ChevronRight/></button></div></div>}
 
