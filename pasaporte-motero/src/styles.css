@@ -243,3 +243,5 @@ input.date-control::-webkit-calendar-picker-indicator,input.document-date-contro
 .trip-delete{margin-left:auto}
 @media(max-width:380px){.trip-card{gap:10px;padding:12px}.trip-icon{width:36px;height:36px}.trip-card-title>strong{font-size:14px}}
 
+
+.qr-scanner-video{display:block;width:100%;max-height:300px;aspect-ratio:4/3;object-fit:cover;background:#090909;border:1px solid #ffffff24;border-radius:14px;margin:10px 0}
