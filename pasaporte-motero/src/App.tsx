@@ -325,11 +325,11 @@ export default function App() {
   async function makePersonalQr() {
     const user = await getCurrentAuthUser()
     if (!supabase || !user) { setAuthMode('login'); setAuthOpen(true); notify('Inicia sesión para generar tu QR personal.'); return }
-    const { data, error } = await supabase.from('user_qr_codes').select('public_code').eq('user_id', user.id).is('revoked_at', null).maybeSingle()
-    if (error || !data?.public_code) { notify('No encontramos tu identificador QR. Contacta al administrador.'); return }
+    const { data, error } = await supabase.functions.invoke('get-personal-qr', { body: {} })
+    if (error || !data?.code) { notify('No se pudo obtener tu identificador QR: ' + (data?.error || error?.message || 'Error')); return }
     try {
       setQrChallengeExpires('')
-      const payload = JSON.stringify({ type: 'pasaporte-motero-user', code: data.public_code })
+      const payload = JSON.stringify({ type: 'pasaporte-motero-user', code: data.code })
       setQr(await QRCode.toDataURL(payload, { width: 260, margin: 2, errorCorrectionLevel: 'M' }))
       notify('QR de identificación generado. No concede sellos ni autoriza visitas por sí solo.')
     } catch { notify('No se pudo generar el QR.') }
