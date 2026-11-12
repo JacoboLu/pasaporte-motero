@@ -157,6 +157,9 @@ export default function App() {
   const [postPlace, setPostPlace] = useState('')
   const [postVisibility, setPostVisibility] = useState<'public'|'followers'|'private'>('public')
   const [postImage, setPostImage] = useState('')
+  const [editingPostId, setEditingPostId] = useState<string | null>(null)
+  const [editingTripId, setEditingTripId] = useState<string | null>(null)
+  const [activityStats, setActivityStats] = useState({comments:0,likes:0,saves:0})
   const [tripName, setTripName] = useState('')
   const [tripStart, setTripStart] = useState(new Date().toISOString().slice(0,10))
   const [tripEnd, setTripEnd] = useState('')
@@ -646,7 +649,83 @@ export default function App() {
     }))
     setPosts([...posts,...publicTrips].sort((a,b)=>new Date(b.createdAt || 0).getTime()-new Date(a.createdAt || 0).getTime()))
   }
+  async function loadMyActivity(userId:string) {
+    if (!supabase) return
+    const {data:rows,error}=await supabase.from('posts').select('id,user_id,title,content,visibility,status,created_at,post_photos(storage_path)').eq('user_id',userId).order('created_at',{ascending:false}).limit(100)
+    if(error){notify('No se pudo cargar tu actividad: '+error.message);return}
+    const ownPosts=await Promise.all((rows||[]).map(async(row:any)=>{
+      let image:string|undefined
+      const photo=row.post_photos?.[0]?.storage_path
+      if(photo){const {data:signed}=await supabase!.storage.from('community').createSignedUrl(photo,3600);image=signed?.signedUrl||undefined}
+      const [{count:likes},{count:comments},{count:saves}]=await Promise.all([
+        supabase!.from('post_likes').select('id',{count:'exact',head:true}).eq('post_id',row.id),
+        supabase!.from('comments').select('id',{count:'exact',head:true}).eq('post_id',row.id),
+        supabase!.from('saved_posts').select('id',{count:'exact',head:true}).eq('post_id',row.id)
+      ])
+      return {id:row.id,authorId:userId,title:row.title||'Una nueva aventura',text:row.content,place:'Comunidad motera',date:new Intl.DateTimeFormat('es-PE',{dateStyle:'medium'}).format(new Date(row.created_at)),likes:likes||0,visibility:row.visibility,image,comments:[],kind:'post',authorName:displayName,authorUsername:username,authorAvatar:avatarUrl,createdAt:row.created_at,activityComments:comments||0,activitySaves:saves||0,status:row.status} as any
+    }))
+    setPosts(current=>[...current.filter(p=>p.authorId!==userId),...ownPosts])
+    const [{count:comments},{count:likes},{count:saves}]=await Promise.all([
+      supabase.from('comments').select('id,posts!inner(user_id)',{count:'exact',head:true}).eq('posts.user_id',userId),
+      supabase.from('post_likes').select('id,posts!inner(user_id)',{count:'exact',head:true}).eq('posts.user_id',userId),
+      supabase.from('saved_posts').select('id,posts!inner(user_id)',{count:'exact',head:true}).eq('posts.user_id',userId)
+    ])
+    setActivityStats({comments:comments||0,likes:likes||0,saves:saves||0})
+  }
+
+  function editOwnPost(post:any) {
+    setEditingPostId(String(post.id));setEditingTripId(null)
+    setPostTitle(post.title||'');setPostText(post.text||'');setPostPlace('')
+    setPostVisibility(post.visibility||'private');setPostImage(post.image||'');setAction('post')
+  }
+
+  async function updateOwnPost() {
+    const user=await getCurrentAuthUser()
+    if(!supabase||!user||!editingPostId)return
+    if(!postText.trim()){notify('La publicación necesita una historia.');return}
+    setBusy(true)
+    const {error}=await supabase.from('posts').update({title:postTitle.trim()||'Una nueva aventura',content:postText.trim(),visibility:postVisibility,updated_at:new Date().toISOString()}).eq('id',editingPostId).eq('user_id',user.id)
+    setBusy(false)
+    if(error){notify('No se pudo actualizar: '+error.message);return}
+    setEditingPostId(null);setAction('');setPostImage('')
+    await loadCommunityPosts();await loadMyActivity(user.id);notify('Publicación actualizada.')
+  }
+
+  async function deleteOwnPost(post:any) {
+    const user=await getCurrentAuthUser()
+    if(!supabase||!user)return
+    if(!window.confirm('¿Eliminar esta publicación y sus fotografías? Esta acción no se puede deshacer.'))return
+    setBusy(true)
+    const {data:photos}=await supabase.from('post_photos').select('storage_path').eq('post_id',post.id).eq('user_id',user.id)
+    const paths=(photos||[]).map((p:any)=>p.storage_path).filter(Boolean)
+    if(paths.length){const {error}=await supabase.storage.from('community').remove(paths);if(error){setBusy(false);notify('No se pudieron eliminar las fotografías: '+error.message);return}}
+    const {error}=await supabase.from('posts').delete().eq('id',post.id).eq('user_id',user.id)
+    setBusy(false)
+    if(error){notify('No se pudo eliminar la publicación: '+error.message);return}
+    setPosts(items=>items.filter(p=>String(p.id)!==String(post.id)))
+    await loadMyActivity(user.id);notify('Publicación eliminada.')
+  }
+
+  function editOwnTrip(trip:Trip) {
+    setEditingTripId(trip.id);setEditingPostId(null)
+    setTripName(trip.name);setTripStart(trip.start||'');setTripEnd(trip.end||'')
+    setTripDescription(trip.description);setTripVisibility(trip.visibility)
+    setTripDestinations([]);setTripManualStops([]);setAction('trip')
+  }
+
+  async function updateOwnTrip() {
+    const user=await getCurrentAuthUser()
+    if(!supabase||!user||!editingTripId)return
+    if(!tripName.trim()){notify('Escribe un nombre para la bitácora.');return}
+    setBusy(true)
+    const {error}=await supabase.from('trips').update({name:tripName.trim(),description:tripDescription.trim(),start_date:tripStart||null,end_date:tripEnd||null,visibility:tripVisibility,updated_at:new Date().toISOString()}).eq('id',editingTripId).eq('user_id',user.id)
+    setBusy(false)
+    if(error){notify('No se pudo actualizar la bitácora: '+error.message);return}
+    setEditingTripId(null);setAction('');await loadTrips(user.id);await loadCommunityPosts();notify('Bitácora actualizada.')
+  }
+
   async function publishPost() {
+    if (editingPostId) { await updateOwnPost(); return }
     if (!postText.trim()) { notify('Escribe algo sobre tu aventura antes de publicar.'); return }
     const user = await getCurrentAuthUser()
     if (!supabase || !user) { setAuthMode('login'); setAuthOpen(true); notify('Inicia sesión para publicar en la comunidad.'); return }
@@ -673,6 +752,7 @@ export default function App() {
     notify(postVisibility==='public'?'Publicación publicada en la comunidad.':'Publicación guardada con la privacidad seleccionada.')
   }
   async function createTrip() {
+    if (editingTripId) { await updateOwnTrip(); return }
     if (!tripName.trim()) { notify('Escribe un nombre para tu viaje.'); return }
     const user = await getCurrentAuthUser()
     if (!supabase || !user) { setAuthMode('login'); setAuthOpen(true); notify('Inicia sesión para sincronizar tus viajes.'); return }
@@ -1133,7 +1213,7 @@ export default function App() {
           </div> : <>
             <span className="eyebrow">TU IDENTIDAD VIAJERA</span><h1>Mi perfil</h1>
             <div className="profile-card"><div className="avatar large">{avatarUrl ? <img src={avatarUrl} alt="Foto de perfil"/> : initials(displayName)}</div><h2>{displayName}</h2><span className="muted">@{username}</span><p className="muted">{bio}</p><span className="profile-location"><MapPin size={13}/> {homeCity}</span><div className="profile-stats"><span><b>{followed.length}</b> siguiendo</span><span><b>0</b> seguidores</span><span><b>{posts.length}</b> publicaciones</span></div></div>
-            <div className="profile-menu"><button onClick={() => setSubview('motorcycle')}><Bike/><span><strong>Mi motocicleta</strong><small>{motorcycleBrand && motorcycleModel ? motorcycleBrand + ' ' + motorcycleModel : 'Ficha técnica y mantenimiento'}</small></span><ChevronRight/></button><button onClick={() => setSubview('trips')}><Route/><span><strong>Mis viajes y bitácoras</strong><small>{trips.length} viajes registrados</small></span><ChevronRight/></button><button onClick={() => setSubview('memories')}><Images/><span><strong>Fotos y recuerdos</strong><small>{galleryItems.length} fotografías · gestionar galería</small></span><ChevronRight/></button><button onClick={() => setSubview('saved')}><Bookmark/><span><strong>Publicaciones guardadas</strong><small>{savedPostIds.length+savedTripIds.length} favoritos sincronizados</small></span><ChevronRight/></button><button onClick={makePersonalQr}><QrCode/><span><strong>Mi QR de viajero</strong><small>Identificación para validación presencial</small></span><ChevronRight/></button><button onClick={() => setSubview('settings')}><Settings/><span><strong>Configuración</strong><small>Datos personales y privacidad</small></span><ChevronRight/></button><button onClick={() => authUser ? signOut() : setAuthOpen(true)}>{authUser ? <LogOut/> : <ShieldCheck/>}<span><strong>{authUser ? 'Cerrar sesión' : 'Iniciar sesión / Registrarme'}</strong><small>{authUser || (isSupabaseConfigured ? 'Accede para sincronizar tus datos' : 'Modo demostración disponible')}</small></span><ChevronRight/></button></div>
+            <div className="profile-menu"><button onClick={() => {setSubview('activity'); if(authUserId) void loadMyActivity(authUserId)}}><Activity/><span><strong>Mi actividad y publicaciones</strong><small>Gestionar publicaciones, bitácoras y comentarios</small></span><ChevronRight/></button><button onClick={() => setSubview('motorcycle')}><Bike/><span><strong>Mi motocicleta</strong><small>{motorcycleBrand && motorcycleModel ? motorcycleBrand + ' ' + motorcycleModel : 'Ficha técnica y mantenimiento'}</small></span><ChevronRight/></button><button onClick={() => setSubview('trips')}><Route/><span><strong>Mis viajes y bitácoras</strong><small>{trips.length} viajes registrados</small></span><ChevronRight/></button><button onClick={() => setSubview('memories')}><Images/><span><strong>Fotos y recuerdos</strong><small>{galleryItems.length} fotografías · gestionar galería</small></span><ChevronRight/></button><button onClick={() => setSubview('saved')}><Bookmark/><span><strong>Publicaciones guardadas</strong><small>{savedPostIds.length+savedTripIds.length} favoritos sincronizados</small></span><ChevronRight/></button><button onClick={makePersonalQr}><QrCode/><span><strong>Mi QR de viajero</strong><small>Identificación para validación presencial</small></span><ChevronRight/></button><button onClick={() => setSubview('settings')}><Settings/><span><strong>Configuración</strong><small>Datos personales y privacidad</small></span><ChevronRight/></button><button onClick={() => authUser ? signOut() : setAuthOpen(true)}>{authUser ? <LogOut/> : <ShieldCheck/>}<span><strong>{authUser ? 'Cerrar sesión' : 'Iniciar sesión / Registrarme'}</strong><small>{authUser || (isSupabaseConfigured ? 'Accede para sincronizar tus datos' : 'Modo demostración disponible')}</small></span><ChevronRight/></button></div>
             {qr && <div className="qr-card"><h3>Mi identificación QR</h3><img src={qr} alt="QR personal de demostración"/><p>QR de demostración. Para validar visitas reales se necesita un token temporal generado por el servidor.</p></div>}
             {subview === 'settings' && <div className="settings-card"><div className="section-heading"><h2>Editar perfil</h2><button className="text-action" onClick={() => setSubview('')}>Cerrar</button></div><label className="file-pick profile-photo-pick"><UserRound size={17}/> {avatarFile ? avatarFile.name : 'Elegir foto de perfil'}<input type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>{const f=e.target.files?.[0];if(!f)return;if(!['image/jpeg','image/png','image/webp'].includes(f.type)||f.size>5*1024*1024){notify('Usa JPG, PNG o WebP de máximo 5 MB.');e.currentTarget.value='';return}setAvatarFile(f);setAvatarUrl(URL.createObjectURL(f))}}/></label><label>Nombre para mostrar<input value={displayName} onChange={e => setDisplayName(e.target.value)}/></label><label>Nombre de usuario<input value={username} onChange={e => setUsername(e.target.value.replace(/\s/g,'').replace('@',''))}/></label><label>Biografía<textarea rows={3} value={bio} onChange={e => setBio(e.target.value)}/></label><label>Ciudad o país<input value={homeCity} onChange={e => setHomeCity(e.target.value)}/></label><div className="form-grid"><label>Marca de motocicleta<input value={motorcycleBrand} onChange={e => setMotorcycleBrand(e.target.value)} placeholder="Ej. Honda"/></label><label>Modelo<input value={motorcycleModel} onChange={e => setMotorcycleModel(e.target.value)} placeholder="Ej. CB 300F"/></label></div><label>Año de fabricación<input type="number" inputMode="numeric" min="1885" max={new Date().getFullYear()+1} value={motorcycleYear} onChange={e => setMotorcycleYear(e.target.value)} placeholder="Ej. 2024"/></label>{authUser ? <button className="primary full" disabled={profileBusy} onClick={saveProfile}>{profileBusy ? 'Guardando…' : 'Guardar y sincronizar perfil'}</button> : <button className="primary full" onClick={() => { notify('Inicia sesión para sincronizar tus datos.'); setAuthOpen(true) }}>Iniciar sesión para guardar</button>}{(profileRole === 'admin' || profileRole === 'manager') && <div className="admin-demo"><div className="section-heading"><h3>Panel de validaciones</h3><button className="text-action" onClick={loadAdminVisits}>Actualizar</button></div><p>{adminVisits.length} solicitudes pendientes de revisión</p><label>Destino para generar QR presencial<select value={visitDestination} onChange={e=>setVisitDestination(Number(e.target.value))}>{destinations.map(d=><option key={d.id} value={d.id}>{d.title} · {d.region}</option>)}</select></label><button className="secondary full" disabled={adminBusy} onClick={()=>createVisitQr(visitDestination)}><QrCode size={16}/> Generar QR de visita (2 minutos)</button><div className="staff-scan-panel"><strong>Validar QR del viajero</strong><p className="muted tiny">El encargado escanea el QR personal del motociclista y confirma su presencia en el destino seleccionado.</p><button type="button" className="secondary full" disabled={adminBusy} onClick={qrScanning ? stopQrScanner : startQrScanner}><Camera size={16}/>{qrScanning ? 'Cerrar cámara' : 'Abrir lector QR integrado'}</button>{qrScanning && <video ref={qrVideoRef} className="qr-scanner-video" autoPlay muted playsInline/>}<label>Código QR del viajero<input value={qrManual} onChange={e=>setQrManual(e.target.value)} placeholder="Escanea el QR personal del viajero"/></label><button className="primary full" disabled={adminBusy || !qrManual.trim()} onClick={validateRiderQr}>{adminBusy ? 'Validando…' : 'Confirmar visita presencial'}</button></div>{qr && qrChallengeExpires && <div className="qr-card"><img src={qr} alt="QR temporal de validación presencial"/><p>Vence: {new Date(qrChallengeExpires).toLocaleTimeString('es-PE')}</p></div>}{adminBusy && <p className="muted">Actualizando…</p>}{adminVisits.map(v => <div className="admin-visit" key={v.id}><strong>{v.destination?.name || 'Destino'}</strong><small>{v.rider?.full_name || v.rider?.username || 'Motero'} · {v.validation_method?.toUpperCase()} · {new Date(v.visited_at).toLocaleString('es-PE')}</small>{v.notes && <p>{v.notes}</p>}{v.evidence_url && <img src={v.evidence_url} alt="Evidencia de visita"/>}<div><button className="primary" disabled={adminBusy} onClick={() => reviewVisit(v.id,'validated')}>Aprobar</button><button className="secondary" disabled={adminBusy} onClick={() => reviewVisit(v.id,'rejected')}>Rechazar</button></div></div>)}{!adminBusy && adminVisits.length===0 && <p className="muted">No hay solicitudes pendientes.</p>}</div>}</div>}
           </>}
