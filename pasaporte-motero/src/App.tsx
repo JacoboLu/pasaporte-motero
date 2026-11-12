@@ -337,15 +337,18 @@ export default function App() {
         setVisitMethod('photo')
         return
       }
-      const { error } = await supabase!.from('app_visits').insert({
-        user_id: user.id, destination_id: dest.id, visited_at: new Date().toISOString(),
-        validation_method: 'gps', validation_status: 'pending', notes: visitNote.trim() || null,
-        latitude: position.coords.latitude, longitude: position.coords.longitude
+      const { data: result, error } = await supabase!.functions.invoke('validate-gps-visit', {
+        body: {
+          destination_id: dest.id,
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          notes: visitNote.trim() || null
+        }
       })
       setBusy(false)
-      if (error) { notify('No se pudo guardar la visita: ' + error.message); return }
+      if (error || !result?.visit) { notify('No se pudo validar la ubicación: ' + (result?.error || error?.message || 'Error desconocido')); return }
       await loadVisits(user.id)
-      notify('Ubicación recibida. La visita quedó pendiente de validación del servidor; el sello se activará al aprobarse.')
+      notify('Ubicación verificada dentro del radio del destino. La visita quedó pendiente de aprobación para obtener el sello.')
       closeModal(); setTab('passport')
     }, error => {
       setBusy(false)
