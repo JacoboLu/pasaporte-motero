@@ -63,7 +63,7 @@ values
 (39,'Piedra de los 12 Ángulos','Cusco','Cusco','Cusco','Histórico','Elemento emblemático de la arquitectura inca en Hatunrumiyoc.',-13.5162,-71.9753,100,'PROMPERÚ'),
 (40,'Barrio de San Blas','Cusco','Cusco','Cusco','Cultural','Barrio tradicional de talleres artesanales y calles históricas.',-13.5140,-71.9730,250,'PROMPERÚ'),
 (41,'Mercado de San Pedro','Cusco','Cusco','Cusco','Cultural','Mercado tradicional de productos y gastronomía local.',-13.5200,-71.9820,180,'PROMPERÚ'),
-(42,'Pikillaqta','Cusco','Quispicanchi','Lucre','Histórico','Parque arqueológico preincaico del Valle Sur.',-13.ೆಯ?,-71.7,300,'COSITUC'),
+(42,'Pikillaqta','Cusco','Quispicanchi','Lucre','Histórico','Parque arqueológico preincaico del Valle Sur.',-13.6131,-71.7163,300,'COSITUC'),
 (43,'Waqrapukara','Cusco','Acomayo','Acopia','Histórico','Complejo arqueológico en un promontorio rocoso.',-13.9250,-71.6750,500,'GERCETUR Cusco'),
 (44,'Q’eswachaka','Cusco','Canas','Quehue','Cultural','Puente colgante tradicional de ichu sobre el río Apurímac.',-14.3800,-71.4850,250,'GERCETUR Cusco'),
 (45,'Pallay Punchu','Cusco','Canas','Layo','Montañas','Montaña de formaciones y colores en el sur de Cusco.',-14.4900,-71.1500,450,'GERCETUR Cusco'),
