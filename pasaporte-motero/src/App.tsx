@@ -373,7 +373,7 @@ export default function App() {
     setMotorcycleCc(''); setMotorcycleType('Adventure'); setMotorcycleFuel('Gasolina')
     setMotorcycleOdometer(''); setMotorcycleNotes(''); setMaintenance([]); setDocuments([])
     setQr(''); setQrChallengeExpires(''); setAdminMode(false); setProfileRole('user'); setAdminVisits([]); setAuthUser(null); setAuthUserId(null)
-    setSubview(''); setSelected(null); setAction(''); setShowActions(false); setTab('profile')
+    setSubview(''); setSelected(null); setSelectedDepartment(null); setAction(''); setShowActions(false); setTab('profile')
   }
   function closeModal() { setEditingPostId(null); setEditingTripId(null); qrScannerControls.current?.stop(); qrScannerControls.current = null; setQrScanning(false); setAction(''); setVisitPhoto(''); setVisitNote(''); setPostImage(''); setCommentPost(null) }
   async function compressImageFile(file: File, maxBytes = 2_400_000): Promise<File> {
@@ -1276,15 +1276,15 @@ export default function App() {
           <div className="passport-book-heading"><div><strong>SELLOS DE LOS 25 DEPARTAMENTOS</strong><span>Desliza las páginas para explorar tu recorrido por el Perú.</span></div><span className="book-page-count">{visitedRegionCount}/25</span></div>
           <div className="passport-book-viewport" aria-label="Pasaporte por departamentos. Desliza horizontalmente para cambiar de página">
             <div className="passport-book-track">{departmentPages.map((page, index) => <button type="button" className={`passport-book-page ${page.earned ? 'has-stamp' : ''}`} key={page.name} onClick={() => { setSelected(null); setSelectedDepartment(page.name) }} aria-label={`Abrir ${page.name}: ${page.visitedPlaces.length} de ${page.places.length} lugares visitados`}>
-              <span className="passport-page-number">PÁGINA ${String(index + 1).padStart(2,'0')} / 25</span>
+              <span className="passport-page-number">PÁGINA {String(index + 1).padStart(2,'0')} / 25</span>
               <span className="passport-page-ornament">✦ REPÚBLICA DEL PERÚ ✦</span>
-              <span className="passport-page-title">${page.name}</span>
+              <span className="passport-page-title">{page.name}</span>
               <span className="passport-page-caption">DEPARTAMENTO</span>
               <span className={`department-seal ${page.earned ? 'earned' : ''}`} style={{transform:`rotate(${(index % 5 - 2) * 2}deg)`}}>
-                <span className="seal-ring"><Stamp size={25}/><b>${page.code}</b><small>${page.earned ? 'VISITADO' : 'POR EXPLORAR'}</small></span>
+                <span className="seal-ring"><Stamp size={25}/><b>{page.code}</b><small>{page.earned ? 'VISITADO' : 'POR EXPLORAR'}</small></span>
               </span>
-              <span className="passport-place-counter"><strong>${page.visitedPlaces.length}</strong><span> de ${page.places.length} lugares visitados</span></span>
-              <span className="passport-page-status">${page.earned ? `SELLO OBTENIDO · ${page.earnedAt ? new Date(page.earnedAt).toLocaleDateString('es-PE') : 'VISITADO'}` : page.places.length ? 'TU PRÓXIMO DESTINO TE ESPERA' : 'DESTINOS EN INCORPORACIÓN'}</span>
+              <span className="passport-place-counter"><strong>{page.visitedPlaces.length}</strong><span> de {page.places.length} lugares visitados</span></span>
+              <span className="passport-page-status">{page.earned ? `SELLO OBTENIDO · ${page.earnedAt ? new Date(page.earnedAt).toLocaleDateString('es-PE') : 'VISITADO'}` : page.places.length ? 'TU PRÓXIMO DESTINO TE ESPERA' : 'DESTINOS EN INCORPORACIÓN'}</span>
               <span className="passport-page-footer">PASAPORTE MOTERO · PERÚ</span>
               <span className="passport-page-open">Ver lugares <ChevronRight size={14}/></span>
             </button>)}</div>
