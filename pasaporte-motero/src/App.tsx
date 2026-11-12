@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import QRCode from 'qrcode'
-import { BrowserQRCodeReader } from '@zxing/browser'
 import {
   Search, MapPin, Compass, BookOpen, Plus, Users, UserRound, ChevronRight,
   Award, Lock, Map, Mountain, Sunrise, Tent, Navigation, CheckCircle2,
@@ -260,17 +259,22 @@ export default function App() {
       return
     }
     let cancelled = false
-    const reader = new BrowserQRCodeReader()
-    void reader.decodeFromVideoDevice(undefined, video, (result) => {
-      if (!result || cancelled) return
-      const raw = result.getText()
-      cancelled = true
-      qrScannerControls.current?.stop()
-      qrScannerControls.current = null
-      setQrScanning(false)
-      setQrManual(raw)
-      notify('QR detectado. Ahora puedes validar la visita.')
+    // El lector QR es pesado; se carga sólo cuando el usuario abre la cámara.
+    void import('@zxing/browser').then(({ BrowserQRCodeReader }) => {
+      if (cancelled) return undefined
+      const reader = new BrowserQRCodeReader()
+      return reader.decodeFromVideoDevice(undefined, video, (result) => {
+        if (!result || cancelled) return
+        const raw = result.getText()
+        cancelled = true
+        qrScannerControls.current?.stop()
+        qrScannerControls.current = null
+        setQrScanning(false)
+        setQrManual(raw)
+        notify('QR detectado. Ahora puedes validar la visita.')
+      })
     }).then((controls) => {
+      if (!controls) return
       if (cancelled) controls.stop()
       else qrScannerControls.current = controls
     }).catch((error: any) => {
