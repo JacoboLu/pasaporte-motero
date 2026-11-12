@@ -1308,7 +1308,7 @@ export default function App() {
   async function startOAuth(provider: 'google'|'apple'|'facebook') {
     if (!supabase) { notify('Conecta Supabase para habilitar el acceso social.'); return }
     setAuthBusy(true)
-    const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: 'https://pasaporte-motero.pages.dev', ...(provider === 'google' ? { queryParams: { prompt: 'select_account' } } : {}) } })
+    const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: window.location.origin, ...(provider === 'google' ? { queryParams: { prompt: 'select_account' } } : {}) } })
     setAuthBusy(false)
     if (error) notify('No se pudo iniciar con '+provider+': '+error.message)
   }
