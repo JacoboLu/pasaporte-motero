@@ -132,7 +132,6 @@ export default function App() {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('Todos')
   const [regionFilter, setRegionFilter] = useState('Todos')
-  const [showFilters, setShowFilters] = useState(false)
   const [selected, setSelected] = useState<Destination | null>(null)
   const [showActions, setShowActions] = useState(false)
   const [action, setAction] = useState<'visit'|'trip'|'post'|'memory'|''>('')
@@ -1335,8 +1334,7 @@ export default function App() {
       </section> : <>
         {tab === 'explore' && <section>
           <div className="page-heading"><div><span className="eyebrow">DESCUBRE EL PERÚ</span><h1>Tu próxima aventura te espera.</h1><p className="muted">Encuentra rutas, paisajes y lugares para sumar a tu pasaporte.</p></div><div className="heading-icon"><Compass size={23}/></div></div>
-          <div className="search-row"><div className="searchbox"><Search size={18}/><input aria-label="Buscar destinos" placeholder="Buscar destinos, ciudades..." value={query} onChange={e => setQuery(e.target.value)}/></div><button className={`filter-button ${showFilters ? 'selected' : ''}`} onClick={() => setShowFilters(!showFilters)} aria-label="Filtros"><SlidersHorizontal size={18}/></button></div>
-          {showFilters && <div className="filter-panel"><label>Departamento<select value={regionFilter} onChange={e => setRegionFilter(e.target.value)}><option>Todos</option>{allRegions.map(r => <option key={r}>{r}</option>)}</select></label><label>Categoría<select value={category} onChange={e => setCategory(e.target.value)}>{categories.map(c => <option key={c}>{c}</option>)}</select></label></div>}
+          <div className="search-row"><div className="searchbox"><Search size={18}/><input aria-label="Buscar destinos" placeholder="Buscar destinos, ciudades..." value={query} onChange={e => setQuery(e.target.value)}/></div></div>
           <div className="explore-location-panel"><div className="explore-location-copy"><span className="explore-location-icon"><LocateFixed size={17}/></span><div><strong>{exploreLocation ? 'Ubicación activa' : 'Descubre destinos cerca de ti'}</strong><small>{exploreLocation ? 'Distancias aproximadas en línea recta' : 'Activa el GPS para ordenar los lugares por cercanía'}</small></div></div><button className="explore-location-button" onClick={requestExploreLocation} disabled={locationBusy}><LocateFixed size={15}/>{locationBusy ? 'Localizando…' : exploreLocation ? 'Actualizar' : 'Usar mi ubicación'}</button></div>
           <div className="section-heading explore-section-heading"><div><h2>{exploreLocation ? 'Cerca de tu ubicación' : 'Destinos recomendados'}</h2><small>{exploreLocation ? 'Los más próximos a tu posición actual' : 'Activa tu ubicación para ver distancias y ordenar por cercanía'}</small></div><button className="text-action" onClick={() => setMapMode(!mapMode)}><Map size={15}/>{mapMode ? 'Ver lista' : 'Ver mapa'}</button></div>
           {!mapMode && <div className="nearby-destination-list">{nearbyDestinations.map(dest => <button className="nearby-destination-card" key={dest.id} onClick={() => setSelected(dest)}><img src={dest.image} alt=""/><span className="nearby-destination-copy"><strong>{dest.title}</strong><small><MapPin size={12}/> {dest.city}, {dest.region}</small><span className="nearby-destination-meta"><i>{dest.category}</i>{dest.distanceFromUser !== null ? <b>{formatDistanceKm(dest.distanceFromUser)}</b> : <em>Activa GPS para ver distancia</em>}</span></span><ChevronRight size={17}/></button>)}</div>
