@@ -321,6 +321,14 @@ export default function App() {
     catch { notify('No se pudo generar el QR.') }
   }
 
+  async function submitQrCode() {
+    const code = qrManual.trim()
+    if (!code) { notify('Ingresa el código QR proporcionado por el encargado.'); return }
+    // No se registra una visita con un código escrito manualmente: la validación
+    // presencial requiere un token temporal emitido y verificado por el servidor.
+    notify('La validación presencial por QR aún no está habilitada. Por seguridad, este código no se registró como visita.')
+  }
+
   async function validateGps() {
     const dest = destinations.find(d => d.id === visitDestination)
     if (!dest) return
