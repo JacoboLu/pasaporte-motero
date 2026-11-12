@@ -399,3 +399,25 @@ html[data-theme="light"] .app-shell .empty-card svg{color:#344252!important}
 html[data-theme="light"] .app-shell .section-heading h2{color:#202b37!important}
 html[data-theme="light"] .app-shell .text-action{color:#b94b00!important}
 html[data-theme="light"] .app-shell .page-heading .muted{color:#596675!important}
+
+
+/* Perfil sin sesión: jerarquía, aire y superficies coherentes con ambos temas */
+.signed-out-profile{display:flex;flex-direction:column;gap:0;padding:0 2px 24px}
+.signed-out-profile>.eyebrow{margin:4px 0 8px}
+.signed-out-profile>h1{margin:0 0 18px;line-height:1.08}
+.signed-out-card{display:flex;flex-direction:column;align-items:stretch;gap:0;padding:22px 20px 20px;margin:0 0 18px;border:1px solid var(--line-color,#dce2e8);border-radius:18px;background:var(--card-bg,#fff);color:var(--main-text,#1d2732);box-shadow:0 5px 18px #17212b0a}
+.signed-out-icon{width:54px;height:54px;margin:0 auto 13px;display:grid;place-items:center;border-radius:16px;background:#fff0e6;color:#b94b00;border:1px solid #f6d4bf}
+.signed-out-card h2{margin:0 0 9px;text-align:center;font-size:19px;line-height:1.25;color:var(--main-text,#1d2732)}
+.signed-out-card p{margin:0 0 19px;text-align:center;font-size:13px;line-height:1.65;color:var(--muted-text,#596675)}
+.signed-out-card .primary.full{margin:0 0 10px;min-height:48px;border-radius:12px}
+.signed-out-card .secondary.full{min-height:46px;border-radius:12px}
+html[data-theme="light"] .app-shell .signed-out-card{background:#fff!important;color:#17212b!important;border:1px solid #dce2e8!important;box-shadow:0 5px 18px #17212b0a!important}
+html[data-theme="light"] .app-shell .signed-out-card h2{color:#17212b!important}
+html[data-theme="light"] .app-shell .signed-out-card p{color:#596675!important}
+html[data-theme="light"] .app-shell .signed-out-icon{background:#fff0e6!important;color:#b94b00!important;border-color:#f6d4bf!important}
+html[data-theme="light"] .app-shell .signed-out-card .secondary.full{background:#f5f7f9!important;color:#273444!important;border:1px solid #d7dfe7!important}
+html[data-theme="dark"] .app-shell .signed-out-card{background:#1d2024!important;color:#f4f6f8!important;border:1px solid #363c44!important;box-shadow:0 5px 18px #0003!important}
+html[data-theme="dark"] .app-shell .signed-out-card h2{color:#f4f6f8!important}
+html[data-theme="dark"] .app-shell .signed-out-card p{color:#b0b8c2!important}
+html[data-theme="dark"] .app-shell .signed-out-icon{background:#332116!important;color:#ff9857!important;border-color:#65432d!important}
+html[data-theme="dark"] .app-shell .signed-out-card .secondary.full{background:#25292e!important;color:#f4f6f8!important;border:1px solid #4b535d!important}
