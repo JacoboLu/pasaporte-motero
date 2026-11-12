@@ -17,7 +17,7 @@ import { clearPrivateCache, migrateLegacyPrivateCache, readPrivateCache, writePr
 type Tab = 'explore' | 'passport' | 'community' | 'profile'
 type VisitStatus = 'validated' | 'pending' | 'rejected'
 type Destination = { id: number; title: string; region: string; province: string; city: string; category: string; distance: string; image: string; description: string; lat: number; lng: number; radius: number }
-type Post = { id: string | number; title: string; text: string; place: string; date: string; likes: number; liked?: boolean; saved?: boolean; visibility: 'public'|'followers'|'private'; image?: string; comments: string[]; kind?: 'post'|'trip'; tripStops?: string[]; tripPhotos?: string[]; authorName?: string; authorUsername?: string }
+type Post = { id: string | number; title: string; text: string; place: string; date: string; likes: number; liked?: boolean; saved?: boolean; visibility: 'public'|'followers'|'private'; image?: string; comments: string[]; kind?: 'post'|'trip'; tripStops?: string[]; tripPhotos?: string[]; authorName?: string; authorUsername?: string; createdAt?: string }
 type Visit = { id: string | number; destinationId: number; date: string; method: 'gps'|'photo'|'qr'; status: VisitStatus; note?: string; image?: string }
 type TripStop = { name: string; catalogDestinationId: number | null; sortOrder: number }
 type Trip = { id: string; name: string; start: string; end: string; description: string; destinationIds: number[]; stops: TripStop[]; visibility: 'public'|'followers'|'private'; photos: string[] }
@@ -622,7 +622,7 @@ export default function App() {
       const profile = profileById.get(row.user_id)
       const likesForPost = (likeRows || []).filter((item: any) => item.post_id === row.id)
       const commentsForPost = (commentRows || []).filter((item: any) => item.post_id === row.id).map((item: any) => item.body)
-      return {id:row.id,title:row.title || 'Una nueva aventura',text:row.body,place:'Comunidad motera',date:new Intl.DateTimeFormat('es-PE',{dateStyle:'medium'}).format(new Date(row.created_at)),likes:likesForPost.length,liked:!!currentUserId && likesForPost.some((item:any)=>item.user_id===currentUserId),visibility:row.visibility,image,comments:commentsForPost,kind:'post',authorName:profile?.full_name || 'Motero',authorUsername:profile?.username || 'viajero'} as Post
+      return {id:row.id,title:row.title || 'Una nueva aventura',text:row.body,place:'Comunidad motera',date:new Intl.DateTimeFormat('es-PE',{dateStyle:'medium'}).format(new Date(row.created_at)),likes:likesForPost.length,liked:!!currentUserId && likesForPost.some((item:any)=>item.user_id===currentUserId),visibility:row.visibility,image,comments:commentsForPost,kind:'post',authorName:profile?.full_name || 'Motero',authorUsername:profile?.username || 'viajero',createdAt:row.created_at} as Post
     }))
     const publicTrips = await Promise.all((tripRows || []).map(async (row:any) => {
       const profile = profileById.get(row.user_id)
@@ -633,9 +633,9 @@ export default function App() {
       }))
       const stops = (row.trip_custom_stops || []).sort((a:any,b:any)=>a.sort_order-b.sort_order).map((stop:any)=>stop.name)
       const date = row.start_date ? new Intl.DateTimeFormat('es-PE',{dateStyle:'medium'}).format(new Date(row.start_date+'T12:00:00')) : new Intl.DateTimeFormat('es-PE',{dateStyle:'medium'}).format(new Date(row.created_at))
-      return {id:'trip:'+row.id,title:row.name,text:row.description || 'Una nueva bitácora de viaje compartida con la comunidad.',place:stops.join(' · ') || 'Ruta motera',date,likes:0,visibility:row.visibility,image:tripPhotos.find(Boolean),tripPhotos:tripPhotos.filter(Boolean),tripStops:stops,comments:[],kind:'trip',authorName:profile?.full_name || 'Motero',authorUsername:profile?.username || 'viajero'} as Post
+      return {id:'trip:'+row.id,title:row.name,text:row.description || 'Una nueva bitácora de viaje compartida con la comunidad.',place:stops.join(' · ') || 'Ruta motera',date,likes:0,visibility:row.visibility,image:tripPhotos.find(Boolean),tripPhotos:tripPhotos.filter(Boolean),tripStops:stops,comments:[],kind:'trip',authorName:profile?.full_name || 'Motero',authorUsername:profile?.username || 'viajero',createdAt:row.created_at} as Post
     }))
-    setPosts([...posts,...publicTrips].sort((a,b)=>new Date(b.date).getTime()-new Date(a.date).getTime()))
+    setPosts([...posts,...publicTrips].sort((a,b)=>new Date(b.createdAt || 0).getTime()-new Date(a.createdAt || 0).getTime()))
   }
   async function publishPost() {
     if (!postText.trim()) { notify('Escribe algo sobre tu aventura antes de publicar.'); return }
