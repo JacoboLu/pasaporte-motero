@@ -23,8 +23,9 @@ create policy "Users read own notifications" on public.user_notifications
 drop policy if exists "Users mark own notifications read" on public.user_notifications;
 create policy "Users mark own notifications read" on public.user_notifications
   for update to authenticated using (recipient_id = auth.uid())
-  with check (recipient_id = auth.uid() and actor_id is not distinct from actor_id
-    and event_type = event_type and message = message and created_at = created_at);
+  with check (recipient_id = auth.uid());
+revoke update on public.user_notifications from authenticated;
+grant update (read_at) on public.user_notifications to authenticated;
 -- Clients cannot create notifications directly; trusted database triggers do it.
 
 create or replace function public.notify_on_follow()
@@ -105,7 +106,8 @@ create policy "Department managers read regional visits" on public.app_visits
     exists (
       select 1
       from public.destination_catalog d
-      join public.department_managers dm on dm.department_code = upper(left(d.department, 3))
+      join public.passport_department_catalog pc on lower(pc.name) = lower(d.department)
+      join public.department_managers dm on dm.department_code = pc.code
       where d.id = app_visits.destination_id
         and dm.user_id = auth.uid()
         and dm.is_active
