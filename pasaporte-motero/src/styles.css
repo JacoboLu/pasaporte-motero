@@ -455,3 +455,12 @@ html[data-theme="light"] .destination-view-switch button,
 .theme-light .destination-view-switch button{color:#485462!important}
 html[data-theme="light"] .destination-view-switch button.active,
 .theme-light .destination-view-switch button.active{background:#ff6b00!important;color:#fff!important}
+
+
+/* Community feed: public trip journal cards */
+.trip-public-badge{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;margin:0 16px 10px;padding:6px 9px;border-radius:999px;background:rgba(255,107,0,.11);color:#c65300;font-size:10px;font-weight:800;letter-spacing:.08em}
+.trip-feed-stops{margin-top:14px;padding:12px 14px;border:1px solid var(--line,#dce2e8);border-radius:14px;background:var(--surface-soft,#f7f8fa)}
+.trip-feed-stops>strong{display:flex;align-items:center;gap:7px;font-size:13px}
+.trip-feed-stops ol{margin:9px 0 0;padding-left:22px;display:grid;gap:6px;font-size:13px;color:var(--text-secondary,#667085)}
+.trip-feed-photos{margin:0 14px 12px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.trip-feed-photos img{width:100%;height:100px;object-fit:cover;border-radius:10px}
