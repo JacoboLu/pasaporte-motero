@@ -718,3 +718,14 @@ html[data-theme="light"] .community-author-open small,.theme-light .community-au
 .theme-dark .explore-shortcuts button{background:#202328;color:#d8dde3;border-color:#424a53}
 .theme-dark .explore-shortcuts button.active{background:#38271b;color:#ffb16f;border-color:#a65a24}
 .theme-dark .destination-load-more{background:#202328;color:#f2f4f6;border-color:#424a53}
+
+
+/* Confirmación legible del QR escaneado: nunca exponer el token técnico */
+.qr-code-ready{display:flex;align-items:center;gap:10px;width:100%;box-sizing:border-box;margin:12px 0;padding:13px;border:1px solid #9bd8b1;border-radius:12px;background:#effaf3;color:#176b3a;text-align:left}
+.qr-code-ready>svg{flex:0 0 auto}
+.qr-code-ready>div{display:flex;flex:1;flex-direction:column;gap:4px;min-width:0}
+.qr-code-ready strong{font-size:12px}
+.qr-code-ready small{font-size:10px;line-height:1.45;color:#397451}
+.qr-code-ready .text-action{flex:0 0 auto;font-size:10px}
+.theme-dark .qr-code-ready{background:#183326;border-color:#356c4b;color:#a8e7bd}
+.theme-dark .qr-code-ready small{color:#b6d9c2}
