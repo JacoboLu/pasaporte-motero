@@ -210,3 +210,17 @@ input.date-control::-webkit-calendar-picker-indicator,input.document-date-contro
 .trip-stop-list li small{font-size:12px;font-weight:400;color:var(--muted-text,#747b84)}
 .trip-stop-list li button{border:0;background:transparent;color:#e56b24;font-size:23px;line-height:1;padding:4px 8px}
 @media(max-width:380px){.trip-stop-manual{grid-template-columns:1fr}.trip-stop-manual .secondary{width:100%}}
+
+
+/* Bitácora: selector visual de destinos, paradas y eliminación */
+.trip-destination-options{display:grid;gap:7px;margin:8px 0 12px;max-height:230px;overflow:auto}
+.trip-destination-option{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:11px 12px;border:1px solid var(--field-border,#cbd1d8);border-radius:11px;background:var(--field-bg,#fff);color:var(--main-text,#20242a);text-align:left}
+.trip-destination-option span{display:grid;gap:3px;min-width:0}
+.trip-destination-option strong{font-size:13px}
+.trip-destination-option small{font-size:11px;color:var(--muted-text,#68717c)}
+.trip-destination-option svg{flex:none;color:#f47721}
+.trip-card-title{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.trip-card-title>strong{min-width:0}
+.trip-delete{flex:none;color:#c65343}
+.theme-light .trip-destination-option{background:#fff!important;color:#20242a!important;border-color:#dfe3e7!important}
+.theme-light .trip-destination-option small{color:#68717c!important}
