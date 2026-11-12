@@ -104,3 +104,28 @@ export async function clearPrivateCache(): Promise<void> {
     request.onsuccess = request.onerror = request.onblocked = () => resolve()
   })
 }
+
+/** Supabase Auth custom storage: session and refresh tokens are encrypted at rest too. */
+export const encryptedAuthStorage = {
+  async getItem(key: string): Promise<string | null> {
+    const value = localStorage.getItem(key)
+    if (value === null) return null
+    try {
+      const parsed = JSON.parse(value)
+      if (parsed?.version === 1 && parsed?.iv && parsed?.data) return await decryptValue(value)
+    } catch { /* Existing Supabase sessions were stored as plaintext JSON; migrate them below. */ }
+    try {
+      localStorage.setItem(key, await encryptValue(value))
+      return value
+    } catch {
+      // Fail closed: don't return a plaintext token if secure storage cannot be initialized.
+      return null
+    }
+  },
+  async setItem(key: string, value: string): Promise<void> {
+    localStorage.setItem(key, await encryptValue(value))
+  },
+  removeItem(key: string): void {
+    localStorage.removeItem(key)
+  }
+}
