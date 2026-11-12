@@ -525,3 +525,63 @@ html[data-theme="light"] .community-trip-caption{color:#647180}
 .theme-light .community-post-actions{border-color:#e7ebef}
 .theme-light .community-post-actions button{color:#566473}
 @media(max-width:380px){.community-post-content h3{font-size:17px}.community-post-cover{aspect-ratio:4/3}.community-post-actions button{gap:5px;padding:0 4px;font-size:10px}.community-post-gallery img{height:82px}}
+
+
+/* Descubrimiento de viajeros, perfiles públicos y galería administrable */
+.community-search-panel{display:flex;gap:8px;align-items:center;margin:13px 0 16px}
+.community-search-input{display:flex;align-items:center;gap:9px;min-width:0;flex:1;padding:11px 13px;border:1px solid #3b4149;border-radius:13px;background:#1d2024;color:#aeb8c3}
+.community-search-input input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#f5f6f7;font-size:12px}
+.community-search-input input::placeholder{color:#a0aab5}
+.community-search-panel>.secondary{min-height:42px;padding:0 14px;white-space:nowrap}
+.community-user-results{margin:0 0 18px;padding:13px;border:1px solid #363d45;border-radius:16px;background:#1a1d21}
+.community-user-results .section-heading{margin:0 0 10px}
+.community-user-result{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid #30363d}
+.community-user-identity{display:flex;align-items:center;gap:10px;min-width:0;flex:1;text-align:left;border:0;background:transparent;color:inherit}
+.community-user-identity>span:last-child{display:grid;gap:4px;min-width:0}
+.community-user-identity strong{font-size:12px;color:#f3f5f7}
+.community-user-identity small{font-size:10px;color:#aab4bf}
+.community-user-result>.primary,.community-user-result>.secondary{min-height:34px;padding:0 12px;font-size:10px}
+.community-author-open{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;padding:0;border:0;background:transparent;text-align:left}
+.community-author-open strong,.community-author-open span,.community-author-open small{display:block}
+.community-bookmark{color:#aeb8c3!important}
+.community-bookmark.saved{color:#f6bd28!important}
+.community-bookmark.saved svg{filter:drop-shadow(0 0 5px #f6bd2850)}
+.public-profile-card{padding:22px 18px 18px;margin:8px 0 20px;text-align:center;border:1px solid #363d45;border-radius:20px;background:#1b1e22}
+.public-profile-avatar{width:88px;height:88px;margin:0 auto 12px;display:grid;place-items:center;overflow:hidden;border-radius:50%;border:3px solid #ff8a3d;background:#35261d;color:#ffad70;font-size:24px;font-weight:800}
+.public-profile-avatar img{width:100%;height:100%;object-fit:cover}
+.public-profile-card h1{font-size:25px;margin:0 0 3px}
+.public-profile-card>p{margin:13px 0;color:#c4cbd3;font-size:13px;line-height:1.6}
+.public-profile-card>small{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;color:#b6c0ca;font-size:11px}
+.public-profile-card>small svg{color:#ff9a52}
+.public-profile-stats{display:flex;justify-content:center;gap:18px;margin:16px 0;color:#aeb8c3;font-size:11px}
+.public-profile-stats b{color:#f5f6f7;font-size:14px}
+.public-profile-feed{display:grid;gap:14px}
+.public-profile-post{margin:0}
+.public-profile-post-image{display:block;width:100%;max-height:260px;object-fit:cover}
+.memory-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:15px}
+.memory-gallery-item{min-width:0;margin:0;overflow:hidden;border:1px solid #363d45;border-radius:14px;background:#1b1e22}
+.memory-gallery-item>img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;background:#252a30}
+.memory-gallery-item figcaption{display:flex;align-items:center;justify-content:space-between;gap:5px;padding:8px}
+.memory-gallery-item figcaption>span{font-size:10px;color:#aeb8c3}
+.memory-gallery-item figcaption button{display:flex;align-items:center;gap:4px;padding:5px;border:0;border-radius:8px;background:transparent;color:#ff9b55;font-size:10px}
+.memory-gallery-item figcaption button:disabled{color:#87919c;opacity:.7}
+.saved-community-list{display:grid;gap:13px;margin-top:15px}
+.saved-community-list .community-post{margin:0}
+html[data-theme="light"] .community-search-input,.theme-light .community-search-input{background:#fff;border-color:#d6dee7;color:#586777}
+html[data-theme="light"] .community-search-input input,.theme-light .community-search-input input{color:#202b36}
+html[data-theme="light"] .community-search-input input::placeholder,.theme-light .community-search-input input::placeholder{color:#687686}
+html[data-theme="light"] .community-user-results,.theme-light .community-user-results{background:#fff;border-color:#e0e6ed}
+html[data-theme="light"] .community-user-result,.theme-light .community-user-result{border-color:#e8edf2}
+html[data-theme="light"] .community-user-identity strong,.theme-light .community-user-identity strong{color:#1e2935}
+html[data-theme="light"] .community-user-identity small,.theme-light .community-user-identity small{color:#5f6d7b}
+html[data-theme="light"] .public-profile-card,.theme-light .public-profile-card{background:#fff;border-color:#e0e6ed}
+html[data-theme="light"] .public-profile-card>p,.theme-light .public-profile-card>p{color:#4d5a67}
+html[data-theme="light"] .public-profile-card>small,.theme-light .public-profile-card>small{color:#536170}
+html[data-theme="light"] .public-profile-stats,.theme-light .public-profile-stats{color:#596776}
+html[data-theme="light"] .public-profile-stats b,.theme-light .public-profile-stats b{color:#1e2935}
+html[data-theme="light"] .memory-gallery-item,.theme-light .memory-gallery-item{background:#fff;border-color:#e0e6ed}
+html[data-theme="light"] .memory-gallery-item figcaption>span,.theme-light .memory-gallery-item figcaption>span{color:#586777}
+html[data-theme="light"] .community-author-open strong,.theme-light .community-author-open strong{color:#1d2732}
+html[data-theme="light"] .community-author-open span,.theme-light .community-author-open span{color:#596675}
+html[data-theme="light"] .community-author-open small,.theme-light .community-author-open small{color:#75808c}
+@media(max-width:360px){.memory-gallery{gap:8px}.memory-gallery-item figcaption{padding:6px}.memory-gallery-item figcaption button{font-size:9px}.community-search-panel{gap:6px}.community-search-panel>.secondary{padding:0 10px}}
