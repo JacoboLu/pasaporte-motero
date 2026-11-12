@@ -1005,9 +1005,11 @@ export default function App() {
       const {data:signed} = await supabase.storage.from('travel-media').createSignedUrl(row.storage_path,3600)
       if (signed?.signedUrl) items.push({id:'trip:'+row.id,rowId:row.id,source:'trip',bucket:'travel-media',path:row.storage_path,url:signed.signedUrl,createdAt:row.created_at})
     }
+    // Visit evidence is uploaded to the private travel-media bucket in submitPhotoVisit.
+    // Keep gallery reads and deletes aligned with the actual upload location.
     for (const row of visitRows || []) {
-      const {data:signed} = await supabase.storage.from('visit-evidence').createSignedUrl(row.evidence_path,3600)
-      if (signed?.signedUrl) items.push({id:'visit:'+row.id,rowId:row.id,source:'visit',bucket:'visit-evidence',path:row.evidence_path,url:signed.signedUrl,createdAt:row.visited_at})
+      const {data:signed} = await supabase.storage.from('travel-media').createSignedUrl(row.evidence_path,3600)
+      if (signed?.signedUrl) items.push({id:'visit:'+row.id,rowId:row.id,source:'visit',bucket:'travel-media',path:row.evidence_path,url:signed.signedUrl,createdAt:row.visited_at})
     }
     items.sort((a,b)=>new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime())
     setGalleryItems(items)
@@ -1332,7 +1334,7 @@ export default function App() {
       <button className="brand" onClick={() => openTab('explore')} aria-label="Ir a inicio"><span className="brand-mark"><Bike size={21}/></span><span><strong>PASAPORTE MOTERO</strong><small>RUTAS · HISTORIAS · DESTINOS</small></span></button>
       <div className="top-actions"><span className={`connection-dot ${offline ? 'off' : ''}`} title={offline ? 'Sin conexión' : 'Con conexión'}/><button className="icon-button theme-toggle" aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'} title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'} onClick={() => setTheme(v => v === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? <Sun size={18}/> : <Moon size={18}/>}</button><button className="icon-button" aria-label="Notificaciones" onClick={() => notify('No tienes notificaciones nuevas.')}><Bell size={19}/></button></div>
     </header>
-    {offline && <div className="offline-banner"><CloudOff size={15}/> Modo sin conexión. Tus cambios se guardan en este dispositivo.</div>}
+    {offline && <div className="offline-banner"><CloudOff size={15}/> Sin conexión. Puedes consultar contenido previamente cargado; las acciones que requieren sincronización estarán disponibles al recuperar Internet.</div>}
 
     <main className="content" key={`${tab}-${subview}`}>
       {selectedDepartment && selectedDepartmentPage ? <section className="department-detail-view">
