@@ -367,3 +367,35 @@ html[data-theme="light"] .app-shell .bottom-nav button{color:#596675!important}
 html[data-theme="light"] .app-shell .bottom-nav button.active{color:#c65308!important}
 html[data-theme="light"] .app-shell .bottom-nav .nav-plus{background:#ff6b00!important;color:#fff!important;border-color:#f4f6f8!important}
 html[data-theme="dark"] .app-shell .theme-toggle{display:inline-flex!important;visibility:visible!important;opacity:1!important}
+
+
+/* Correcciones específicas de las pantallas compartidas en modo claro */
+html[data-theme="light"] .app-shell .page-heading h1{color:#17212b!important}
+html[data-theme="light"] .app-shell .page-heading .eyebrow{color:#687585!important}
+html[data-theme="light"] .app-shell .heading-icon{background:#fff0e6!important;border:1px solid #ffd2b5!important;color:#c65308!important;box-shadow:0 2px 8px #9a4b1010!important}
+html[data-theme="light"] .app-shell .composer-shortcut{background:#fff!important;color:#526071!important;border:1px solid #d9e0e7!important;box-shadow:0 3px 12px #17212b08!important}
+html[data-theme="light"] .app-shell .composer-shortcut>span:nth-child(2){color:#536171!important}
+html[data-theme="light"] .app-shell .composer-shortcut .avatar{background:#fff0e6!important;color:#b94b00!important;border:1px solid #f3c6a7!important}
+html[data-theme="light"] .app-shell .composer-shortcut .round-add{background:#ff6b00!important;color:#fff!important;border:0!important}
+html[data-theme="light"] .app-shell .action-sheet{background:#fff!important;color:#17212b!important;border:1px solid #dce2e8!important;box-shadow:0 -12px 40px #17212b24!important}
+html[data-theme="light"] .app-shell .action-sheet .sheet-handle{background:#c3cbd4!important}
+html[data-theme="light"] .app-shell .action-sheet .modal-head h2{color:#17212b!important}
+html[data-theme="light"] .app-shell .action-sheet .icon-button{background:#fff!important;color:#b94b00!important;border:1px solid #e5e9ee!important}
+html[data-theme="light"] .app-shell .action-option{background:#fff!important;color:#253140!important;border-bottom:1px solid #e8edf1!important}
+html[data-theme="light"] .app-shell .action-option>span{background:#fff0e6!important;color:#b94b00!important;border:1px solid #f6d4bf!important}
+html[data-theme="light"] .app-shell .action-option>span svg{color:#b94b00!important;stroke:#b94b00!important}
+html[data-theme="light"] .app-shell .action-option strong{color:#17212b!important}
+html[data-theme="light"] .app-shell .action-option small{color:#657282!important}
+html[data-theme="light"] .app-shell .action-option>svg{color:#7a8794!important;stroke:#7a8794!important}
+html[data-theme="light"] .app-shell .status-card{background:#fff!important;color:#253140!important;border-color:#dce2e8!important}
+html[data-theme="light"] .app-shell .status-card strong{color:#17212b!important}
+html[data-theme="light"] .app-shell .status-card small{color:#657282!important}
+html[data-theme="light"] .app-shell .feed-switch button{background:#f4f6f8!important;color:#445160!important;border-color:#dce2e8!important}
+html[data-theme="light"] .app-shell .feed-switch button.active{background:#fff0e6!important;color:#b94b00!important;border-color:#ffb27e!important}
+html[data-theme="light"] .app-shell .empty-card{background:#fff!important;color:#17212b!important;border:1px dashed #d5dee7!important}
+html[data-theme="light"] .app-shell .empty-card h3,html[data-theme="light"] .app-shell .empty-card strong{color:#17212b!important}
+html[data-theme="light"] .app-shell .empty-card p{color:#657282!important}
+html[data-theme="light"] .app-shell .empty-card svg{color:#344252!important}
+html[data-theme="light"] .app-shell .section-heading h2{color:#202b37!important}
+html[data-theme="light"] .app-shell .text-action{color:#b94b00!important}
+html[data-theme="light"] .app-shell .page-heading .muted{color:#596675!important}
