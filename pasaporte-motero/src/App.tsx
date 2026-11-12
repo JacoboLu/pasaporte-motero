@@ -17,7 +17,7 @@ import { clearPrivateCache, migrateLegacyPrivateCache, readPrivateCache, writePr
 type Tab = 'explore' | 'passport' | 'community' | 'profile'
 type VisitStatus = 'validated' | 'pending' | 'rejected'
 type Destination = { id: number; title: string; region: string; province: string; city: string; category: string; distance: string; image: string; description: string; lat: number; lng: number; radius: number }
-type Post = { id: string | number; title: string; text: string; place: string; date: string; likes: number; liked?: boolean; saved?: boolean; visibility: 'public'|'followers'|'private'; image?: string; comments: string[]; kind?: 'post'|'trip'; tripStops?: string[]; tripPhotos?: string[]; authorName?: string; authorUsername?: string; authorAvatar?: string | null; createdAt?: string }
+type Post = { id: string | number; title: string; text: string; place: string; date: string; likes: number; liked?: boolean; saved?: boolean; visibility: 'public'|'followers'|'private'; image?: string; comments: string[]; kind?: 'post'|'trip'; tripStops?: string[]; tripPhotos?: string[]; authorName?: string; authorUsername?: string; authorAvatar?: string | null; authorId?: string; createdAt?: string }
 type Visit = { id: string | number; destinationId: number; date: string; method: 'gps'|'photo'|'qr'; status: VisitStatus; note?: string; image?: string }
 type TripStop = { name: string; catalogDestinationId: number | null; sortOrder: number }
 type Trip = { id: string; name: string; start: string; end: string; description: string; destinationIds: number[]; stops: TripStop[]; visibility: 'public'|'followers'|'private'; photos: string[] }
@@ -176,6 +176,15 @@ export default function App() {
   const [commentPost, setCommentPost] = useState<string | number | null>(null)
   const [commentText, setCommentText] = useState('')
   const [followed, setFollowed] = useState<string[]>([])
+  const [savedPostIds, setSavedPostIds] = useState<string[]>([])
+  const [savedTripIds, setSavedTripIds] = useState<string[]>([])
+  const [communitySearch, setCommunitySearch] = useState('')
+  const [communityUsers, setCommunityUsers] = useState<any[]>([])
+  const [searchingUsers, setSearchingUsers] = useState(false)
+  const [selectedPublicProfile, setSelectedPublicProfile] = useState<any | null>(null)
+  const [publicProfileBusy, setPublicProfileBusy] = useState(false)
+  const [galleryItems, setGalleryItems] = useState<any[]>([])
+  const [galleryBusy, setGalleryBusy] = useState(false)
   const [qrManual, setQrManual] = useState('')
   const [qrChallengeExpires, setQrChallengeExpires] = useState('')
   const [qrScanning, setQrScanning] = useState(false)
@@ -291,12 +300,12 @@ export default function App() {
       const user = data.session?.user
       setAuthUser(user?.email || null)
       setAuthUserId(user?.id || null)
-      if (user) { void loadProfile(user.id); void loadMotorcycle(user.id); void loadTrips(user.id); void loadVisits(user.id); void loadCommunityPosts() } else { void loadCommunityPosts() }
+      if (user) { void loadProfile(user.id); void loadMotorcycle(user.id); void loadTrips(user.id); void loadVisits(user.id); void loadCommunityPosts(); void loadSocialData(user.id); void loadGallery(user.id) } else { void loadCommunityPosts() }
     })
     const {data:{subscription}} = supabase.auth.onAuthStateChange((_event, session) => {
       setAuthUser(session?.user.email || null)
       setAuthUserId(session?.user.id || null)
-      if (session?.user) { void loadProfile(session.user.id); void loadMotorcycle(session.user.id); void loadTrips(session.user.id); void loadVisits(session.user.id); void loadCommunityPosts() }
+      if (session?.user) { void loadProfile(session.user.id); void loadMotorcycle(session.user.id); void loadTrips(session.user.id); void loadVisits(session.user.id); void loadCommunityPosts(); void loadSocialData(session.user.id); void loadGallery(session.user.id) }
       else { resetSignedOutData(); void loadCommunityPosts() }
     })
     return () => { alive = false; subscription.unsubscribe() }
@@ -309,7 +318,7 @@ export default function App() {
   const progress = Math.round(visitedRegionCount / 25 * 100)
   const filteredDestinations = destinations.filter(d => (category === 'Todos' || d.category === category) && (regionFilter === 'Todos' || d.region === regionFilter) && `${d.title} ${d.region} ${d.province} ${d.city}`.toLowerCase().includes(query.toLowerCase()))
   const filteredMapDestinations = mapDestinations.filter(d => (category === 'Todos' || d.category === category) && (regionFilter === 'Todos' || d.region === regionFilter) && `${d.title} ${d.region} ${d.province} ${d.city}`.toLowerCase().includes(query.toLowerCase()))
-  const visiblePosts = posts.filter(p => p.visibility !== 'private').filter(p => feedMode === 'all' || followed.length === 0 || followed.includes('motero_viajero'))
+  const visiblePosts = posts.filter(p => p.visibility !== 'private').filter(p => feedMode === 'all' || (!!p.authorId && followed.includes(p.authorId)))
 
   function openTab(next: Tab) { setSubview(''); setSelected(null); setTab(next) }
   function formatDisplayDate(value: string) {
@@ -335,7 +344,7 @@ export default function App() {
     void clearPrivateCache()
     ;['pm_name','pm_username','pm_bio','pm_city','pm_visits','pm_posts','pm_trips','pm_saved','pm_followed'].forEach(key => localStorage.removeItem(key))
     setDisplayName('Viajero Motero'); setUsername('viajero_motero'); setBio(''); setHomeCity('Perú')
-    setVisits([]); setDepartmentStamps([]); setPosts([]); setTrips([]); setSaved([]); setFollowed([])
+    setVisits([]); setDepartmentStamps([]); setPosts([]); setTrips([]); setSaved([]); setFollowed([]); setSavedPostIds([]); setSavedTripIds([]); setCommunityUsers([]); setSelectedPublicProfile(null); setGalleryItems([])
     setMotorcycleBrand(''); setMotorcycleModel(''); setMotorcycleYear(''); setMotorcycleId(null)
     setAvatarUrl(''); setAvatarFile(null); setDocumentFile(null)
     setMotorcyclePhoto(''); setMotorcyclePhotoFile(null); setMotorcyclePhotoPreview('')
@@ -622,7 +631,7 @@ export default function App() {
       const profile = profileById.get(row.user_id)
       const likesForPost = (likeRows || []).filter((item: any) => item.post_id === row.id)
       const commentsForPost = (commentRows || []).filter((item: any) => item.post_id === row.id).map((item: any) => item.content)
-      return {id:row.id,title:row.title || 'Una nueva aventura',text:row.content,place:'Comunidad motera',date:new Intl.DateTimeFormat('es-PE',{dateStyle:'medium'}).format(new Date(row.created_at)),likes:likesForPost.length,liked:!!currentUserId && likesForPost.some((item:any)=>item.user_id===currentUserId),visibility:row.visibility,image,comments:commentsForPost,kind:'post',authorName:profile?.full_name || 'Motero',authorUsername:profile?.username || 'viajero',authorAvatar:profile?.avatar_url || null,createdAt:row.created_at} as Post
+      return {id:row.id,authorId:row.user_id,title:row.title || 'Una nueva aventura',text:row.content,place:'Comunidad motera',date:new Intl.DateTimeFormat('es-PE',{dateStyle:'medium'}).format(new Date(row.created_at)),likes:likesForPost.length,liked:!!currentUserId && likesForPost.some((item:any)=>item.user_id===currentUserId),visibility:row.visibility,image,comments:commentsForPost,kind:'post',authorName:profile?.full_name || 'Motero',authorUsername:profile?.username || 'viajero',authorAvatar:profile?.avatar_url || null,createdAt:row.created_at} as Post
     }))
     const publicTrips = await Promise.all((tripRows || []).map(async (row:any) => {
       const profile = profileById.get(row.user_id)
@@ -633,7 +642,7 @@ export default function App() {
       }))
       const stops = (row.trip_custom_stops || []).sort((a:any,b:any)=>a.sort_order-b.sort_order).map((stop:any)=>stop.name)
       const date = row.start_date ? new Intl.DateTimeFormat('es-PE',{dateStyle:'medium'}).format(new Date(row.start_date+'T12:00:00')) : new Intl.DateTimeFormat('es-PE',{dateStyle:'medium'}).format(new Date(row.created_at))
-      return {id:'trip:'+row.id,title:row.name,text:row.description || 'Una nueva bitácora de viaje compartida con la comunidad.',place:stops.join(' · ') || 'Ruta motera',date,likes:0,visibility:row.visibility,image:tripPhotos.find(Boolean),tripPhotos:tripPhotos.filter(Boolean),tripStops:stops,comments:[],kind:'trip',authorName:profile?.full_name || 'Motero',authorUsername:profile?.username || 'viajero',authorAvatar:profile?.avatar_url || null,createdAt:row.created_at} as Post
+      return {id:'trip:'+row.id,authorId:row.user_id,title:row.name,text:row.description || 'Una nueva bitácora de viaje compartida con la comunidad.',place:stops.join(' · ') || 'Ruta motera',date,likes:0,visibility:row.visibility,image:tripPhotos.find(Boolean),tripPhotos:tripPhotos.filter(Boolean),tripStops:stops,comments:[],kind:'trip',authorName:profile?.full_name || 'Motero',authorUsername:profile?.username || 'viajero',authorAvatar:profile?.avatar_url || null,createdAt:row.created_at} as Post
     }))
     setPosts([...posts,...publicTrips].sort((a,b)=>new Date(b.createdAt || 0).getTime()-new Date(a.createdAt || 0).getTime()))
   }
