@@ -15,7 +15,7 @@ import { isSupabaseConfigured, supabase } from './lib/supabase'
 type Tab = 'explore' | 'passport' | 'community' | 'profile'
 type VisitStatus = 'validated' | 'pending' | 'rejected'
 type Destination = { id: number; title: string; region: string; province: string; city: string; category: string; distance: string; image: string; description: string; lat: number; lng: number; radius: number }
-type Post = { id: number; title: string; text: string; place: string; date: string; likes: number; liked?: boolean; saved?: boolean; visibility: 'public'|'followers'|'private'; image?: string; comments: string[] }
+type Post = { id: string | number; title: string; text: string; place: string; date: string; likes: number; liked?: boolean; saved?: boolean; visibility: 'public'|'followers'|'private'; image?: string; comments: string[] }
 type Visit = { id: number; destinationId: number; date: string; method: 'gps'|'photo'|'qr'; status: VisitStatus; note?: string; image?: string }
 type Trip = { id: string; name: string; start: string; end: string; description: string; destinationIds: number[]; visibility: 'public'|'followers'|'private'; photos: string[] }
 
@@ -106,6 +106,9 @@ export default function App() {
   const [tripDescription, setTripDescription] = useState('')
   const [tripVisibility, setTripVisibility] = useState<'public'|'followers'|'private'>('private')
   const [tripDestinations, setTripDestinations] = useState<number[]>([])
+  const [tripStopSelection, setTripStopSelection] = useState('')
+  const [tripManualStop, setTripManualStop] = useState('')
+  const [tripManualStops, setTripManualStops] = useState<string[]>([])
   const [visitNote, setVisitNote] = useState('')
   const [visitPhoto, setVisitPhoto] = useState('')
   const [qr, setQr] = useState('')
@@ -166,13 +169,13 @@ export default function App() {
       const user = data.session?.user
       setAuthUser(user?.email || null)
       setAuthUserId(user?.id || null)
-      if (user) { void loadProfile(user.id); void loadMotorcycle(user.id); void loadTrips(user.id) }
+      if (user) { void loadProfile(user.id); void loadMotorcycle(user.id); void loadTrips(user.id); void loadCommunityPosts() } else { void loadCommunityPosts() }
     })
     const {data:{subscription}} = supabase.auth.onAuthStateChange((_event, session) => {
       setAuthUser(session?.user.email || null)
       setAuthUserId(session?.user.id || null)
-      if (session?.user) { void loadProfile(session.user.id); void loadMotorcycle(session.user.id); void loadTrips(session.user.id) }
-      else { resetSignedOutData() }
+      if (session?.user) { void loadProfile(session.user.id); void loadMotorcycle(session.user.id); void loadTrips(session.user.id); void loadCommunityPosts() }
+      else { resetSignedOutData(); void loadCommunityPosts() }
     })
     return () => { alive = false; subscription.unsubscribe() }
   }, [])
@@ -208,7 +211,7 @@ export default function App() {
   function resetSignedOutData() {
     ;['pm_name','pm_username','pm_bio','pm_city','pm_visits','pm_posts','pm_trips','pm_saved','pm_followed'].forEach(key => localStorage.removeItem(key))
     setDisplayName('Viajero Motero'); setUsername('viajero_motero'); setBio(''); setHomeCity('Perú')
-    setVisits([]); setPosts(initialPosts); setTrips([]); setSaved([]); setFollowed([])
+    setVisits([]); setPosts([]); setTrips([]); setSaved([]); setFollowed([])
     setMotorcycleBrand(''); setMotorcycleModel(''); setMotorcycleYear(''); setMotorcycleId(null)
     setAvatarUrl(''); setAvatarFile(null); setDocumentFile(null)
     setMotorcyclePhoto(''); setMotorcyclePhotoFile(null); setMotorcyclePhotoPreview('')
@@ -290,10 +293,43 @@ export default function App() {
     notify('Código recibido en modo demostración. La confirmación presencial requiere un escaneo autorizado y validación del servidor.')
     setQrManual('')
   }
-  function publishPost() {
+  async function loadCommunityPosts() {
+    if (!supabase) return
+    const { data, error } = await supabase.from('posts').select('id,user_id,title,body,visibility,created_at,profiles(username,full_name,avatar_url),post_photos(storage_path)').eq('visibility','public').order('created_at',{ascending:false}).limit(50)
+    if (error) { notify('No pudimos cargar el feed: '+error.message); return }
+    const rows = await Promise.all((data || []).map(async (row:any) => {
+      const photo = row.post_photos?.[0]?.storage_path
+      let image: string | undefined
+      if (photo) { const {data:signed} = await supabase!.storage.from('community').createSignedUrl(photo,3600); image=signed?.signedUrl || undefined }
+      const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
+      return {id:row.id,title:row.title || 'Una nueva aventura',text:row.body,place:'Comunidad motera',date:new Intl.DateTimeFormat('es-PE',{dateStyle:'medium'}).format(new Date(row.created_at)),likes:0,visibility:row.visibility,image,comments:[],authorName:profile?.full_name || 'Motero',authorUsername:profile?.username || 'viajero'} as Post & {authorName:string;authorUsername:string}
+    }))
+    setPosts(rows)
+  }
+  async function publishPost() {
     if (!postText.trim()) { notify('Escribe algo sobre tu aventura antes de publicar.'); return }
-    setPosts(p => [{ id: Date.now(), title: postTitle.trim() || 'Una nueva aventura', text: postText.trim(), place: postPlace || 'Destino por agregar', date: 'Ahora', likes: 0, visibility: postVisibility, image: postImage || undefined, comments: [] }, ...p])
-    setPostTitle(''); setPostText(''); setPostPlace(''); setPostImage(''); setAction(''); setTab('community'); notify('Publicación guardada en este dispositivo.')
+    const user = await getCurrentAuthUser()
+    if (!supabase || !user) { setAuthMode('login'); setAuthOpen(true); notify('Inicia sesión para publicar en la comunidad.'); return }
+    setBusy(true)
+    const {data:post,error} = await supabase.from('posts').insert({user_id:user.id,post_type:postImage?'photo':'diary',title:postTitle.trim() || 'Una nueva aventura',body:postText.trim(),visibility:postVisibility}).select('id').single()
+    if (error || !post) { setBusy(false); notify('No se pudo publicar: '+(error?.message || 'No se recibió confirmación')); return }
+    if (postImage) {
+      try {
+        const blob = await (await fetch(postImage)).blob()
+        const ext = blob.type==='image/png'?'png':blob.type==='image/webp'?'webp':'jpg'
+        const path = user.id+'/'+post.id+'/'+crypto.randomUUID()+'.'+ext
+        const {error:uploadError} = await supabase.storage.from('community').upload(path,blob,{contentType:blob.type,upsert:false})
+        if (uploadError) throw uploadError
+        const {error:photoError} = await supabase.from('post_photos').insert({post_id:post.id,user_id:user.id,storage_path:path,sort_order:0})
+        if (photoError) { await supabase.storage.from('community').remove([path]); throw photoError }
+      } catch (err:any) {
+        await supabase.from('posts').delete().eq('id',post.id)
+        setBusy(false); notify('No se pudo guardar la fotografía: '+(err?.message || 'Error de almacenamiento')); return
+      }
+    }
+    setBusy(false); setPostTitle(''); setPostText(''); setPostPlace(''); setPostImage(''); setAction(''); setTab('community')
+    await loadCommunityPosts()
+    notify(postVisibility==='public'?'Publicación publicada en la comunidad.':'Publicación guardada con la privacidad seleccionada.')
   }
   async function createTrip() {
     if (!tripName.trim()) { notify('Escribe un nombre para tu viaje.'); return }
@@ -306,7 +342,7 @@ export default function App() {
     if (error) { notify('No se pudo crear el viaje: ' + error.message); return }
     const newTrip: Trip = { id: data.id, name: data.name, start: data.start_date || '', end: data.end_date || '', description: data.description || '', destinationIds: [], visibility: data.visibility, photos: [] }
     setTrips(items => [newTrip, ...items])
-    setTripName(''); setTripDescription(''); setTripDestinations([]); setAction(''); setTab('profile'); setSubview('trips')
+    setTripName(''); setTripDescription(''); setTripDestinations([]); setTripManualStops([]); setTripStopSelection(''); setTripManualStop(''); setAction(''); setTab('profile'); setSubview('trips')
     notify('Viaje creado y sincronizado con tu cuenta.')
   }
   function toggleLike(id: number) { setPosts(p => p.map(x => x.id === id ? { ...x, liked: !x.liked, likes: Math.max(0, x.likes + (x.liked ? -1 : 1)) } : x)) }
@@ -589,7 +625,7 @@ export default function App() {
 
     {action && <div className="modal-backdrop" onClick={closeModal}><div className="composer-modal" onClick={e => e.stopPropagation()}><div className="modal-head"><h2>{action === 'visit' ? 'Validar visita' : action === 'trip' ? 'Nuevo viaje' : action === 'memory' ? 'Nuevo recuerdo' : 'Nueva publicación'}</h2><button className="icon-button" onClick={closeModal}><X/></button></div>
       {action === 'visit' && <><p className="muted">Selecciona el destino y el método para registrar tu visita.</p><label>Destino<select value={visitDestination} onChange={e => setVisitDestination(Number(e.target.value))}>{destinations.map(d => <option key={d.id} value={d.id}>{d.title} · {d.region}</option>)}</select></label><div className="method-tabs"><button className={visitMethod==='gps'?'active':''} onClick={()=>setVisitMethod('gps')}><LocateFixed/> GPS</button><button className={visitMethod==='photo'?'active':''} onClick={()=>setVisitMethod('photo')}><Camera/> Foto</button><button className={visitMethod==='qr'?'active':''} onClick={()=>setVisitMethod('qr')}><QrCode/> QR</button></div>{visitMethod==='gps' && <div className="method-panel"><LocateFixed size={28}/><strong>Validación por ubicación</strong><p>Compararemos tu ubicación actual con el área permitida del destino. Activa el GPS y permite el acceso desde el navegador.</p><button className="primary full" disabled={busy} onClick={validateGps}>{busy ? 'Comprobando ubicación…' : 'Comprobar mi ubicación'}</button></div>}{visitMethod==='photo' && <div className="method-panel"><Camera size={28}/><strong>Validación fotográfica</strong><p>Adjunta una fotografía tomada en el destino. La visita quedará pendiente de revisión.</p><label className="file-pick"><ImagePlus/> Seleccionar fotografía<input type="file" accept="image/*" capture="environment" onChange={e=>fileToData(e.target.files?.[0])}/></label>{visitPhoto && <img className="preview-image" src={visitPhoto} alt="Vista previa"/>}<label>Descripción (opcional)<textarea rows={2} value={visitNote} onChange={e=>setVisitNote(e.target.value)} placeholder="Cuéntanos sobre esta visita"/></label><button className="primary full" onClick={submitPhotoVisit}>Enviar evidencia</button></div>}{visitMethod==='qr' && <div className="method-panel"><QrCode size={28}/><strong>Validación presencial</strong><p>Solicita al encargado autorizado que escanee tu QR. En esta versión de demostración puedes ingresar un código de prueba.</p><label>Código del establecimiento<input value={qrManual} onChange={e=>setQrManual(e.target.value)} placeholder="Código proporcionado por el encargado"/></label><button className="primary full" onClick={submitQrCode}>Enviar código</button></div>}</>}
-      {action === 'trip' && <><p className="muted">Agrupa tus destinos y recuerdos en una expedición.</p><label>Nombre del viaje<input value={tripName} onChange={e=>setTripName(e.target.value)} placeholder="Ej. Ruta a Huaraz"/></label><div className="form-grid trip-date-grid"><label>Fecha de inicio<input className="trip-date-control" type="date" value={tripStart} onChange={e=>setTripStart(e.target.value)}/></label><label>Fecha de fin<input className="trip-date-control" type="date" value={tripEnd} onChange={e=>setTripEnd(e.target.value)}/></label></div><label>Descripción<textarea rows={3} value={tripDescription} onChange={e=>setTripDescription(e.target.value)} placeholder="¿Qué esperas descubrir?"/></label><details className="trip-stops"><summary>Añadir paradas o destinos (opcional) <span>{tripDestinations.length ? `${tripDestinations.length} seleccionados` : "Sin paradas"}</span></summary><p className="muted tiny">Si tu viaje tiene varios puntos, selecciónalos aquí. Puedes crear la bitácora sin añadir destinos.</p><div className="select-destinations">{destinations.map(d=><label key={d.id} className="check-row"><input type="checkbox" checked={tripDestinations.includes(d.id)} onChange={e=>setTripDestinations(a=>e.target.checked?[...a,d.id]:a.filter(x=>x!==d.id))}/>{d.title}</label>)}</div></details><label>Privacidad<select value={tripVisibility} onChange={e=>setTripVisibility(e.target.value as 'public'|'followers'|'private')}><option value="private">Privado · Solo yo</option><option value="followers">Seguidores · Solo quienes me siguen</option><option value="public">Público · Toda la comunidad</option></select></label><button className="primary full" onClick={createTrip}>Crear viaje <Route size={17}/></button></>}
+      {action === 'trip' && <><p className="muted">Agrupa tus destinos y recuerdos en una expedición.</p><label>Nombre del viaje<input value={tripName} onChange={e=>setTripName(e.target.value)} placeholder="Ej. Ruta a Huaraz"/></label><div className="form-grid trip-date-grid"><label>Fecha de inicio<input className="trip-date-control" type="date" value={tripStart} onChange={e=>setTripStart(e.target.value)}/></label><label>Fecha de fin<input className="trip-date-control" type="date" value={tripEnd} onChange={e=>setTripEnd(e.target.value)}/></label></div><label>Descripción<textarea rows={3} value={tripDescription} onChange={e=>setTripDescription(e.target.value)} placeholder="¿Qué esperas descubrir?"/></label><details className="trip-stops"><summary>Añadir paradas o destinos (opcional) <span>{tripDestinations.length+tripManualStops.length ? (tripDestinations.length+tripManualStops.length)+' paradas' : 'Sin paradas'}</span></summary><p className="muted tiny">Añade las paradas en el orden en que realizarás el recorrido.</p><label>Seleccionar destino del catálogo<select value={tripStopSelection} onChange={e=>{const id=Number(e.target.value);if(id && !tripDestinations.includes(id))setTripDestinations(v=>[...v,id]);setTripStopSelection('')}}><option value="">Elegir entre todos los destinos disponibles…</option>{destinations.filter(d=>!tripDestinations.includes(d.id)).map(d=><option key={d.id} value={d.id}>{d.title} · {d.city}, {d.region}</option>)}</select></label><div className="trip-stop-manual"><label>¿No aparece? Añadir parada manual<input value={tripManualStop} onChange={e=>setTripManualStop(e.target.value)} placeholder="Ej. Mirador, grifo, restaurante…"/></label><button type="button" className="secondary" onClick={()=>{const value=tripManualStop.trim();if(value && !tripManualStops.some(x=>x.toLowerCase()===value.toLowerCase()))setTripManualStops(v=>[...v,value]);setTripManualStop('')}}>Añadir parada</button></div>{(tripDestinations.length>0 || tripManualStops.length>0) && <ol className="trip-stop-list">{tripDestinations.map((id,index)=>{const d=destinations.find(x=>x.id===id);return d?<li key={id}><span>{index+1}. {d.title} <small>{d.city}, {d.region}</small></span><button type="button" aria-label="Quitar parada" onClick={()=>setTripDestinations(v=>v.filter(x=>x!==id))}>×</button></li>:null})}{tripManualStops.map((name,index)=><li key={name}><span>{tripDestinations.length+index+1}. {name} <small>Parada manual</small></span><button type="button" aria-label="Quitar parada" onClick={()=>setTripManualStops(v=>v.filter(x=>x!==name))}>×</button></li>)}</ol>}</details><label>Privacidad<select value={tripVisibility} onChange={e=>setTripVisibility(e.target.value as 'public'|'followers'|'private')}><option value="private">Privado · Solo yo</option><option value="followers">Seguidores · Solo quienes me siguen</option><option value="public">Público · Toda la comunidad</option></select></label><button className="primary full" onClick={createTrip}>Crear viaje <Route size={17}/></button></>}
       {(action === 'post' || action === 'memory') && <><p className="muted">Comparte una experiencia con la comunidad o guarda un recuerdo privado.</p><label>Título<input value={postTitle} onChange={e=>setPostTitle(e.target.value)} placeholder="Ej. Una ruta inolvidable"/></label><label>Tu historia<textarea rows={4} value={postText} onChange={e=>setPostText(e.target.value)} placeholder="Describe el recorrido, los paisajes y lo que viviste…"/></label><label>Destino relacionado<select value={postPlace} onChange={e=>setPostPlace(e.target.value)}><option value="">Seleccionar destino</option>{destinations.map(d=><option key={d.id} value={`${d.city}, ${d.region}`}>{d.title}</option>)}</select></label><label className="file-pick"><ImagePlus/> Añadir fotografía<input type="file" accept="image/*" onChange={e=>postFileToData(e.target.files?.[0])}/></label>{postImage && <img className="preview-image" src={postImage} alt="Vista previa"/>}<label>Visibilidad<select value={postVisibility} onChange={e=>setPostVisibility(e.target.value as 'public'|'followers'|'private')}><option value="public">Pública · Comunidad</option><option value="followers">Seguidores</option><option value="private">Privada · Solo yo</option></select></label><button className="primary full" onClick={publishPost}>{postVisibility==='private'?'Guardar recuerdo':'Publicar experiencia'} <Send size={17}/></button></>}
     </div></div>}
 
