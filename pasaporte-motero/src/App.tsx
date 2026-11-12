@@ -797,6 +797,12 @@ export default function App() {
   async function followUser(profile:any) {
     const user=await getCurrentAuthUser()
     if (!supabase || !user) { setAuthMode('login'); setAuthOpen(true); notify('Inicia sesión para seguir viajeros.'); return }
+    // The database intentionally forbids self-following. Guard here so stale
+    // search/profile state can never submit a row that violates follows_check.
+    if (user.id === profile.id) {
+      notify('Este es tu propio perfil; no necesitas seguirte.')
+      return
+    }
     const isFollowing=followed.includes(profile.id)
     const result=isFollowing
       ? await supabase.from('follows').delete().eq('follower_id',user.id).eq('following_id',profile.id)
