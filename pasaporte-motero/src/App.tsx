@@ -116,7 +116,7 @@ export default function App() {
   const [busy, setBusy] = useState(false)
   const [offline, setOffline] = useState(!navigator.onLine)
   const [feedMode, setFeedMode] = useState<'all'|'following'>('all')
-  const [commentPost, setCommentPost] = useState<number | null>(null)
+  const [commentPost, setCommentPost] = useState<string | number | null>(null)
   const [commentText, setCommentText] = useState('')
   const [followed, setFollowed] = useState<string[]>(() => readStore('pm_followed', []))
   const [qrManual, setQrManual] = useState('')
@@ -295,7 +295,7 @@ export default function App() {
   }
   async function loadCommunityPosts() {
     if (!supabase) return
-    const { data, error } = await supabase.from('posts').select('id,user_id,title,body,visibility,created_at,post_photos(storage_path)').eq('visibility','public').order('created_at',{ascending:false}).limit(50)
+    const { data, error } = await supabase.from('posts').select('id,user_id,title,body,visibility,created_at,post_photos(storage_path)').order('created_at',{ascending:false}).limit(50)
     if (error) { notify('No pudimos cargar el feed: '+error.message); return }
     const userIds=[...new Set((data || []).map((row:any)=>row.user_id))]
     const {data:profiles}=userIds.length ? await supabase.from('profiles').select('id,username,full_name,avatar_url').in('id',userIds) : {data:[] as any[]}
@@ -356,9 +356,9 @@ export default function App() {
     setTripName(''); setTripDescription(''); setTripDestinations([]); setTripManualStops([]); setTripStopSelection(''); setTripManualStop(''); setAction(''); setTab('profile'); setSubview('trips')
     notify('Viaje creado y sincronizado con tu cuenta.')
   }
-  function toggleLike(id: number) { setPosts(p => p.map(x => x.id === id ? { ...x, liked: !x.liked, likes: Math.max(0, x.likes + (x.liked ? -1 : 1)) } : x)) }
+  function toggleLike(id: string | number) { setPosts(p => p.map(x => x.id === id ? { ...x, liked: !x.liked, likes: Math.max(0, x.likes + (x.liked ? -1 : 1)) } : x)) }
   function addComment() { if (commentPost === null || !commentText.trim()) return; setPosts(p => p.map(x => x.id === commentPost ? { ...x, comments: [...x.comments, commentText.trim()] } : x)); setCommentText(''); setCommentPost(null); notify('Comentario añadido localmente.') }
-  function toggleSaved(id: number) { setSaved(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]); notify(saved.includes(id) ? 'Destino eliminado de guardados.' : 'Destino guardado para después.') }
+  function toggleSaved(id: string | number) { setSaved(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]); notify(saved.includes(id) ? 'Destino eliminado de guardados.' : 'Destino guardado para después.') }
   function openAction(which: 'visit'|'trip'|'post'|'memory') { setShowActions(false); setAction(which); if (which === 'visit') setVisitDestination(selected?.id || destinations[0].id) }
   function createMemory() { setAction('post'); setPostTitle('Un recuerdo de viaje'); setPostVisibility('private') }
 
@@ -604,7 +604,7 @@ export default function App() {
           <div className="page-heading"><div><span className="eyebrow">TU COMUNIDAD VIAJERA</span><h1>Historias sobre ruedas.</h1><p className="muted">Inspírate, comparte y descubre nuevos destinos.</p></div><div className="heading-icon"><Users size={23}/></div></div>
           <button className="composer-shortcut" onClick={() => openAction('post')}><span className="avatar small">{initials(displayName)}</span><span>¿Qué aventura quieres contar?</span><span className="round-add"><Plus size={18}/></span></button>
           <div className="feed-switch"><button className={feedMode === 'all' ? 'active' : ''} onClick={() => setFeedMode('all')}>Comunidad</button><button className={feedMode === 'following' ? 'active' : ''} onClick={() => setFeedMode('following')}>Siguiendo</button></div>
-          {visiblePosts.map(post => <article className="post-card" key={post.id}><div className="post-author"><span className="avatar small">{initials(displayName)}</span><div className="author-info"><strong>{displayName}</strong><span>@{username} · {post.date}</span></div><button className="more" aria-label="Más opciones" onClick={() => notify('Opciones de publicación disponibles al conectar la comunidad.') }><MoreHorizontal size={20}/></button></div>{post.image && <div className="post-image"><img src={post.image} alt="Fotografía de viaje"/><span className="photo-label"><MapPin size={13}/> {post.place}</span></div>}<div className="post-body"><h3>{post.title}</h3><p>{post.text}</p><div className="post-actions"><button onClick={() => toggleLike(post.id)} className={post.liked ? 'liked' : ''}><Heart size={18} fill={post.liked ? 'currentColor' : 'none'}/> {post.likes}</button><button onClick={() => setCommentPost(post.id)}><MessageCircle size={18}/> {post.comments.length || 'Comentar'}</button><button onClick={() => { if (navigator.share) navigator.share({title: post.title, text: post.text}).catch(() => undefined); else notify('Comparte esta publicación copiando su enlace cuando esté publicada en línea.') }}><Share2 size={18}/> Compartir</button><button aria-label="Guardar publicación" onClick={() => notify('Publicación guardada en favoritos locales.')}><Bookmark size={17}/></button></div></div></article>)}
+          {visiblePosts.map(post => <article className="post-card" key={post.id}><div className="post-author"><span className="avatar small">{initials(displayName)}</span><div className="author-info"><strong>{(post as any).authorName || displayName}</strong><span>@{(post as any).authorUsername || username} · {post.date}</span></div><button className="more" aria-label="Más opciones" onClick={() => notify('Opciones de publicación disponibles al conectar la comunidad.') }><MoreHorizontal size={20}/></button></div>{post.image && <div className="post-image"><img src={post.image} alt="Fotografía de viaje"/><span className="photo-label"><MapPin size={13}/> {post.place}</span></div>}<div className="post-body"><h3>{post.title}</h3><p>{post.text}</p><div className="post-actions"><button onClick={() => toggleLike(post.id)} className={post.liked ? 'liked' : ''}><Heart size={18} fill={post.liked ? 'currentColor' : 'none'}/> {post.likes}</button><button onClick={() => setCommentPost(post.id)}><MessageCircle size={18}/> {post.comments.length || 'Comentar'}</button><button onClick={() => { if (navigator.share) navigator.share({title: post.title, text: post.text}).catch(() => undefined); else notify('Comparte esta publicación copiando su enlace cuando esté publicada en línea.') }}><Share2 size={18}/> Compartir</button><button aria-label="Guardar publicación" onClick={() => notify('Publicación guardada en favoritos locales.')}><Bookmark size={17}/></button></div></div></article>)}
           {visiblePosts.length === 0 && <div className="empty-card"><Users size={30}/><h3>Aún no sigues viajeros</h3><p>Descubre historias de la comunidad y sigue a otros motociclistas para ver sus aventuras aquí.</p><button className="primary" onClick={() => setFeedMode('all')}>Ver comunidad</button></div>}
         </section>}
 
