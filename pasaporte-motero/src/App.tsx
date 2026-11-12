@@ -357,42 +357,63 @@ export default function App() {
     setSubview(''); setSelected(null); setAction(''); setShowActions(false); setTab('profile')
   }
   function closeModal() { setEditingPostId(null); setEditingTripId(null); qrScannerControls.current?.stop(); qrScannerControls.current = null; setQrScanning(false); setAction(''); setVisitPhoto(''); setVisitNote(''); setPostImage(''); setCommentPost(null) }
-  function fileToData(file?: File) { if (!file) return; if (file.size > 2_500_000) { notify('La imagen supera 2.5 MB. Selecciona una más ligera.'); return } const reader = new FileReader(); reader.onload = () => setVisitPhoto(String(reader.result || '')); reader.readAsDataURL(file) }
-  async function postFileToData(file?: File) {
-    if (!file) return
-    if (!file.type.startsWith('image/')) { notify('Selecciona una imagen JPG, PNG o WebP.'); return }
-    if (file.size <= 2_500_000) {
-      const reader = new FileReader()
-      reader.onload = () => setPostImage(String(reader.result || ''))
-      reader.readAsDataURL(file)
-      return
-    }
+  async function compressImageFile(file: File, maxBytes = 2_400_000): Promise<File> {
+    if (!file.type.startsWith('image/')) throw new Error('Selecciona un archivo de imagen.')
+    if (file.size <= maxBytes) return file
+    const sourceUrl = URL.createObjectURL(file)
     try {
-      const sourceUrl = URL.createObjectURL(file)
       const image = new Image()
       image.src = sourceUrl
       await new Promise<void>((resolve,reject)=>{image.onload=()=>resolve();image.onerror=()=>reject(new Error('No se pudo leer la imagen'))})
-      const canvas = document.createElement('canvas')
-      const scale = Math.min(1, 2200 / Math.max(image.naturalWidth,image.naturalHeight))
-      canvas.width = Math.round(image.naturalWidth * scale)
-      canvas.height = Math.round(image.naturalHeight * scale)
-      const context = canvas.getContext('2d')
-      if (!context) throw new Error('No se pudo preparar la imagen')
-      context.drawImage(image,0,0,canvas.width,canvas.height)
-      URL.revokeObjectURL(sourceUrl)
-      let quality = 0.88
-      let blob: Blob | null = await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',quality))
-      while (blob && blob.size > 2_400_000 && quality > 0.48) {
-        quality -= 0.1
+      let scale = Math.min(1, 2200 / Math.max(image.naturalWidth,image.naturalHeight))
+      let blob: Blob | null = null
+      for (let attempt=0; attempt<5; attempt++) {
+        const canvas = document.createElement('canvas')
+        canvas.width = Math.max(1,Math.round(image.naturalWidth*scale))
+        canvas.height = Math.max(1,Math.round(image.naturalHeight*scale))
+        const context = canvas.getContext('2d')
+        if (!context) throw new Error('No se pudo preparar la imagen')
+        context.fillStyle = '#ffffff'
+        context.fillRect(0,0,canvas.width,canvas.height)
+        context.drawImage(image,0,0,canvas.width,canvas.height)
+        let quality = 0.86
         blob = await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',quality))
+        while (blob && blob.size > maxBytes && quality > 0.5) {
+          quality = Math.max(0.5,quality-0.1)
+          blob = await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',quality))
+        }
+        if (blob && blob.size <= maxBytes) break
+        scale *= 0.78
       }
-      if (!blob || blob.size > 2_500_000) { notify('No fue posible reducir la imagen a 2.5 MB. Prueba con otra fotografía.'); return }
-      const before=(file.size/1024/1024).toFixed(2), after=(blob.size/1024/1024).toFixed(2)
-      if (!window.confirm(`La fotografía pesa ${before} MB. Podemos comprimirla automáticamente a ${after} MB para publicarla. ¿Aceptas la compresión?`)) { notify('No se aplicó compresión. Elige otra fotografía si deseas continuar.'); return }
+      if (!blob || blob.size > maxBytes) throw new Error('No se pudo reducir la imagen al tamaño permitido.')
+      return new File([blob],file.name.replace(/\\.[^.]+$/,'')+'.jpg',{type:'image/jpeg',lastModified:Date.now()})
+    } finally { URL.revokeObjectURL(sourceUrl) }
+  }
+  async function fileToData(file?: File) {
+    if (!file) return
+    if (!file.type.startsWith('image/')) { notify('Selecciona una fotografía JPG, PNG o WebP.'); return }
+    try {
+      const compressed = await compressImageFile(file)
       const reader = new FileReader()
-      reader.onload = () => { setPostImage(String(reader.result || '')); notify(`Imagen comprimida: ${before} MB → ${after} MB.`) }
-      reader.readAsDataURL(blob)
-    } catch { notify('No se pudo comprimir esta fotografía. Prueba con otra imagen.') }
+      reader.onload = () => {
+        setVisitPhoto(String(reader.result || ''))
+        if (compressed.size < file.size) notify(`Fotografía comprimida automáticamente: ${(file.size/1024/1024).toFixed(2)} MB → ${(compressed.size/1024/1024).toFixed(2)} MB.`)
+      }
+      reader.readAsDataURL(compressed)
+    } catch (error:any) { notify(error?.message || 'No se pudo comprimir la fotografía.') }
+  }
+  async function postFileToData(file?: File) {
+    if (!file) return
+    if (!file.type.startsWith('image/')) { notify('Selecciona una imagen JPG, PNG o WebP.'); return }
+    try {
+      const compressed = await compressImageFile(file)
+      const reader = new FileReader()
+      reader.onload = () => {
+        setPostImage(String(reader.result || ''))
+        if (compressed.size < file.size) notify(`Imagen comprimida automáticamente: ${(file.size/1024/1024).toFixed(2)} MB → ${(compressed.size/1024/1024).toFixed(2)} MB.`)
+      }
+      reader.readAsDataURL(compressed)
+    } catch (error:any) { notify(error?.message || 'No se pudo comprimir esta fotografía.') }
   }
 
   async function makePersonalQr() {
@@ -967,13 +988,14 @@ export default function App() {
 
   async function addTripPhoto(tripId: string, file?: File) {
     if (!file || !supabase) return
-    if (!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) { notify('Selecciona JPG, PNG o WebP de máximo 5 MB.'); return }
+    if (!['image/jpeg','image/png','image/webp'].includes(file.type)) { notify('Selecciona una fotografía JPG, PNG o WebP.'); return }
     const user = await getCurrentAuthUser()
     if (!user) { setAuthMode('login'); setAuthOpen(true); notify('Inicia sesión para guardar fotografías.'); return }
-    const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg'
-    const path = user.id + '/trips/' + tripId + '/' + crypto.randomUUID() + '.' + ext
     setBusy(true)
-    const { error: uploadError } = await supabase.storage.from('travel-media').upload(path, file, { contentType: file.type, upsert: false })
+    let uploadFile: File
+    try { uploadFile = await compressImageFile(file) } catch (error:any) { setBusy(false); notify(error?.message || 'No se pudo comprimir la fotografía.'); return }
+    const path = user.id + '/trips/' + tripId + '/' + crypto.randomUUID() + '.jpg'
+    const { error: uploadError } = await supabase.storage.from('travel-media').upload(path, uploadFile, { contentType: uploadFile.type, upsert: false })
     if (uploadError) { setBusy(false); notify('No se pudo subir la foto: ' + uploadError.message); return }
     const { error: rowError } = await supabase.from('trip_photos').insert({ trip_id: tripId, user_id: user.id, storage_path: path })
     if (rowError) { await supabase.storage.from('travel-media').remove([path]); setBusy(false); notify('No se pudo vincular la foto: ' + rowError.message); return }
@@ -1034,9 +1056,10 @@ export default function App() {
     setMotorcycleBusy(true)
     let photoPath = motorcyclePhoto.trim() || null
     if (motorcyclePhotoFile) {
-      const extension = motorcyclePhotoFile.name.split('.').pop()?.toLowerCase() || 'jpg'
-      const path = user.id + '/' + crypto.randomUUID() + '.' + extension
-      const {error:uploadError} = await supabase.storage.from('motorcycles').upload(path,motorcyclePhotoFile,{upsert:false,contentType:motorcyclePhotoFile.type,cacheControl:'3600'})
+      let uploadFile: File
+      try { uploadFile = await compressImageFile(motorcyclePhotoFile) } catch (error:any) { setMotorcycleBusy(false); notify(error?.message || 'No se pudo comprimir la fotografía.'); return }
+      const path = user.id + '/' + crypto.randomUUID() + '.jpg'
+      const {error:uploadError} = await supabase.storage.from('motorcycles').upload(path,uploadFile,{upsert:false,contentType:uploadFile.type,cacheControl:'3600'})
       if (uploadError) { setMotorcycleBusy(false); notify('No se pudo subir la fotografía: ' + uploadError.message); return }
       photoPath = 'motorcycles/' + path
     }
@@ -1104,9 +1127,10 @@ export default function App() {
     setProfileBusy(true)
     let nextAvatarUrl = avatarUrl
     if (avatarFile) {
-      const ext = avatarFile.type === 'image/png' ? 'png' : avatarFile.type === 'image/webp' ? 'webp' : 'jpg'
-      const path = user.id + '/' + crypto.randomUUID() + '.' + ext
-      const {error:uploadError} = await supabase.storage.from('avatars').upload(path,avatarFile,{upsert:false,contentType:avatarFile.type,cacheControl:'3600'})
+      let uploadFile: File
+      try { uploadFile = await compressImageFile(avatarFile) } catch (error:any) { setProfileBusy(false); notify(error?.message || 'No se pudo comprimir la foto de perfil.'); return }
+      const path = user.id + '/' + crypto.randomUUID() + '.jpg'
+      const {error:uploadError} = await supabase.storage.from('avatars').upload(path,uploadFile,{upsert:false,contentType:uploadFile.type,cacheControl:'3600'})
       if (uploadError) { setProfileBusy(false); notify('No se pudo subir la foto de perfil: ' + uploadError.message); return }
       nextAvatarUrl = supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl
     }
