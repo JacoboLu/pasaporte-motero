@@ -85,7 +85,7 @@ const destinations: Destination[] = [
   { id: 59, title: 'Laguna Rajucolta', region: 'Áncash', province: 'Huaraz', city: 'Huaraz', category: 'Montañas', distance: '—', image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1100&q=85', description: 'Laguna glaciar al pie del nevado Huantsán.', lat: -9.56, lng: -77.39, radius: 350 },
   { id: 60, title: 'Nevado Huascarán (sector de acceso)', region: 'Áncash', province: 'Yungay', city: 'Yungay', category: 'Montañas', distance: '—', image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1100&q=85', description: 'Sector de acceso al entorno del nevado; requiere planificación.', lat: -9.12, lng: -77.605, radius: 350 },
 ]
-const categories = ['Todos', 'Montañas', 'Rutas', 'Costa', 'Naturaleza', 'Histórico', 'Desierto']
+const categories = ['Todos', 'Montañas', 'Rutas', 'Costa', 'Naturaleza', 'Histórico', 'Cultural', 'Desierto']
 const initialPosts: Post[] = [
   { id: 1, title: 'Rumbo a la Cordillera Blanca', text: 'Cada kilómetro es una historia. Próxima parada: Huaraz. Preparando la primera expedición de Pasaporte Motero.', place: 'Áncash, Perú', date: 'Hace 2 h', likes: 24, visibility: 'public', image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=85', comments: ['¡Qué buena ruta!', 'Comparte el track cuando puedas.'] },
   { id: 2, title: 'Carretera y libertad', text: 'Una parada para disfrutar el paisaje y seguir sumando kilómetros.', place: 'Junín, Perú', date: 'Ayer', likes: 12, visibility: 'public', image: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=85', comments: [] },
