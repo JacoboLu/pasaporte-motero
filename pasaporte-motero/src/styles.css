@@ -663,3 +663,58 @@ html[data-theme="light"] .community-author-open small,.theme-light .community-au
 .department-empty{background:var(--card-bg,#fff);color:#b65d2b}
 @media(max-width:360px){.passport-book-page{flex-basis:82vw;min-height:295px;padding:16px 13px}.passport-page-title{font-size:21px}}
 @media(prefers-reduced-motion:reduce){.department-seal.earned,.department-detail-seal.earned{animation:none}.department-seal{transition:none}}
+
+
+/* Pasaporte como libro abierto: dos páginas, lomo central y volteo */
+.passport-book-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 9px;padding:0 2px}
+.passport-book-controls>span{font-size:8px;letter-spacing:1.2px;font-weight:800;color:var(--muted-text);text-align:center;font-variant-numeric:tabular-nums}
+.passport-book-controls small{color:#bd8251;font-size:8px}
+.book-turn-button{display:grid;place-items:center;width:34px;height:34px;border:1px solid #b99a72;border-radius:50%;background:linear-gradient(145deg,#fff7e9,#ead8bd);color:#765333;box-shadow:0 2px 5px #0002}
+.book-turn-button:disabled{opacity:.32;cursor:not-allowed}
+.passport-book-viewport{position:relative;margin:0 0 17px;padding:5px 2px 13px;overflow:hidden;perspective:1500px;touch-action:pan-y}
+.passport-book-spread{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;width:100%;min-height:320px;transform-style:preserve-3d;animation:passportSpreadIn .48s cubic-bezier(.2,.7,.25,1) both;filter:drop-shadow(0 9px 10px #0002)}
+.passport-book-spread:before{content:"";position:absolute;z-index:4;top:0;bottom:0;left:50%;width:12px;transform:translateX(-50%);background:linear-gradient(90deg,#76553644,#fff4d5aa 40%,#5c412d55);pointer-events:none}
+.passport-book-page{position:relative;display:flex;min-width:0;min-height:320px;flex-direction:column;align-items:center;padding:17px 9px 13px;border:1px solid #b99a72;background:linear-gradient(100deg,#e4d0ae 0%,#f7ecd8 13%,#f5ead5 100%);color:#59432e;text-align:center;overflow:hidden;box-shadow:inset 7px 0 12px #6e4a251c}
+.passport-book-page.left-page{border-right:0;border-radius:7px 0 0 7px;background:linear-gradient(100deg,#e2caa5 0%,#f5e8d1 12%,#f6ecd9 100%);box-shadow:inset 8px 0 12px #6e4a251c, inset -5px 0 9px #6e4a2510}
+.passport-book-page.right-page{border-left:0;border-radius:0 7px 7px 0;background:linear-gradient(260deg,#e2caa5 0%,#f5e8d1 12%,#f6ecd9 100%);box-shadow:inset -8px 0 12px #6e4a251c,inset 5px 0 9px #6e4a2510}
+.passport-book-page:before{content:"";position:absolute;inset:7px;border:1px solid #a98a6266;border-radius:4px;pointer-events:none}
+.passport-book-page:after{content:"";position:absolute;top:0;bottom:0;width:1px;background:#9b795344;pointer-events:none}
+.passport-book-page.left-page:after{left:9px}
+.passport-book-page.right-page:after{right:9px}
+.passport-book-page .passport-page-number,.passport-book-page .passport-page-ornament,.passport-book-page .passport-page-title,.passport-book-page .passport-page-caption,.passport-book-page .passport-place-counter,.passport-book-page .passport-page-status,.passport-book-page .passport-page-footer,.passport-book-page .passport-page-open{position:relative;z-index:1}
+.passport-book-page .passport-page-number{align-self:flex-end;font-size:6px;letter-spacing:1px;color:#8d7255}
+.passport-book-page .passport-page-ornament{margin-top:10px;font-size:6px;letter-spacing:1px;color:#a36e43}
+.passport-book-page .passport-page-title{margin-top:13px;font-family:'Playfair Display',serif;font-size:clamp(15px,4.3vw,22px);line-height:1.1;color:#493321;overflow-wrap:anywhere}
+.passport-book-page .passport-page-caption{margin-top:4px;font-size:6px;letter-spacing:1.5px;color:#8e7253}
+.passport-book-page .department-seal{width:clamp(65px,20vw,91px);height:clamp(65px,20vw,91px);margin:16px 0 9px}
+.passport-book-page .department-seal .seal-ring{width:82%;height:82%;gap:1px}
+.passport-book-page .department-seal svg{width:19px;height:19px}
+.passport-book-page .department-seal b{font-size:9px}
+.passport-book-page .department-seal small{font-size:5px}
+.passport-book-page .passport-place-counter{gap:2px}
+.passport-book-page .passport-place-counter strong{font-size:19px}
+.passport-book-page .passport-place-counter span{font-size:7px}
+.passport-book-page .passport-page-status{margin-top:7px;font-size:6px;line-height:1.4;letter-spacing:.6px}
+.passport-book-page .passport-page-footer{margin-top:auto;padding-top:8px;font-size:5px;letter-spacing:1px}
+.passport-book-page .passport-page-open{gap:2px;margin-top:8px;font-size:8px}
+.passport-book-blank{justify-content:center;gap:13px;color:#9a8061}
+.passport-book-blank>strong{font-family:'Playfair Display',serif;font-size:15px;color:#765333}
+.passport-book-blank>small{font-size:8px;color:#8d7255}
+@keyframes passportSpreadIn{0%{opacity:.55;transform:rotateY(-7deg) scale(.985)}100%{opacity:1;transform:rotateY(0) scale(1)}}
+@media(max-width:360px){.passport-book-spread{min-height:286px}.passport-book-page{min-height:286px;padding:14px 6px 11px}.passport-book-page .department-seal{margin:13px 0 8px}.passport-book-page .passport-page-title{font-size:15px}.passport-book-page .passport-page-ornament{font-size:5px}}
+@media(prefers-reduced-motion:reduce){.passport-book-spread{animation:none}}
+
+/* Exploración rápida: accesos por zona y resultados por tandas */
+.explore-shortcuts{display:flex;gap:8px;margin:0 0 11px;overflow-x:auto;scrollbar-width:none}
+.explore-shortcuts::-webkit-scrollbar{display:none}
+.explore-shortcuts button{display:inline-flex;align-items:center;justify-content:center;gap:6px;flex:0 0 auto;min-height:34px;padding:0 12px;border:1px solid var(--line-color);border-radius:999px;background:var(--card-bg);color:var(--muted-text);font-size:9px;font-weight:700;white-space:nowrap}
+.explore-shortcuts button.active{border-color:#ff7a18;background:#fff0e4;color:#c45100}
+.destination-results-meta{display:flex;justify-content:space-between;gap:8px;margin:0 1px 9px;color:var(--muted-text);font-size:8px}
+.destination-load-more{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:42px;margin:11px 0 18px;border:1px solid var(--line-color);border-radius:12px;background:var(--card-bg);color:var(--text-color);font-size:10px;font-weight:800}
+.destination-load-more span{color:#d65a00;font-size:8px;font-weight:700}
+.theme-light .explore-shortcuts button{background:#fff;color:#45515f;border-color:#d8e0e8}
+.theme-light .explore-shortcuts button.active{background:#fff0e4;color:#b84c08;border-color:#ff9a55}
+.theme-light .destination-load-more{background:#fff;color:#24303b;border-color:#d8e0e8}
+.theme-dark .explore-shortcuts button{background:#202328;color:#d8dde3;border-color:#424a53}
+.theme-dark .explore-shortcuts button.active{background:#38271b;color:#ffb16f;border-color:#a65a24}
+.theme-dark .destination-load-more{background:#202328;color:#f2f4f6;border-color:#424a53}
