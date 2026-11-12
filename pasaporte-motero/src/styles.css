@@ -585,3 +585,8 @@ html[data-theme="light"] .community-author-open strong,.theme-light .community-a
 html[data-theme="light"] .community-author-open span,.theme-light .community-author-open span{color:#596675}
 html[data-theme="light"] .community-author-open small,.theme-light .community-author-open small{color:#75808c}
 @media(max-width:360px){.memory-gallery{gap:8px}.memory-gallery-item figcaption{padding:6px}.memory-gallery-item figcaption button{font-size:9px}.community-search-panel{gap:6px}.community-search-panel>.secondary{padding:0 10px}}
+
+
+.community-author-avatar{padding:0;border:0;cursor:pointer}
+.community-author-open{border:0;background:transparent;color:inherit;cursor:pointer}
+.community-author-open:focus-visible{outline:2px solid #ff8b42;outline-offset:3px;border-radius:8px}
