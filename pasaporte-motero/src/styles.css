@@ -421,3 +421,37 @@ html[data-theme="dark"] .app-shell .signed-out-card h2{color:#f4f6f8!important}
 html[data-theme="dark"] .app-shell .signed-out-card p{color:#b0b8c2!important}
 html[data-theme="dark"] .app-shell .signed-out-icon{background:#332116!important;color:#ff9857!important;border-color:#65432d!important}
 html[data-theme="dark"] .app-shell .signed-out-card .secondary.full{background:#25292e!important;color:#f4f6f8!important;border:1px solid #4b535d!important}
+
+
+/* Destinos: superficies claras y texto de alto contraste en modo claro */
+html[data-theme="light"] .destination-compact .destination-card,
+.theme-light .destination-compact .destination-card{
+  background:#fff!important;
+  color:#20242a!important;
+  border:1px solid #dfe4e9;
+  box-shadow:0 2px 8px #17202a0a;
+}
+html[data-theme="light"] .destination-compact .destination-overlay,
+.theme-light .destination-compact .destination-overlay{
+  left:104px!important;
+  background:linear-gradient(90deg,#ffffff00 0%,#ffffff 16%,#ffffff 100%)!important;
+}
+html[data-theme="light"] .destination-compact .destination-copy strong,
+.theme-light .destination-compact .destination-copy strong{color:#20242a!important}
+html[data-theme="light"] .destination-compact .destination-copy small,
+.theme-light .destination-compact .destination-copy small{color:#596574!important}
+html[data-theme="light"] .destination-compact .destination-tag,
+.theme-light .destination-compact .destination-tag{
+  background:#fff3e9!important;color:#9a470e!important;border:1px solid #f2c7a8!important;
+  backdrop-filter:none!important;
+}
+html[data-theme="light"] .destination-compact .destination-distance,
+.theme-light .destination-compact .destination-distance{
+  background:#fff0e5!important;color:#a94c0b!important;border-color:#f0c5a4!important;
+}
+html[data-theme="light"] .destination-view-switch,
+.theme-light .destination-view-switch{background:#fff!important;border-color:#dce2e8!important}
+html[data-theme="light"] .destination-view-switch button,
+.theme-light .destination-view-switch button{color:#485462!important}
+html[data-theme="light"] .destination-view-switch button.active,
+.theme-light .destination-view-switch button.active{background:#ff6b00!important;color:#fff!important}
