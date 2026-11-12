@@ -16,7 +16,7 @@ type Tab = 'explore' | 'passport' | 'community' | 'profile'
 type VisitStatus = 'validated' | 'pending' | 'rejected'
 type Destination = { id: number; title: string; region: string; province: string; city: string; category: string; distance: string; image: string; description: string; lat: number; lng: number; radius: number }
 type Post = { id: string | number; title: string; text: string; place: string; date: string; likes: number; liked?: boolean; saved?: boolean; visibility: 'public'|'followers'|'private'; image?: string; comments: string[] }
-type Visit = { id: number; destinationId: number; date: string; method: 'gps'|'photo'|'qr'; status: VisitStatus; note?: string; image?: string }
+type Visit = { id: string | number; destinationId: number; date: string; method: 'gps'|'photo'|'qr'; status: VisitStatus; note?: string; image?: string }
 type TripStop = { name: string; catalogDestinationId: number | null; sortOrder: number }
 type Trip = { id: string; name: string; start: string; end: string; description: string; destinationIds: number[]; stops: TripStop[]; visibility: 'public'|'followers'|'private'; photos: string[] }
 
@@ -205,12 +205,12 @@ export default function App() {
       const user = data.session?.user
       setAuthUser(user?.email || null)
       setAuthUserId(user?.id || null)
-      if (user) { void loadProfile(user.id); void loadMotorcycle(user.id); void loadTrips(user.id); void loadCommunityPosts() } else { void loadCommunityPosts() }
+      if (user) { void loadProfile(user.id); void loadMotorcycle(user.id); void loadTrips(user.id); void loadVisits(user.id); void loadCommunityPosts() } else { void loadCommunityPosts() }
     })
     const {data:{subscription}} = supabase.auth.onAuthStateChange((_event, session) => {
       setAuthUser(session?.user.email || null)
       setAuthUserId(session?.user.id || null)
-      if (session?.user) { void loadProfile(session.user.id); void loadMotorcycle(session.user.id); void loadTrips(session.user.id); void loadCommunityPosts() }
+      if (session?.user) { void loadProfile(session.user.id); void loadMotorcycle(session.user.id); void loadTrips(session.user.id); void loadVisits(session.user.id); void loadCommunityPosts() }
       else { resetSignedOutData(); void loadCommunityPosts() }
     })
     return () => { alive = false; subscription.unsubscribe() }
@@ -303,32 +303,88 @@ export default function App() {
   async function validateGps() {
     const dest = destinations.find(d => d.id === visitDestination)
     if (!dest) return
-    if (!navigator.geolocation) { notify('Este dispositivo no ofrece geolocalización. Puedes solicitar validación fotográfica.'); return }
+    const user = await getCurrentAuthUser()
+    if (!supabase || !user) { setAuthMode('login'); setAuthOpen(true); notify('Inicia sesión para registrar visitas sincronizadas.'); return }
+    if (!navigator.geolocation) { notify('Este dispositivo no ofrece geolocalización. Puedes enviar evidencia fotográfica.'); return }
     setBusy(true)
-    navigator.geolocation.getCurrentPosition(position => {
+    navigator.geolocation.getCurrentPosition(async position => {
       const meters = distanceMeters(position.coords, dest.lat, dest.lng)
-      setBusy(false)
-      if (meters <= dest.radius) {
-        setVisits(v => [{ id: Date.now(), destinationId: dest.id, date: new Date().toISOString(), method: 'gps', status: 'validated', note: visitNote }, ...v])
-        notify(`¡Visita GPS validada! Has conseguido el sello de ${dest.title}.`)
-        closeModal(); setTab('passport')
-      } else {
+      if (meters > dest.radius) {
+        setBusy(false)
         notify(`Estás aproximadamente a ${(meters/1000).toFixed(1)} km de ${dest.title}. Puedes enviar una evidencia fotográfica.`)
         setVisitMethod('photo')
+        return
       }
-    }, error => { setBusy(false); notify(error.code === 1 ? 'Permiso de ubicación denegado. Actívalo en tu navegador o utiliza fotografía.' : 'No pudimos obtener tu ubicación. Intenta nuevamente o utiliza fotografía.') }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 })
+      const { error } = await supabase!.from('app_visits').insert({
+        user_id: user.id, destination_id: dest.id, visited_at: new Date().toISOString(),
+        validation_method: 'gps', validation_status: 'pending', notes: visitNote.trim() || null,
+        latitude: position.coords.latitude, longitude: position.coords.longitude
+      })
+      setBusy(false)
+      if (error) { notify('No se pudo guardar la visita: ' + error.message); return }
+      await loadVisits(user.id)
+      notify('Ubicación recibida. La visita quedó pendiente de validación del servidor; el sello se activará al aprobarse.')
+      closeModal(); setTab('passport')
+    }, error => {
+      setBusy(false)
+      notify(error.code === 1 ? 'Permiso de ubicación denegado. Actívalo en tu navegador o utiliza fotografía.' : 'No pudimos obtener tu ubicación. Intenta nuevamente o utiliza fotografía.')
+    }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 })
   }
-  function submitPhotoVisit() {
+
+  async function submitPhotoVisit() {
     if (!visitPhoto) { notify('Adjunta una fotografía para continuar.'); return }
-    setVisits(v => [{ id: Date.now(), destinationId: visitDestination, date: new Date().toISOString(), method: 'photo', status: 'pending', note: visitNote, image: visitPhoto }, ...v])
-    notify('Evidencia guardada como pendiente de revisión. El sello se activará cuando sea aprobada.')
-    closeModal()
+    const user = await getCurrentAuthUser()
+    if (!supabase || !user) { setAuthMode('login'); setAuthOpen(true); notify('Inicia sesión para enviar evidencia sincronizada.'); return }
+    const dest = destinations.find(d => d.id === visitDestination)
+    if (!dest) return
+    setBusy(true)
+    try {
+      const blob = await (await fetch(visitPhoto)).blob()
+      const ext = blob.type === 'image/png' ? 'png' : blob.type === 'image/webp' ? 'webp' : 'jpg'
+      const path = user.id + '/visits/' + crypto.randomUUID() + '.' + ext
+      const { error: uploadError } = await supabase.storage.from('travel-media').upload(path, blob, { contentType: blob.type, upsert: false })
+      if (uploadError) throw uploadError
+      const { error } = await supabase.from('app_visits').insert({
+        user_id: user.id, destination_id: dest.id, visited_at: new Date().toISOString(),
+        validation_method: 'photo', validation_status: 'pending', notes: visitNote.trim() || null, evidence_path: path
+      })
+      if (error) {
+        await supabase.storage.from('travel-media').remove([path])
+        throw error
+      }
+      await loadVisits(user.id)
+      setBusy(false)
+      notify('Evidencia enviada y sincronizada. El sello quedará pendiente hasta su revisión.')
+      closeModal()
+    } catch (err: any) {
+      setBusy(false)
+      notify('No se pudo enviar la evidencia: ' + (err?.message || 'Error desconocido'))
+    }
   }
-  function submitQrCode() {
-    if (!qrManual.trim()) { notify('Ingresa el código proporcionado por el establecimiento autorizado.'); return }
-    notify('Código recibido en modo demostración. La confirmación presencial requiere un escaneo autorizado y validación del servidor.')
-    setQrManual('')
+
+  async function loadVisits(userId: string) {
+    if (!supabase) return
+    const { data, error } = await supabase.from('app_visits')
+      .select('id,destination_id,visited_at,validation_method,validation_status,notes,evidence_path')
+      .eq('user_id', userId).order('visited_at', { ascending: false })
+    if (error) { notify('No pudimos cargar tu pasaporte: ' + error.message); return }
+    const rows: Visit[] = (data || []).map((row: any) => {
+      let image: string | undefined
+      return {
+        id: row.id, destinationId: Number(row.destination_id), date: row.visited_at,
+        method: row.validation_method, status: row.validation_status,
+        note: row.notes || undefined, image
+      }
+    })
+    const withImages = await Promise.all(rows.map(async (visit, index) => {
+      const path = data?.[index]?.evidence_path
+      if (!path) return visit
+      const { data: signed } = await supabase!.storage.from('travel-media').createSignedUrl(path, 3600)
+      return { ...visit, image: signed?.signedUrl || undefined }
+    }))
+    setVisits(withImages)
   }
+
   async function loadCommunityPosts() {
     if (!supabase) return
     const { data, error } = await supabase.from('posts').select('id,user_id,title,body,visibility,created_at,post_photos(storage_path)').order('created_at',{ascending:false}).limit(50)
