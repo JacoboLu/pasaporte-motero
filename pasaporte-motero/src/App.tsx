@@ -994,7 +994,8 @@ export default function App() {
     setBusy(true)
     let uploadFile: File
     try { uploadFile = await compressImageFile(file) } catch (error:any) { setBusy(false); notify(error?.message || 'No se pudo comprimir la fotografía.'); return }
-    const path = user.id + '/trips/' + tripId + '/' + crypto.randomUUID() + '.jpg'
+    const extension = uploadFile.type === 'image/png' ? 'png' : uploadFile.type === 'image/webp' ? 'webp' : 'jpg'
+    const path = user.id + '/trips/' + tripId + '/' + crypto.randomUUID() + '.' + extension
     const { error: uploadError } = await supabase.storage.from('travel-media').upload(path, uploadFile, { contentType: uploadFile.type, upsert: false })
     if (uploadError) { setBusy(false); notify('No se pudo subir la foto: ' + uploadError.message); return }
     const { error: rowError } = await supabase.from('trip_photos').insert({ trip_id: tripId, user_id: user.id, storage_path: path })
@@ -1058,7 +1059,8 @@ export default function App() {
     if (motorcyclePhotoFile) {
       let uploadFile: File
       try { uploadFile = await compressImageFile(motorcyclePhotoFile) } catch (error:any) { setMotorcycleBusy(false); notify(error?.message || 'No se pudo comprimir la fotografía.'); return }
-      const path = user.id + '/' + crypto.randomUUID() + '.jpg'
+      const extension = uploadFile.type === 'image/png' ? 'png' : uploadFile.type === 'image/webp' ? 'webp' : 'jpg'
+      const path = user.id + '/' + crypto.randomUUID() + '.' + extension
       const {error:uploadError} = await supabase.storage.from('motorcycles').upload(path,uploadFile,{upsert:false,contentType:uploadFile.type,cacheControl:'3600'})
       if (uploadError) { setMotorcycleBusy(false); notify('No se pudo subir la fotografía: ' + uploadError.message); return }
       photoPath = 'motorcycles/' + path
@@ -1129,7 +1131,8 @@ export default function App() {
     if (avatarFile) {
       let uploadFile: File
       try { uploadFile = await compressImageFile(avatarFile) } catch (error:any) { setProfileBusy(false); notify(error?.message || 'No se pudo comprimir la foto de perfil.'); return }
-      const path = user.id + '/' + crypto.randomUUID() + '.jpg'
+      const extension = uploadFile.type === 'image/png' ? 'png' : uploadFile.type === 'image/webp' ? 'webp' : 'jpg'
+      const path = user.id + '/' + crypto.randomUUID() + '.' + extension
       const {error:uploadError} = await supabase.storage.from('avatars').upload(path,uploadFile,{upsert:false,contentType:uploadFile.type,cacheControl:'3600'})
       if (uploadError) { setProfileBusy(false); notify('No se pudo subir la foto de perfil: ' + uploadError.message); return }
       nextAvatarUrl = supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl
