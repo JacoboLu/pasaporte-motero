@@ -187,7 +187,7 @@ export default function App() {
   const [adminBusy, setAdminBusy] = useState(false)
   const [mapMode, setMapMode] = useState(false)
   const [mapDestinations, setMapDestinations] = useState<Destination[]>(destinations)
-  const [destinationView, setDestinationView] = useState<'list'|'grid'|'compact'>('list')
+  const [destinationView, setDestinationView] = useState<'list'|'grid'|'compact'>(() => { try { const saved = localStorage.getItem('pm_destination_view'); return saved === 'list' || saved === 'grid' || saved === 'compact' ? saved : 'list' } catch { return 'list' } })
   const [authOpen, setAuthOpen] = useState(false)
   const [authMode, setAuthMode] = useState<'login'|'register'>('login')
   const [theme, setTheme] = useState<'dark'|'light'>(() => (localStorage.getItem('pm_theme') as 'dark'|'light') || 'dark')
@@ -206,6 +206,7 @@ export default function App() {
   const [documentsOpen, setDocumentsOpen] = useState(true)
 
   useEffect(() => { localStorage.setItem('pm_theme', theme); document.documentElement.dataset.theme = theme; const color = theme === 'light' ? '#f5f6f7' : '#111111'; document.querySelector('meta[name="theme-color"]')?.setAttribute('content', color); document.documentElement.style.backgroundColor = color; document.body.style.backgroundColor = color }, [theme])
+  useEffect(() => { try { localStorage.setItem('pm_destination_view', destinationView) } catch { /* La preferencia seguirá activa durante esta sesión */ } }, [destinationView])
   useEffect(() => {
     if (!supabase) return
     let active = true
