@@ -947,7 +947,7 @@ html[data-theme="light"] .community-author-open small,.theme-light .community-au
 .passport-ink-stamp>small{font-size:5px;font-weight:700;letter-spacing:.8px;margin-top:3px}
 .passport-ink-stamp>em{font-style:normal;font-family:'DM Sans',sans-serif;font-size:5px;letter-spacing:.6px;margin-top:4px;border-top:1px solid currentColor;padding-top:3px}
 .passport-ink-stamp.earned{opacity:.94;filter:contrast(1.13) saturate(.9);text-shadow:0 0 .45px currentColor;animation:passportStampIn .58s cubic-bezier(.2,.8,.2,1) both}
-.passport-ink-stamp.unearned{opacity:.2;filter:grayscale(1)}
+.passport-ink-stamp.unearned{opacity:.48;filter:grayscale(.28) contrast(.98)}
 .passport-book-page.has-stamp .passport-ink-stamp.earned{filter:contrast(1.2) saturate(.85) drop-shadow(1px 1px 0 #65442b20)}
 .passport-ink-stamp.earned:after{opacity:.34}
 .passport-ink-stamp.earned:before{border-style:dotted}
