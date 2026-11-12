@@ -105,12 +105,12 @@ create policy "Create pending app visits" on public.app_visits for insert to aut
 drop policy if exists "Delete own pending app visits" on public.app_visits;
 create policy "Delete own pending app visits" on public.app_visits for delete to authenticated using (user_id=auth.uid() and validation_status<>'validated');
 
--- Correct follow relationship column is followed_id (not following_id).
+-- Follow relationship uses follower_id and following_id.
 drop policy if exists "Posts read visible" on public.posts;
 create policy "Posts read visible" on public.posts for select to anon, authenticated using (
   visibility='public' or user_id=(select auth.uid()) or (
     visibility='followers' and exists (
-      select 1 from public.follows f where f.follower_id=(select auth.uid()) and f.followed_id=posts.user_id
+      select 1 from public.follows f where f.follower_id=(select auth.uid()) and f.following_id=posts.user_id
     )
   )
 );
@@ -118,7 +118,7 @@ drop policy if exists "Read visible trips" on public.trips;
 create policy "Read visible trips" on public.trips for select to anon, authenticated using (
   visibility='public' or user_id=(select auth.uid()) or (
     visibility='followers' and exists (
-      select 1 from public.follows f where f.follower_id=(select auth.uid()) and f.followed_id=trips.user_id
+      select 1 from public.follows f where f.follower_id=(select auth.uid()) and f.following_id=trips.user_id
     )
   )
 );
@@ -127,7 +127,7 @@ create policy "Read custom stops for visible trips" on public.trip_custom_stops 
   exists(select 1 from public.trips t where t.id=trip_id and (
     t.visibility='public' or t.user_id=(select auth.uid()) or (
       t.visibility='followers' and exists (
-        select 1 from public.follows f where f.follower_id=(select auth.uid()) and f.followed_id=t.user_id
+        select 1 from public.follows f where f.follower_id=(select auth.uid()) and f.following_id=t.user_id
       )
     )
   ))
@@ -141,8 +141,8 @@ create policy "Read likes" on public.post_likes for select to anon, authenticate
 drop policy if exists "Manage own likes" on public.post_likes;
 create policy "Manage own likes" on public.post_likes for all to authenticated using (user_id=auth.uid()) with check (user_id=auth.uid());
 drop policy if exists "Read comments" on public.comments;
-create policy "Read comments" on public.comments for select to anon, authenticated using (exists(select 1 from public.posts p where p.id=post_id and (p.visibility='public' or p.user_id=auth.uid() or (p.visibility='followers' and exists(select 1 from public.follows f where f.follower_id=auth.uid() and f.followed_id=p.user_id)))));
+create policy "Read comments" on public.comments for select to anon, authenticated using (exists(select 1 from public.posts p where p.id=post_id and (p.visibility='public' or p.user_id=auth.uid() or (p.visibility='followers' and exists(select 1 from public.follows f where f.follower_id=auth.uid() and f.following_id=p.user_id)))));
 drop policy if exists "Create own comments" on public.comments;
-create policy "Create own comments" on public.comments for insert to authenticated with check (user_id=auth.uid() and exists(select 1 from public.posts p where p.id=post_id and (p.visibility='public' or p.user_id=auth.uid() or (p.visibility='followers' and exists(select 1 from public.follows f where f.follower_id=auth.uid() and f.followed_id=p.user_id)))));
+create policy "Create own comments" on public.comments for insert to authenticated with check (user_id=auth.uid() and exists(select 1 from public.posts p where p.id=post_id and (p.visibility='public' or p.user_id=auth.uid() or (p.visibility='followers' and exists(select 1 from public.follows f where f.follower_id=auth.uid() and f.following_id=p.user_id)))));
 drop policy if exists "Delete own comments" on public.comments;
 create policy "Delete own comments" on public.comments for delete to authenticated using (user_id=auth.uid());
