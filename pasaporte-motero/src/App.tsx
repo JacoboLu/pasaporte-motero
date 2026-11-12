@@ -178,6 +178,9 @@ export default function App() {
   const [followed, setFollowed] = useState<string[]>(() => readStore('pm_followed', []))
   const [qrManual, setQrManual] = useState('')
   const [adminMode, setAdminMode] = useState(false)
+  const [profileRole, setProfileRole] = useState<'user'|'manager'|'admin'>('user')
+  const [adminVisits, setAdminVisits] = useState<any[]>([])
+  const [adminBusy, setAdminBusy] = useState(false)
   const [mapMode, setMapMode] = useState(false)
   const [authOpen, setAuthOpen] = useState(false)
   const [authMode, setAuthMode] = useState<'login'|'register'>('login')
@@ -206,11 +209,12 @@ export default function App() {
     let alive = true
     const loadProfile = async (userId: string) => {
       const { data, error } = await supabase!.from('profiles')
-        .select('username, full_name, bio, city, avatar_url, motorcycle_brand, motorcycle_model, motorcycle_year')
+        .select('username, full_name, bio, city, avatar_url, motorcycle_brand, motorcycle_model, motorcycle_year, role')
         .eq('id', userId).maybeSingle()
       if (!alive) return
       if (error) { notify('No pudimos cargar tu perfil: ' + error.message); return }
       if (data) {
+        setProfileRole(data.role === 'admin' || data.role === 'manager' ? data.role : 'user')
         setUsername(data.username || '')
         setDisplayName(data.full_name || 'Viajero Motero')
         setBio(data.bio || '')
@@ -219,6 +223,7 @@ export default function App() {
         setMotorcycleBrand(data.motorcycle_brand || '')
         setMotorcycleModel(data.motorcycle_model || '')
         setMotorcycleYear(data.motorcycle_year ? String(data.motorcycle_year) : '')
+        if (data.role === 'admin' || data.role === 'manager') void loadAdminVisits()
       }
     }
     supabase.auth.getSession().then(({data}) => {
@@ -317,8 +322,15 @@ export default function App() {
   }
 
   async function makePersonalQr() {
-    try { const code = `PM-DEMO-${username}-${btoa(username).replace(/=/g,'').slice(0,8)}`; setQr(await QRCode.toDataURL(code, { width: 240, margin: 2 })); notify('QR de demostración generado. La validación real requiere autenticación y función segura en servidor.') }
-    catch { notify('No se pudo generar el QR.') }
+    const user = await getCurrentAuthUser()
+    if (!supabase || !user) { setAuthMode('login'); setAuthOpen(true); notify('Inicia sesión para generar tu QR personal.'); return }
+    const { data, error } = await supabase.from('user_qr_codes').select('public_code').eq('user_id', user.id).is('revoked_at', null).maybeSingle()
+    if (error || !data?.public_code) { notify('No encontramos tu identificador QR. Contacta al administrador.'); return }
+    try {
+      const payload = JSON.stringify({ type: 'pasaporte-motero-user', code: data.public_code })
+      setQr(await QRCode.toDataURL(payload, { width: 260, margin: 2, errorCorrectionLevel: 'M' }))
+      notify('QR de identificación generado. No concede sellos ni autoriza visitas por sí solo.')
+    } catch { notify('No se pudo generar el QR.') }
   }
 
   async function submitQrCode() {
@@ -392,6 +404,34 @@ export default function App() {
       setBusy(false)
       notify('No se pudo enviar la evidencia: ' + (err?.message || 'Error desconocido'))
     }
+  }
+
+  async function loadAdminVisits() {
+    if (!supabase) return
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+    setAdminBusy(true)
+    const { data, error } = await supabase.functions.invoke('review-app-visit', { method: 'GET' })
+    setAdminBusy(false)
+    if (error || !data?.visits) { notify('No se pudieron cargar las validaciones: ' + (data?.error || error?.message || 'Error')); return }
+    setAdminVisits(data.visits)
+  }
+
+  async function reviewVisit(visitId: string, decision: 'validated'|'rejected') {
+    let reason = ''
+    if (decision === 'rejected') {
+      reason = window.prompt('Indica el motivo del rechazo:')?.trim() || ''
+      if (!reason) { notify('Debes indicar el motivo para rechazar la visita.'); return }
+    }
+    setAdminBusy(true)
+    const { data, error } = await supabase!.functions.invoke('review-app-visit', {
+      body: { visit_id: visitId, decision, rejection_reason: reason || undefined }
+    })
+    setAdminBusy(false)
+    if (error || !data?.visit) { notify('No se pudo procesar la revisión: ' + (data?.error || error?.message || 'Error')); return }
+    setAdminVisits(items => items.filter(item => item.id !== visitId))
+    if (authUserId) await loadVisits(authUserId)
+    notify(decision === 'validated' ? 'Visita aprobada. El sello ya figura en el pasaporte.' : 'Visita rechazada. Se guardó el motivo.')
   }
 
   async function loadVisits(userId: string) {
@@ -797,7 +837,7 @@ export default function App() {
             <div className="profile-card"><div className="avatar large">{avatarUrl ? <img src={avatarUrl} alt="Foto de perfil"/> : initials(displayName)}</div><h2>{displayName}</h2><span className="muted">@{username}</span><p className="muted">{bio}</p><span className="profile-location"><MapPin size={13}/> {homeCity}</span><div className="profile-stats"><span><b>{followed.length}</b> siguiendo</span><span><b>0</b> seguidores</span><span><b>{posts.length}</b> publicaciones</span></div></div>
             <div className="profile-menu"><button onClick={() => setSubview('motorcycle')}><Bike/><span><strong>Mi motocicleta</strong><small>{motorcycleBrand && motorcycleModel ? motorcycleBrand + ' ' + motorcycleModel : 'Ficha técnica y mantenimiento'}</small></span><ChevronRight/></button><button onClick={() => setSubview('trips')}><Route/><span><strong>Mis viajes y bitácoras</strong><small>{trips.length} viajes registrados</small></span><ChevronRight/></button><button onClick={() => setSubview('memories')}><Images/><span><strong>Fotos y recuerdos</strong><small>Tu galería personal</small></span><ChevronRight/></button><button onClick={makePersonalQr}><QrCode/><span><strong>Mi QR de viajero</strong><small>Identificación para validación presencial</small></span><ChevronRight/></button><button onClick={() => setSubview('settings')}><Settings/><span><strong>Configuración</strong><small>Datos personales y privacidad</small></span><ChevronRight/></button><button onClick={() => authUser ? signOut() : setAuthOpen(true)}>{authUser ? <LogOut/> : <ShieldCheck/>}<span><strong>{authUser ? 'Cerrar sesión' : 'Iniciar sesión / Registrarme'}</strong><small>{authUser || (isSupabaseConfigured ? 'Accede para sincronizar tus datos' : 'Modo demostración disponible')}</small></span><ChevronRight/></button></div>
             {qr && <div className="qr-card"><h3>Mi identificación QR</h3><img src={qr} alt="QR personal de demostración"/><p>QR de demostración. Para validar visitas reales se necesita un token temporal generado por el servidor.</p></div>}
-            {subview === 'settings' && <div className="settings-card"><div className="section-heading"><h2>Editar perfil</h2><button className="text-action" onClick={() => setSubview('')}>Cerrar</button></div><label className="file-pick profile-photo-pick"><UserRound size={17}/> {avatarFile ? avatarFile.name : 'Elegir foto de perfil'}<input type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>{const f=e.target.files?.[0];if(!f)return;if(!['image/jpeg','image/png','image/webp'].includes(f.type)||f.size>5*1024*1024){notify('Usa JPG, PNG o WebP de máximo 5 MB.');e.currentTarget.value='';return}setAvatarFile(f);setAvatarUrl(URL.createObjectURL(f))}}/></label><label>Nombre para mostrar<input value={displayName} onChange={e => setDisplayName(e.target.value)}/></label><label>Nombre de usuario<input value={username} onChange={e => setUsername(e.target.value.replace(/\s/g,'').replace('@',''))}/></label><label>Biografía<textarea rows={3} value={bio} onChange={e => setBio(e.target.value)}/></label><label>Ciudad o país<input value={homeCity} onChange={e => setHomeCity(e.target.value)}/></label><div className="form-grid"><label>Marca de motocicleta<input value={motorcycleBrand} onChange={e => setMotorcycleBrand(e.target.value)} placeholder="Ej. Honda"/></label><label>Modelo<input value={motorcycleModel} onChange={e => setMotorcycleModel(e.target.value)} placeholder="Ej. CB 300F"/></label></div><label>Año de fabricación<input type="number" inputMode="numeric" min="1885" max={new Date().getFullYear()+1} value={motorcycleYear} onChange={e => setMotorcycleYear(e.target.value)} placeholder="Ej. 2024"/></label>{authUser ? <button className="primary full" disabled={profileBusy} onClick={saveProfile}>{profileBusy ? 'Guardando…' : 'Guardar y sincronizar perfil'}</button> : <button className="primary full" onClick={() => { notify('Inicia sesión para sincronizar tus datos.'); setAuthOpen(true) }}>Iniciar sesión para guardar</button>}<button className="secondary full" onClick={() => setAdminMode(!adminMode)}>{adminMode ? 'Salir del modo encargado' : 'Vista de encargado / administrador (demo)'}</button>{adminMode && <div className="admin-demo"><h3>Panel de validaciones</h3><p>Solicitudes fotográficas pendientes: {visits.filter(v => v.status === 'pending').length}</p>{visits.filter(v => v.status === 'pending').map(v => <div className="admin-visit" key={v.id}><strong>{destinations.find(d=>d.id===v.destinationId)?.title}</strong>{v.image && <img src={v.image} alt="Evidencia"/>}<div><button className="primary" onClick={() => {setVisits(a=>a.map(x=>x.id===v.id?{...x,status:'validated'}:x));notify('Visita aprobada en modo local.')}}>Aprobar</button><button className="secondary" onClick={() => {setVisits(a=>a.map(x=>x.id===v.id?{...x,status:'rejected'}:x));notify('Visita rechazada en modo local.')}}>Rechazar</button></div></div>)}</div>}</div>}
+            {subview === 'settings' && <div className="settings-card"><div className="section-heading"><h2>Editar perfil</h2><button className="text-action" onClick={() => setSubview('')}>Cerrar</button></div><label className="file-pick profile-photo-pick"><UserRound size={17}/> {avatarFile ? avatarFile.name : 'Elegir foto de perfil'}<input type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>{const f=e.target.files?.[0];if(!f)return;if(!['image/jpeg','image/png','image/webp'].includes(f.type)||f.size>5*1024*1024){notify('Usa JPG, PNG o WebP de máximo 5 MB.');e.currentTarget.value='';return}setAvatarFile(f);setAvatarUrl(URL.createObjectURL(f))}}/></label><label>Nombre para mostrar<input value={displayName} onChange={e => setDisplayName(e.target.value)}/></label><label>Nombre de usuario<input value={username} onChange={e => setUsername(e.target.value.replace(/\s/g,'').replace('@',''))}/></label><label>Biografía<textarea rows={3} value={bio} onChange={e => setBio(e.target.value)}/></label><label>Ciudad o país<input value={homeCity} onChange={e => setHomeCity(e.target.value)}/></label><div className="form-grid"><label>Marca de motocicleta<input value={motorcycleBrand} onChange={e => setMotorcycleBrand(e.target.value)} placeholder="Ej. Honda"/></label><label>Modelo<input value={motorcycleModel} onChange={e => setMotorcycleModel(e.target.value)} placeholder="Ej. CB 300F"/></label></div><label>Año de fabricación<input type="number" inputMode="numeric" min="1885" max={new Date().getFullYear()+1} value={motorcycleYear} onChange={e => setMotorcycleYear(e.target.value)} placeholder="Ej. 2024"/></label>{authUser ? <button className="primary full" disabled={profileBusy} onClick={saveProfile}>{profileBusy ? 'Guardando…' : 'Guardar y sincronizar perfil'}</button> : <button className="primary full" onClick={() => { notify('Inicia sesión para sincronizar tus datos.'); setAuthOpen(true) }}>Iniciar sesión para guardar</button>}{(profileRole === 'admin' || profileRole === 'manager') && <div className="admin-demo"><div className="section-heading"><h3>Panel de validaciones</h3><button className="text-action" onClick={loadAdminVisits}>Actualizar</button></div><p>{adminVisits.length} solicitudes pendientes de revisión</p>{adminBusy && <p className="muted">Actualizando…</p>}{adminVisits.map(v => <div className="admin-visit" key={v.id}><strong>{v.destination?.name || 'Destino'}</strong><small>{v.rider?.full_name || v.rider?.username || 'Motero'} · {v.validation_method?.toUpperCase()} · {new Date(v.visited_at).toLocaleString('es-PE')}</small>{v.notes && <p>{v.notes}</p>}{v.evidence_url && <img src={v.evidence_url} alt="Evidencia de visita"/>}<div><button className="primary" disabled={adminBusy} onClick={() => reviewVisit(v.id,'validated')}>Aprobar</button><button className="secondary" disabled={adminBusy} onClick={() => reviewVisit(v.id,'rejected')}>Rechazar</button></div></div>)}{!adminBusy && adminVisits.length===0 && <p className="muted">No hay solicitudes pendientes.</p>}</div>}</div>}
           </>}
         </section>}
       </>}
