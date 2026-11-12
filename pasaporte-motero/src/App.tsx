@@ -135,7 +135,7 @@ export default function App() {
   const [maintenanceOpen, setMaintenanceOpen] = useState(true)
   const [documentsOpen, setDocumentsOpen] = useState(true)
 
-  useEffect(() => { localStorage.setItem('pm_theme', theme); document.documentElement.dataset.theme = theme }, [theme])
+  useEffect(() => { localStorage.setItem('pm_theme', theme); document.documentElement.dataset.theme = theme; const color = theme === 'light' ? '#f5f6f7' : '#111111'; document.querySelector('meta[name="theme-color"]')?.setAttribute('content', color); document.documentElement.style.backgroundColor = color; document.body.style.backgroundColor = color }, [theme])
   useEffect(() => { localStorage.setItem('pm_visits', JSON.stringify(visits)) }, [visits])
   useEffect(() => { localStorage.setItem('pm_posts', JSON.stringify(posts)) }, [posts])
   useEffect(() => { localStorage.setItem('pm_trips', JSON.stringify(trips)) }, [trips])
@@ -188,14 +188,14 @@ export default function App() {
   function openTab(next: Tab) { setSubview(''); setSelected(null); setTab(next) }
   function formatDisplayDate(value: string) {
     if (!value) return 'Sin fecha'
-    return new Intl.DateTimeFormat('es-PE',{day:'2-digit',month:'short',year:'numeric'}).format(new Date(value+'T12:00:00')).replace(/\\.$/,'')
+    return new Intl.DateTimeFormat('es-PE',{day:'2-digit',month:'short',year:'numeric'}).format(new Date(value+'T12:00:00')).replace(/\.$/,'')
   }
-  function startMotorcycleCrop(event: React.PointerEvent<HTMLDivElement>) {
+  function startMotorcycleCrop(event: import('react').PointerEvent<HTMLDivElement>) {
     if (!motorcyclePhotoPreview) return
     event.currentTarget.setPointerCapture(event.pointerId)
     cropDrag.current={x:event.clientX,y:event.clientY,cropX:motorcycleCropX,cropY:motorcycleCropY}
   }
-  function moveMotorcycleCrop(event: React.PointerEvent<HTMLDivElement>) {
+  function moveMotorcycleCrop(event: import('react').PointerEvent<HTMLDivElement>) {
     const start=cropDrag.current; if(!start)return
     const rect=event.currentTarget.getBoundingClientRect()
     setMotorcycleCropX(Math.max(0,Math.min(100,start.cropX-(event.clientX-start.x)/rect.width*100)))
