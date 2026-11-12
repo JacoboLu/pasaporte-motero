@@ -280,7 +280,7 @@ export default function App() {
     setMotorcyclePhoto(''); setMotorcyclePhotoFile(null); setMotorcyclePhotoPreview('')
     setMotorcycleCc(''); setMotorcycleType('Adventure'); setMotorcycleFuel('Gasolina')
     setMotorcycleOdometer(''); setMotorcycleNotes(''); setMaintenance([]); setDocuments([])
-    setQr(''); setAdminMode(false); setAuthUser(null); setAuthUserId(null)
+    setQr(''); setQrChallengeExpires(''); setAdminMode(false); setProfileRole('user'); setAdminVisits([]); setAuthUser(null); setAuthUserId(null)
     setSubview(''); setSelected(null); setAction(''); setShowActions(false); setTab('profile')
   }
   function closeModal() { setAction(''); setVisitPhoto(''); setVisitNote(''); setPostImage(''); setCommentPost(null) }
@@ -328,6 +328,7 @@ export default function App() {
     const { data, error } = await supabase.from('user_qr_codes').select('public_code').eq('user_id', user.id).is('revoked_at', null).maybeSingle()
     if (error || !data?.public_code) { notify('No encontramos tu identificador QR. Contacta al administrador.'); return }
     try {
+      setQrChallengeExpires('')
       const payload = JSON.stringify({ type: 'pasaporte-motero-user', code: data.public_code })
       setQr(await QRCode.toDataURL(payload, { width: 260, margin: 2, errorCorrectionLevel: 'M' }))
       notify('QR de identificación generado. No concede sellos ni autoriza visitas por sí solo.')
