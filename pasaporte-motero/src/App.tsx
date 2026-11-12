@@ -660,6 +660,7 @@ export default function App() {
     }
     setBusy(false); setPostTitle(''); setPostText(''); setPostPlace(''); setPostImage(''); setAction(''); setTab('community')
     await loadCommunityPosts()
+    if (authUserId) await loadGallery(authUserId)
     notify(postVisibility==='public'?'Publicación publicada en la comunidad.':'Publicación guardada con la privacidad seleccionada.')
   }
   async function createTrip() {
@@ -711,6 +712,119 @@ export default function App() {
   function openAction(which: 'visit'|'trip'|'post'|'memory') { setShowActions(false); setAction(which); if (which === 'visit') setVisitDestination(selected?.id || destinations[0].id) }
   function createMemory() { setAction('post'); setPostTitle('Un recuerdo de viaje'); setPostVisibility('private') }
 
+  async function loadSocialData(userId: string) {
+    if (!supabase) return
+    const [{data:following,error:followError},{data:postSaves,error:postSaveError},{data:tripSaves,error:tripSaveError}] = await Promise.all([
+      supabase.from('follows').select('following_id').eq('follower_id',userId),
+      supabase.from('saved_posts').select('post_id').eq('user_id',userId),
+      supabase.from('saved_trips').select('trip_id').eq('user_id',userId)
+    ])
+    if (followError) console.warn('No se pudieron cargar los seguidos:',followError.message)
+    if (postSaveError) console.warn('No se pudieron cargar los favoritos:',postSaveError.message)
+    if (tripSaveError) console.warn('No se pudieron cargar los viajes guardados:',tripSaveError.message)
+    setFollowed((following || []).map((row:any)=>row.following_id))
+    setSavedPostIds((postSaves || []).map((row:any)=>row.post_id))
+    setSavedTripIds((tripSaves || []).map((row:any)=>row.trip_id))
+  }
+
+  async function loadGallery(userId: string) {
+    if (!supabase) return
+    setGalleryBusy(true)
+    const [{data:postPhotos},{data:tripPhotos},{data:visitRows}] = await Promise.all([
+      supabase.from('post_photos').select('id,post_id,storage_path,created_at').eq('user_id',userId).order('created_at',{ascending:false}),
+      supabase.from('trip_photos').select('id,trip_id,storage_path,created_at').eq('user_id',userId).order('created_at',{ascending:false}),
+      supabase.from('app_visits').select('id,evidence_path,visited_at,validation_status').eq('user_id',userId).not('evidence_path','is',null).order('visited_at',{ascending:false})
+    ])
+    const items:any[] = []
+    for (const row of postPhotos || []) {
+      const {data:signed} = await supabase.storage.from('community').createSignedUrl(row.storage_path,3600)
+      if (signed?.signedUrl) items.push({id:'post:'+row.id,rowId:row.id,source:'post',bucket:'community',path:row.storage_path,url:signed.signedUrl,createdAt:row.created_at})
+    }
+    for (const row of tripPhotos || []) {
+      const {data:signed} = await supabase.storage.from('travel-media').createSignedUrl(row.storage_path,3600)
+      if (signed?.signedUrl) items.push({id:'trip:'+row.id,rowId:row.id,source:'trip',bucket:'travel-media',path:row.storage_path,url:signed.signedUrl,createdAt:row.created_at})
+    }
+    for (const row of visitRows || []) {
+      const {data:signed} = await supabase.storage.from('visit-evidence').createSignedUrl(row.evidence_path,3600)
+      if (signed?.signedUrl) items.push({id:'visit:'+row.id,rowId:row.id,source:'visit',bucket:'visit-evidence',path:row.evidence_path,url:signed.signedUrl,createdAt:row.visited_at,locked:row.validation_status==='validated'})
+    }
+    items.sort((a,b)=>new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime())
+    setGalleryItems(items)
+    setGalleryBusy(false)
+  }
+
+  async function deleteGalleryImage(item:any) {
+    if (!supabase) return
+    const user=await getCurrentAuthUser()
+    if (!user) { notify('Inicia sesión para eliminar fotografías.'); return }
+    if (item.locked) { notify('La evidencia de una visita validada se conserva como respaldo del sello.'); return }
+    if (!window.confirm('¿Eliminar esta fotografía de tu galería? Esta acción no se puede deshacer.')) return
+    setGalleryBusy(true)
+    const {error:storageError}=await supabase.storage.from(item.bucket).remove([item.path])
+    if (storageError) { setGalleryBusy(false); notify('No se pudo eliminar el archivo: '+storageError.message); return }
+    let result:any
+    if (item.source==='post') result=await supabase.from('post_photos').delete().eq('id',item.rowId).eq('user_id',user.id)
+    else if (item.source==='trip') result=await supabase.from('trip_photos').delete().eq('id',item.rowId).eq('user_id',user.id)
+    else result=await supabase.from('app_visits').update({evidence_path:null}).eq('id',item.rowId).eq('user_id',user.id)
+    setGalleryBusy(false)
+    if (result?.error) { notify('La imagen se eliminó del almacenamiento, pero no se pudo actualizar su registro: '+result.error.message); return }
+    setGalleryItems(items=>items.filter(x=>x.id!==item.id))
+    notify('Fotografía eliminada de tu galería.')
+  }
+
+  async function searchCommunityUsers() {
+    if (!supabase) return
+    const term=communitySearch.trim().replace(/[,%()]/g,' ')
+    if (term.length<2) { notify('Escribe al menos 2 caracteres para buscar viajeros.'); return }
+    setSearchingUsers(true)
+    const {data,error}=await supabase.from('profiles').select('id,username,full_name,avatar_url,city,bio,motorcycle_brand,motorcycle_model,motorcycle_year').or('username.ilike.%'+term+'%,full_name.ilike.%'+term+'%,city.ilike.%'+term+'%').neq('id',authUserId || '').limit(20)
+    setSearchingUsers(false)
+    if (error) { notify('No se pudo buscar viajeros: '+error.message); return }
+    setCommunityUsers(data || [])
+    if (!data?.length) notify('No encontramos viajeros con ese nombre. Prueba con su usuario.')
+  }
+
+  async function followUser(profile:any) {
+    const user=await getCurrentAuthUser()
+    if (!supabase || !user) { setAuthMode('login'); setAuthOpen(true); notify('Inicia sesión para seguir viajeros.'); return }
+    const isFollowing=followed.includes(profile.id)
+    const result=isFollowing
+      ? await supabase.from('follows').delete().eq('follower_id',user.id).eq('following_id',profile.id)
+      : await supabase.from('follows').insert({follower_id:user.id,following_id:profile.id})
+    if (result.error && result.error.code!=='23505') { notify('No se pudo actualizar el seguimiento: '+result.error.message); return }
+    setFollowed(items=>isFollowing?items.filter(id=>id!==profile.id):[...items,profile.id])
+    notify(isFollowing?'Dejaste de seguir a @'+(profile.username || 'viajero'):'Ahora sigues a @'+(profile.username || 'viajero'))
+  }
+
+  async function openPublicProfile(profile:any) {
+    setSelectedPublicProfile(profile)
+    setSubview('public-profile')
+    setPublicProfileBusy(true)
+    if (supabase) {
+      const {data,error}=await supabase.from('profiles').select('id,username,full_name,avatar_url,bio,city,country,motorcycle_brand,motorcycle_model,motorcycle_year,created_at').eq('id',profile.id).maybeSingle()
+      if (!error && data) setSelectedPublicProfile(data)
+      else if (error) console.warn('No se pudo cargar el perfil público:',error.message)
+    }
+    setPublicProfileBusy(false)
+  }
+
+  async function toggleCommunitySaved(post:Post) {
+    const user=await getCurrentAuthUser()
+    if (!supabase || !user) { setAuthMode('login'); setAuthOpen(true); notify('Inicia sesión para guardar favoritos entre dispositivos.'); return }
+    const isTrip=post.kind==='trip'
+    const id=String(post.id).replace(/^trip:/,'')
+    const current=isTrip?savedTripIds:savedPostIds
+    const table=isTrip?'saved_trips':'saved_posts'
+    const key=isTrip?'trip_id':'post_id'
+    const result=current.includes(id)
+      ? await supabase.from(table).delete().eq('user_id',user.id).eq(key,id)
+      : await supabase.from(table).insert({user_id:user.id,[key]:id})
+    if (result.error && result.error.code!=='23505') { notify('No se pudo actualizar favoritos: '+result.error.message); return }
+    if (isTrip) setSavedTripIds(items=>current.includes(id)?items.filter(x=>x!==id):[...items,id])
+    else setSavedPostIds(items=>current.includes(id)?items.filter(x=>x!==id):[...items,id])
+    notify(current.includes(id)?'Eliminado de favoritos.':'Guardado en tus favoritos sincronizados.')
+  }
+
   async function loadTrips(userId: string) {
     if (!supabase) return
     const { data, error } = await supabase.from('trips').select('id,name,description,start_date,end_date,visibility,trip_photos(storage_path),trip_custom_stops(name,catalog_destination_id,sort_order)').eq('user_id', userId).order('created_at', { ascending: false })
@@ -760,6 +874,7 @@ export default function App() {
     if (rowError) { await supabase.storage.from('travel-media').remove([path]); setBusy(false); notify('No se pudo vincular la foto: ' + rowError.message); return }
     const { data: signed } = await supabase.storage.from('travel-media').createSignedUrl(path, 3600)
     setTrips(items => items.map(trip => trip.id === tripId ? { ...trip, photos: [...trip.photos, signed?.signedUrl || ''].filter(Boolean) } : trip))
+    await loadGallery(user.id)
     setBusy(false); notify('Fotografía añadida a tu bitácora.')
   }
 
