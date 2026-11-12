@@ -17,7 +17,7 @@ import { clearPrivateCache, migrateLegacyPrivateCache, readPrivateCache, writePr
 type Tab = 'explore' | 'passport' | 'community' | 'profile'
 type VisitStatus = 'validated' | 'pending' | 'rejected'
 type Destination = { id: number; title: string; region: string; province: string; city: string; category: string; distance: string; image: string; description: string; lat: number; lng: number; radius: number }
-type Post = { id: string | number; title: string; text: string; place: string; date: string; likes: number; liked?: boolean; saved?: boolean; visibility: 'public'|'followers'|'private'; image?: string; comments: string[]; kind?: 'post'|'trip'; tripStops?: string[]; tripPhotos?: string[]; authorName?: string; authorUsername?: string; createdAt?: string }
+type Post = { id: string | number; title: string; text: string; place: string; date: string; likes: number; liked?: boolean; saved?: boolean; visibility: 'public'|'followers'|'private'; image?: string; comments: string[]; kind?: 'post'|'trip'; tripStops?: string[]; tripPhotos?: string[]; authorName?: string; authorUsername?: string; authorAvatar?: string | null; createdAt?: string }
 type Visit = { id: string | number; destinationId: number; date: string; method: 'gps'|'photo'|'qr'; status: VisitStatus; note?: string; image?: string }
 type TripStop = { name: string; catalogDestinationId: number | null; sortOrder: number }
 type Trip = { id: string; name: string; start: string; end: string; description: string; destinationIds: number[]; stops: TripStop[]; visibility: 'public'|'followers'|'private'; photos: string[] }
@@ -600,7 +600,7 @@ export default function App() {
   async function loadCommunityPosts() {
     if (!supabase) return
     const [{ data: postRows, error: postsError }, { data: tripRows, error: tripsError }] = await Promise.all([
-      supabase.from('posts').select('id,user_id,title,body,visibility,created_at,post_photos(storage_path)').order('created_at',{ascending:false}).limit(50),
+      supabase.from('posts').select('id,user_id,title,content,visibility,status,created_at,post_photos(storage_path)').eq('status','published').order('created_at',{ascending:false}).limit(50),
       supabase.from('trips').select('id,user_id,name,description,start_date,end_date,visibility,created_at,trip_photos(storage_path),trip_custom_stops(name,sort_order)').eq('visibility','public').order('created_at',{ascending:false}).limit(50)
     ])
     if (postsError) { notify('No pudimos cargar las publicaciones: '+postsError.message); return }
@@ -611,7 +611,7 @@ export default function App() {
     const postIds = (postRows || []).map((row: any) => row.id)
     const [{ data: likeRows }, { data: commentRows }, { data: sessionData }] = await Promise.all([
       postIds.length ? supabase.from('post_likes').select('post_id,user_id').in('post_id', postIds) : Promise.resolve({ data: [] as any[] }),
-      postIds.length ? supabase.from('comments').select('post_id,body,created_at').in('post_id', postIds).order('created_at') : Promise.resolve({ data: [] as any[] }),
+      postIds.length ? supabase.from('comments').select('post_id,content,created_at').in('post_id', postIds).order('created_at') : Promise.resolve({ data: [] as any[] }),
       supabase.auth.getUser()
     ])
     const currentUserId = sessionData.user?.id
@@ -621,8 +621,8 @@ export default function App() {
       if (photo) { const {data:signed} = await supabase!.storage.from('community').createSignedUrl(photo,3600); image=signed?.signedUrl || undefined }
       const profile = profileById.get(row.user_id)
       const likesForPost = (likeRows || []).filter((item: any) => item.post_id === row.id)
-      const commentsForPost = (commentRows || []).filter((item: any) => item.post_id === row.id).map((item: any) => item.body)
-      return {id:row.id,title:row.title || 'Una nueva aventura',text:row.body,place:'Comunidad motera',date:new Intl.DateTimeFormat('es-PE',{dateStyle:'medium'}).format(new Date(row.created_at)),likes:likesForPost.length,liked:!!currentUserId && likesForPost.some((item:any)=>item.user_id===currentUserId),visibility:row.visibility,image,comments:commentsForPost,kind:'post',authorName:profile?.full_name || 'Motero',authorUsername:profile?.username || 'viajero',createdAt:row.created_at} as Post
+      const commentsForPost = (commentRows || []).filter((item: any) => item.post_id === row.id).map((item: any) => item.content)
+      return {id:row.id,title:row.title || 'Una nueva aventura',text:row.content,place:'Comunidad motera',date:new Intl.DateTimeFormat('es-PE',{dateStyle:'medium'}).format(new Date(row.created_at)),likes:likesForPost.length,liked:!!currentUserId && likesForPost.some((item:any)=>item.user_id===currentUserId),visibility:row.visibility,image,comments:commentsForPost,kind:'post',authorName:profile?.full_name || 'Motero',authorUsername:profile?.username || 'viajero',authorAvatar:profile?.avatar_url || null,createdAt:row.created_at} as Post
     }))
     const publicTrips = await Promise.all((tripRows || []).map(async (row:any) => {
       const profile = profileById.get(row.user_id)
@@ -642,7 +642,7 @@ export default function App() {
     const user = await getCurrentAuthUser()
     if (!supabase || !user) { setAuthMode('login'); setAuthOpen(true); notify('Inicia sesión para publicar en la comunidad.'); return }
     setBusy(true)
-    const {data:post,error} = await supabase.from('posts').insert({user_id:user.id,post_type:postImage?'photo':'diary',title:postTitle.trim() || 'Una nueva aventura',body:postText.trim(),visibility:postVisibility}).select('id').single()
+    const {data:post,error} = await supabase.from('posts').insert({user_id:user.id,title:postTitle.trim() || 'Una nueva aventura',content:postText.trim(),visibility:postVisibility}).select('id').single()
     if (error || !post) { setBusy(false); notify('No se pudo publicar: '+(error?.message || 'No se recibió confirmación')); return }
     if (postImage) {
       try {
@@ -651,7 +651,7 @@ export default function App() {
         const path = user.id+'/'+post.id+'/'+crypto.randomUUID()+'.'+ext
         const {error:uploadError} = await supabase.storage.from('community').upload(path,blob,{contentType:blob.type,upsert:false})
         if (uploadError) throw uploadError
-        const {error:photoError} = await supabase.from('post_photos').insert({post_id:post.id,user_id:user.id,storage_path:path,sort_order:0})
+        const {error:photoError} = await supabase.from('post_photos').insert({post_id:post.id,user_id:user.id,storage_path:path})
         if (photoError) { await supabase.storage.from('community').remove([path]); throw photoError }
       } catch (err:any) {
         await supabase.from('posts').delete().eq('id',post.id)
@@ -702,7 +702,7 @@ export default function App() {
     if (commentPost === null || !commentText.trim()) return
     const user = await getCurrentAuthUser()
     if (!supabase || !user) { setAuthMode('login'); setAuthOpen(true); notify('Inicia sesión para comentar.'); return }
-    const { error } = await supabase.from('comments').insert({ post_id: commentPost, user_id: user.id, body: commentText.trim() })
+    const { error } = await supabase.from('comments').insert({ post_id: commentPost, user_id: user.id, content: commentText.trim() })
     if (error) { notify('No se pudo publicar el comentario: ' + error.message); return }
     setPosts(items => items.map(item => item.id === commentPost ? { ...item, comments: [...item.comments, commentText.trim()] } : item))
     setCommentText(''); setCommentPost(null); notify('Comentario publicado en la comunidad.')
@@ -981,7 +981,7 @@ export default function App() {
           <div className="page-heading"><div><span className="eyebrow">TU COMUNIDAD VIAJERA</span><h1>Historias sobre ruedas.</h1><p className="muted">Inspírate, comparte y descubre nuevos destinos.</p></div><div className="heading-icon"><Users size={23}/></div></div>
           <button className="composer-shortcut" onClick={() => openAction('post')}><span className="avatar small">{initials(displayName)}</span><span>¿Qué aventura quieres contar?</span><span className="round-add"><Plus size={18}/></span></button>
           <div className="feed-switch"><button className={feedMode === 'all' ? 'active' : ''} onClick={() => setFeedMode('all')}>Comunidad</button><button className={feedMode === 'following' ? 'active' : ''} onClick={() => setFeedMode('following')}>Siguiendo</button></div>
-          {visiblePosts.map(post => <article className={`post-card ${post.kind === 'trip' ? 'trip-feed-card' : ''}`} key={post.id}><div className="post-author"><span className="avatar small">{initials(post.authorName || displayName)}</span><div className="author-info"><strong>{post.authorName || displayName}</strong><span>@{post.authorUsername || username} · {post.date} {post.kind === 'trip' ? '· Bitácora de viaje' : ''}</span></div><button className="more" aria-label="Más opciones" onClick={() => notify('Opciones de publicación disponibles al conectar la comunidad.')}><MoreHorizontal size={20}/></button></div>{post.kind === 'trip' && <span className="trip-public-badge"><Route size={13}/> VIAJE PÚBLICO</span>}{post.image && <div className="post-image"><img src={post.image} alt={post.kind === 'trip' ? 'Fotografía de la bitácora' : 'Fotografía de viaje'}/><span className="photo-label"><MapPin size={13}/> {post.place}</span></div>}{post.kind === 'trip' && post.tripPhotos && post.tripPhotos.length > 1 && <div className="memory-grid trip-feed-photos">{post.tripPhotos.slice(1,4).map((url,index)=><img key={index} src={url} alt={`Fotografía ${index+2} de la bitácora`}/>)}</div>}<div className="post-body"><h3>{post.title}</h3><p>{post.text}</p>{post.kind === 'trip' && !!post.tripStops?.length && <div className="trip-feed-stops"><strong><MapPin size={15}/> Paradas del recorrido</strong><ol>{post.tripStops.map((stop,index)=><li key={index}>{stop}</li>)}</ol></div>}<div className="post-actions">{post.kind === 'post' ? <><button onClick={() => toggleLike(post.id)} className={post.liked ? 'liked' : ''}><Heart size={18} fill={post.liked ? 'currentColor' : 'none'}/> {post.likes}</button><button onClick={() => setCommentPost(post.id)}><MessageCircle size={18}/> {post.comments.length || 'Comentar'}</button></> : <span className="muted tiny">Bitácora compartida públicamente</span>}<button onClick={() => { if (navigator.share) navigator.share({title: post.title, text: post.text}).catch(() => undefined); else notify('Comparte esta publicación copiando su enlace cuando esté publicada en línea.') }}><Share2 size={18}/> Compartir</button><button aria-label="Guardar publicación" onClick={() => notify('Publicación guardada en favoritos locales.')}><Bookmark size={17}/></button></div></div></article>)}
+          {visiblePosts.map(post => <article className={`post-card community-post ${post.kind === 'trip' ? 'trip-feed-card' : ''}`} key={post.id}><header className="community-post-header"><div className="community-author-avatar">{post.authorAvatar ? <img src={post.authorAvatar} alt=""/> : initials(post.authorName || displayName)}</div><div className="community-author-meta"><strong>{post.authorName || displayName}</strong><span>@{post.authorUsername || username}</span><small>{post.date} · {post.kind === 'trip' ? 'Bitácora de viaje' : 'Publicación'}</small></div><button className="community-more" aria-label="Más opciones" onClick={() => notify('Opciones de publicación disponibles próximamente.')}><MoreHorizontal size={20}/></button></header>{post.kind === 'trip' && <div className="community-post-type"><Route size={14}/> BITÁCORA PÚBLICA</div>}{post.image && <div className="community-post-cover"><img src={post.image} alt={post.kind === 'trip' ? 'Fotografía de la bitácora' : 'Fotografía compartida'}/></div>}{post.kind === 'trip' && post.tripPhotos && post.tripPhotos.length > 1 && <div className="community-post-gallery">{post.tripPhotos.slice(1,4).map((url,index)=><img key={index} src={url} alt={`Fotografía adicional ${index+2}`}/>)}</div>}<div className="community-post-content"><div className="community-post-location"><MapPin size={14}/>{post.place}</div><h3>{post.title}</h3><p>{post.text}</p>{post.kind === 'trip' && !!post.tripStops?.length && <div className="community-route"><strong><Route size={15}/> Ruta del viaje <span>{post.tripStops.length} paradas</span></strong><ol>{post.tripStops.map((stop,index)=><li key={index}>{stop}</li>)}</ol></div>}</div><footer className="community-post-actions">{post.kind === 'post' ? <><button onClick={() => toggleLike(post.id)} className={post.liked ? 'liked' : ''}><Heart size={18} fill={post.liked ? 'currentColor' : 'none'}/><span>{post.likes || 'Me gusta'}</span></button><button onClick={() => setCommentPost(post.id)}><MessageCircle size={18}/><span>{post.comments.length || 'Comentar'}</span></button></> : <span className="community-trip-caption"><ShieldCheck size={15}/> Compartida públicamente</span>}<button onClick={() => { if (navigator.share) navigator.share({title: post.title, text: post.text}).catch(() => undefined); else notify('Comparte esta publicación copiando su enlace cuando esté publicada en línea.') }}><Share2 size={18}/><span>Compartir</span></button><button aria-label="Guardar publicación" onClick={() => notify('Publicación guardada en favoritos locales.')}><Bookmark size={18}/></button></footer></article>)}
           {visiblePosts.length === 0 && <div className="empty-card"><Users size={30}/><h3>Aún no sigues viajeros</h3><p>Descubre historias de la comunidad y sigue a otros motociclistas para ver sus aventuras aquí.</p><button className="primary" onClick={() => setFeedMode('all')}>Ver comunidad</button></div>}
         </section>}
 
