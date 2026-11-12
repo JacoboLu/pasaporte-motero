@@ -219,7 +219,42 @@ export default function App() {
   }
   function closeModal() { setAction(''); setVisitPhoto(''); setVisitNote(''); setPostImage(''); setCommentPost(null) }
   function fileToData(file?: File) { if (!file) return; if (file.size > 2_500_000) { notify('La imagen supera 2.5 MB. Selecciona una más ligera.'); return } const reader = new FileReader(); reader.onload = () => setVisitPhoto(String(reader.result || '')); reader.readAsDataURL(file) }
-  function postFileToData(file?: File) { if (!file) return; if (file.size > 2_500_000) { notify('La imagen supera 2.5 MB. Selecciona una más ligera.'); return } const reader = new FileReader(); reader.onload = () => setPostImage(String(reader.result || '')); reader.readAsDataURL(file) }
+  async function postFileToData(file?: File) {
+    if (!file) return
+    if (!file.type.startsWith('image/')) { notify('Selecciona una imagen JPG, PNG o WebP.'); return }
+    if (file.size <= 2_500_000) {
+      const reader = new FileReader()
+      reader.onload = () => setPostImage(String(reader.result || ''))
+      reader.readAsDataURL(file)
+      return
+    }
+    try {
+      const sourceUrl = URL.createObjectURL(file)
+      const image = new Image()
+      image.src = sourceUrl
+      await new Promise<void>((resolve,reject)=>{image.onload=()=>resolve();image.onerror=()=>reject(new Error('No se pudo leer la imagen'))})
+      const canvas = document.createElement('canvas')
+      const scale = Math.min(1, 2200 / Math.max(image.naturalWidth,image.naturalHeight))
+      canvas.width = Math.round(image.naturalWidth * scale)
+      canvas.height = Math.round(image.naturalHeight * scale)
+      const context = canvas.getContext('2d')
+      if (!context) throw new Error('No se pudo preparar la imagen')
+      context.drawImage(image,0,0,canvas.width,canvas.height)
+      URL.revokeObjectURL(sourceUrl)
+      let quality = 0.88
+      let blob: Blob | null = await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',quality))
+      while (blob && blob.size > 2_400_000 && quality > 0.48) {
+        quality -= 0.1
+        blob = await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',quality))
+      }
+      if (!blob || blob.size > 2_500_000) { notify('No fue posible reducir la imagen a 2.5 MB. Prueba con otra fotografía.'); return }
+      const before=(file.size/1024/1024).toFixed(2), after=(blob.size/1024/1024).toFixed(2)
+      if (!window.confirm(`La fotografía pesa ${before} MB. Podemos comprimirla automáticamente a ${after} MB para publicarla. ¿Aceptas la compresión?`)) { notify('No se aplicó compresión. Elige otra fotografía si deseas continuar.'); return }
+      const reader = new FileReader()
+      reader.onload = () => { setPostImage(String(reader.result || '')); notify(`Imagen comprimida: ${before} MB → ${after} MB.`) }
+      reader.readAsDataURL(blob)
+    } catch { notify('No se pudo comprimir esta fotografía. Prueba con otra imagen.') }
+  }
 
   async function makePersonalQr() {
     try { const code = `PM-DEMO-${username}-${btoa(username).replace(/=/g,'').slice(0,8)}`; setQr(await QRCode.toDataURL(code, { width: 240, margin: 2 })); notify('QR de demostración generado. La validación real requiere autenticación y función segura en servidor.') }
@@ -554,7 +589,7 @@ export default function App() {
 
     {action && <div className="modal-backdrop" onClick={closeModal}><div className="composer-modal" onClick={e => e.stopPropagation()}><div className="modal-head"><h2>{action === 'visit' ? 'Validar visita' : action === 'trip' ? 'Nuevo viaje' : action === 'memory' ? 'Nuevo recuerdo' : 'Nueva publicación'}</h2><button className="icon-button" onClick={closeModal}><X/></button></div>
       {action === 'visit' && <><p className="muted">Selecciona el destino y el método para registrar tu visita.</p><label>Destino<select value={visitDestination} onChange={e => setVisitDestination(Number(e.target.value))}>{destinations.map(d => <option key={d.id} value={d.id}>{d.title} · {d.region}</option>)}</select></label><div className="method-tabs"><button className={visitMethod==='gps'?'active':''} onClick={()=>setVisitMethod('gps')}><LocateFixed/> GPS</button><button className={visitMethod==='photo'?'active':''} onClick={()=>setVisitMethod('photo')}><Camera/> Foto</button><button className={visitMethod==='qr'?'active':''} onClick={()=>setVisitMethod('qr')}><QrCode/> QR</button></div>{visitMethod==='gps' && <div className="method-panel"><LocateFixed size={28}/><strong>Validación por ubicación</strong><p>Compararemos tu ubicación actual con el área permitida del destino. Activa el GPS y permite el acceso desde el navegador.</p><button className="primary full" disabled={busy} onClick={validateGps}>{busy ? 'Comprobando ubicación…' : 'Comprobar mi ubicación'}</button></div>}{visitMethod==='photo' && <div className="method-panel"><Camera size={28}/><strong>Validación fotográfica</strong><p>Adjunta una fotografía tomada en el destino. La visita quedará pendiente de revisión.</p><label className="file-pick"><ImagePlus/> Seleccionar fotografía<input type="file" accept="image/*" capture="environment" onChange={e=>fileToData(e.target.files?.[0])}/></label>{visitPhoto && <img className="preview-image" src={visitPhoto} alt="Vista previa"/>}<label>Descripción (opcional)<textarea rows={2} value={visitNote} onChange={e=>setVisitNote(e.target.value)} placeholder="Cuéntanos sobre esta visita"/></label><button className="primary full" onClick={submitPhotoVisit}>Enviar evidencia</button></div>}{visitMethod==='qr' && <div className="method-panel"><QrCode size={28}/><strong>Validación presencial</strong><p>Solicita al encargado autorizado que escanee tu QR. En esta versión de demostración puedes ingresar un código de prueba.</p><label>Código del establecimiento<input value={qrManual} onChange={e=>setQrManual(e.target.value)} placeholder="Código proporcionado por el encargado"/></label><button className="primary full" onClick={submitQrCode}>Enviar código</button></div>}</>}
-      {action === 'trip' && <><p className="muted">Agrupa tus destinos y recuerdos en una expedición.</p><label>Nombre del viaje<input value={tripName} onChange={e=>setTripName(e.target.value)} placeholder="Ej. Ruta a Huaraz"/></label><div className="form-grid"><label>Fecha de inicio<input type="date" value={tripStart} onChange={e=>setTripStart(e.target.value)}/></label><label>Fecha de fin<input type="date" value={tripEnd} onChange={e=>setTripEnd(e.target.value)}/></label></div><label>Descripción<textarea rows={3} value={tripDescription} onChange={e=>setTripDescription(e.target.value)} placeholder="¿Qué esperas descubrir?"/></label><label>Destinos del viaje</label><div className="select-destinations">{destinations.map(d=><label key={d.id} className="check-row"><input type="checkbox" checked={tripDestinations.includes(d.id)} onChange={e=>setTripDestinations(a=>e.target.checked?[...a,d.id]:a.filter(x=>x!==d.id))}/>{d.title}</label>)}</div><label>Privacidad<select value={tripVisibility} onChange={e=>setTripVisibility(e.target.value as 'public'|'followers'|'private')}><option value="private">Privado · Solo yo</option><option value="followers">Seguidores · Solo quienes me siguen</option><option value="public">Público · Toda la comunidad</option></select></label><button className="primary full" onClick={createTrip}>Crear viaje <Route size={17}/></button></>}
+      {action === 'trip' && <><p className="muted">Agrupa tus destinos y recuerdos en una expedición.</p><label>Nombre del viaje<input value={tripName} onChange={e=>setTripName(e.target.value)} placeholder="Ej. Ruta a Huaraz"/></label><div className="form-grid trip-date-grid"><label>Fecha de inicio<input className="trip-date-control" type="date" value={tripStart} onChange={e=>setTripStart(e.target.value)}/></label><label>Fecha de fin<input className="trip-date-control" type="date" value={tripEnd} onChange={e=>setTripEnd(e.target.value)}/></label></div><label>Descripción<textarea rows={3} value={tripDescription} onChange={e=>setTripDescription(e.target.value)} placeholder="¿Qué esperas descubrir?"/></label><details className="trip-stops"><summary>Añadir paradas o destinos (opcional) <span>{tripDestinations.length ? `${tripDestinations.length} seleccionados` : "Sin paradas"}</span></summary><p className="muted tiny">Si tu viaje tiene varios puntos, selecciónalos aquí. Puedes crear la bitácora sin añadir destinos.</p><div className="select-destinations">{destinations.map(d=><label key={d.id} className="check-row"><input type="checkbox" checked={tripDestinations.includes(d.id)} onChange={e=>setTripDestinations(a=>e.target.checked?[...a,d.id]:a.filter(x=>x!==d.id))}/>{d.title}</label>)}</div></details><label>Privacidad<select value={tripVisibility} onChange={e=>setTripVisibility(e.target.value as 'public'|'followers'|'private')}><option value="private">Privado · Solo yo</option><option value="followers">Seguidores · Solo quienes me siguen</option><option value="public">Público · Toda la comunidad</option></select></label><button className="primary full" onClick={createTrip}>Crear viaje <Route size={17}/></button></>}
       {(action === 'post' || action === 'memory') && <><p className="muted">Comparte una experiencia con la comunidad o guarda un recuerdo privado.</p><label>Título<input value={postTitle} onChange={e=>setPostTitle(e.target.value)} placeholder="Ej. Una ruta inolvidable"/></label><label>Tu historia<textarea rows={4} value={postText} onChange={e=>setPostText(e.target.value)} placeholder="Describe el recorrido, los paisajes y lo que viviste…"/></label><label>Destino relacionado<select value={postPlace} onChange={e=>setPostPlace(e.target.value)}><option value="">Seleccionar destino</option>{destinations.map(d=><option key={d.id} value={`${d.city}, ${d.region}`}>{d.title}</option>)}</select></label><label className="file-pick"><ImagePlus/> Añadir fotografía<input type="file" accept="image/*" onChange={e=>postFileToData(e.target.files?.[0])}/></label>{postImage && <img className="preview-image" src={postImage} alt="Vista previa"/>}<label>Visibilidad<select value={postVisibility} onChange={e=>setPostVisibility(e.target.value as 'public'|'followers'|'private')}><option value="public">Pública · Comunidad</option><option value="followers">Seguidores</option><option value="private">Privada · Solo yo</option></select></label><button className="primary full" onClick={publishPost}>{postVisibility==='private'?'Guardar recuerdo':'Publicar experiencia'} <Send size={17}/></button></>}
     </div></div>}
 
