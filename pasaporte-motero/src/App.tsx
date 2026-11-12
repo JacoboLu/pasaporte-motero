@@ -392,12 +392,21 @@ export default function App() {
     const userIds=[...new Set((data || []).map((row:any)=>row.user_id))]
     const {data:profiles}=userIds.length ? await supabase.from('profiles').select('id,username,full_name,avatar_url').in('id',userIds) : {data:[] as any[]}
     const profileById = new globalThis.Map<string, any>((profiles || []).map((profile: any): [string, any] => [profile.id, profile]))
+    const postIds = (data || []).map((row: any) => row.id)
+    const [{ data: likeRows }, { data: commentRows }, { data: sessionData }] = await Promise.all([
+      postIds.length ? supabase.from('post_likes').select('post_id,user_id').in('post_id', postIds) : Promise.resolve({ data: [] as any[] }),
+      postIds.length ? supabase.from('comments').select('post_id,body,created_at').in('post_id', postIds).order('created_at') : Promise.resolve({ data: [] as any[] }),
+      supabase.auth.getUser()
+    ])
+    const currentUserId = sessionData.user?.id
     const rows = await Promise.all((data || []).map(async (row:any) => {
       const photo = row.post_photos?.[0]?.storage_path
       let image: string | undefined
       if (photo) { const {data:signed} = await supabase!.storage.from('community').createSignedUrl(photo,3600); image=signed?.signedUrl || undefined }
       const profile = profileById.get(row.user_id)
-      return {id:row.id,title:row.title || 'Una nueva aventura',text:row.body,place:'Comunidad motera',date:new Intl.DateTimeFormat('es-PE',{dateStyle:'medium'}).format(new Date(row.created_at)),likes:0,visibility:row.visibility,image,comments:[],authorName:profile?.full_name || 'Motero',authorUsername:profile?.username || 'viajero'} as Post & {authorName:string;authorUsername:string}
+      const likesForPost = (likeRows || []).filter((item: any) => item.post_id === row.id)
+      const commentsForPost = (commentRows || []).filter((item: any) => item.post_id === row.id).map((item: any) => item.body)
+      return {id:row.id,title:row.title || 'Una nueva aventura',text:row.body,place:'Comunidad motera',date:new Intl.DateTimeFormat('es-PE',{dateStyle:'medium'}).format(new Date(row.created_at)),likes:likesForPost.length,liked:!!currentUserId && likesForPost.some((item:any)=>item.user_id===currentUserId),visibility:row.visibility,image,comments:commentsForPost,authorName:profile?.full_name || 'Motero',authorUsername:profile?.username || 'viajero'} as Post & {authorName:string;authorUsername:string}
     }))
     setPosts(rows)
   }
@@ -448,8 +457,29 @@ export default function App() {
     setTripName(''); setTripDescription(''); setTripDestinations([]); setTripManualStops([]); setTripStopSelection(''); setTripManualStop(''); setAction(''); setTab('profile'); setSubview('trips')
     notify('Viaje creado y sincronizado con tu cuenta.')
   }
-  function toggleLike(id: string | number) { setPosts(p => p.map(x => x.id === id ? { ...x, liked: !x.liked, likes: Math.max(0, x.likes + (x.liked ? -1 : 1)) } : x)) }
-  function addComment() { if (commentPost === null || !commentText.trim()) return; setPosts(p => p.map(x => x.id === commentPost ? { ...x, comments: [...x.comments, commentText.trim()] } : x)); setCommentText(''); setCommentPost(null); notify('Comentario añadido localmente.') }
+  async function toggleLike(id: string | number) {
+    const user = await getCurrentAuthUser()
+    if (!supabase || !user) { setAuthMode('login'); setAuthOpen(true); notify('Inicia sesión para indicar que te gusta una publicación.'); return }
+    const post = posts.find(item => item.id === id)
+    if (!post) return
+    if (post.liked) {
+      const { error } = await supabase.from('post_likes').delete().eq('post_id', id).eq('user_id', user.id)
+      if (error) { notify('No se pudo quitar el Me gusta: ' + error.message); return }
+    } else {
+      const { error } = await supabase.from('post_likes').insert({ post_id: id, user_id: user.id })
+      if (error && error.code !== '23505') { notify('No se pudo registrar el Me gusta: ' + error.message); return }
+    }
+    setPosts(items => items.map(item => item.id === id ? { ...item, liked: !post.liked, likes: Math.max(0, item.likes + (post.liked ? -1 : 1)) } : item))
+  }
+  async function addComment() {
+    if (commentPost === null || !commentText.trim()) return
+    const user = await getCurrentAuthUser()
+    if (!supabase || !user) { setAuthMode('login'); setAuthOpen(true); notify('Inicia sesión para comentar.'); return }
+    const { error } = await supabase.from('comments').insert({ post_id: commentPost, user_id: user.id, body: commentText.trim() })
+    if (error) { notify('No se pudo publicar el comentario: ' + error.message); return }
+    setPosts(items => items.map(item => item.id === commentPost ? { ...item, comments: [...item.comments, commentText.trim()] } : item))
+    setCommentText(''); setCommentPost(null); notify('Comentario publicado en la comunidad.')
+  }
   function toggleSaved(id: number) { setSaved(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]); notify(saved.includes(id) ? 'Destino eliminado de guardados.' : 'Destino guardado para después.') }
   function openAction(which: 'visit'|'trip'|'post'|'memory') { setShowActions(false); setAction(which); if (which === 'visit') setVisitDestination(selected?.id || destinations[0].id) }
   function createMemory() { setAction('post'); setPostTitle('Un recuerdo de viaje'); setPostVisibility('private') }
