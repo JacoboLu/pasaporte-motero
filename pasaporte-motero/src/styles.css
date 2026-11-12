@@ -35,3 +35,34 @@
 .settings-card .secondary:active,.settings-card .primary:active{transform:scale(.985);filter:brightness(1.08)}
 @keyframes garageFade{from{opacity:.55;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.motorcycle-card,.settings-card,.collapsible-heading>svg,.motorcycle-file,.settings-card .secondary,.settings-card .primary{transition:none;animation:none}}
+
+
+/* Theme support */
+.app-shell.theme-light{background:#f5f6f7;color:#20242a;color-scheme:light}
+.theme-light .topbar,.theme-light .bottom-nav{background:#fff;border-color:#e4e6e9}
+.theme-light .brand,.theme-light h1,.theme-light h2,.theme-light h3,.theme-light .collapsible-heading,.theme-light .profile-menu button strong{color:#20242a}
+.theme-light .brand small,.theme-light .muted,.theme-light .profile-menu button small{color:#68717c}
+.theme-light .content{background:#f5f6f7}
+.theme-light .profile-card,.theme-light .profile-menu,.theme-light .settings-card,.theme-light .post-card,.theme-light .trip-card,.theme-light .stat,.theme-light .empty-card,.theme-light .history-row,.theme-light .qr-card{background:#fff;border-color:#e2e5e9;color:#20242a}
+.theme-light .profile-stats,.theme-light .collapsible-heading,.theme-light .profile-menu button,.theme-light .post-actions{border-color:#e7e9ec}
+.theme-light .profile-stats b,.theme-light .history-row strong,.theme-light .trip-card strong{color:#20242a}
+.theme-light .profile-menu button,.theme-light .icon-button{color:#c66a28}
+.theme-light .composer-modal,.theme-light .action-sheet{background:#fff;border-color:#e2e5e9;color:#20242a}
+.theme-light .composer-modal h2,.theme-light .action-option strong,.theme-light .method-panel strong{color:#20242a}
+.theme-light .composer-modal label,.theme-light .settings-card label{color:#4d5661}
+.theme-light .composer-modal label input,.theme-light .composer-modal label textarea,.theme-light .composer-modal label select,.theme-light .settings-card label input,.theme-light .settings-card label textarea,.theme-light .settings-card label select,.theme-light .settings-card label input[type="date"],.theme-light .settings-card label input[type="number"]{background:#fff;color:#20242a;border-color:#cbd1d8;color-scheme:light}
+.theme-light .secondary,.theme-light .feed-switch button,.theme-light .method-tabs button,.theme-light .method-panel,.theme-light .searchbox,.theme-light .filter-button{background:#f0f2f4;color:#3c4651;border-color:#dfe3e7}
+.theme-light .method-panel p,.theme-light .post-body p{color:#59636f}
+.theme-light .dev-ribbon{background:#fff2e8;color:#98501f}
+.theme-light .nav-plus{border-color:#f5f6f7}
+.theme-light .toast{background:#fff;color:#20242a;border-color:#dfe3e7}
+.theme-light .signed-out-card{background:#fff;border-color:#e2e5e9}
+.theme-light .signed-out-card h2{color:#20242a}
+
+/* iOS form sizing and equal-width date / odometer controls */
+.form-grid{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.form-grid>label{min-width:0;width:100%}
+.form-grid input,.form-grid select{display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+.settings-card label input[type="date"],.settings-card label input[type="number"]{width:100%;min-width:0;max-width:100%;box-sizing:border-box;padding-left:12px;padding-right:10px}
+.composer-modal label input,.composer-modal label textarea,.composer-modal label select,.settings-card label input,.settings-card label textarea,.settings-card label select,.filter-panel select{font-size:16px!important}
+@media(max-width:700px){input,select,textarea{font-size:16px!important}}
