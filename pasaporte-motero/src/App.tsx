@@ -880,7 +880,7 @@ export default function App() {
       if (error) { notify('No se pudo cerrar la sesión: ' + error.message); return }
     }
     resetSignedOutData()
-    notify('Sesión cerrada. Los datos personales se ocultaron en este dispositivo.')
+    notify('Sesión cerrada.')
   }
 
   const navItems: {id: Tab; label: string; icon: typeof Compass}[] = [
