@@ -1350,6 +1350,7 @@ export default function App() {
             {filteredDestinations.length > visibleDestinations.length && !mapMode && <button className="destination-load-more" onClick={() => setDestinationPage(page => page + 1)}>Mostrar 8 destinos más <span>{filteredDestinations.length-visibleDestinations.length} restantes</span></button>}
             {filteredDestinations.length === 0 && <div className="empty-card"><Search size={30}/><h3>No encontramos destinos</h3><p>Prueba con otro nombre o cambia los filtros.</p></div>}
           </div>}
+        </section>}
 
         {tab === 'passport' && <section>
           <div className="page-heading"><div><span className="eyebrow">DOCUMENTA CADA AVENTURA</span><h1>Mi pasaporte</h1><p className="muted">Cada destino visitado deja una historia y un sello.</p></div><div className="heading-icon"><ShieldCheck size={23}/></div></div>
