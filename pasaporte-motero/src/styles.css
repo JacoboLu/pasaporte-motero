@@ -1247,3 +1247,62 @@ html[data-theme="light"] .community-feed-tabs button.active,.theme-light .commun
   .passport-place-counter{flex-basis:23px;height:23px;min-height:23px}
   .passport-place-counter strong{line-height:23px}
 }
+
+/* Sellos turísticos estampados de forma libre sobre toda la hoja */
+.passport-book-page{position:relative;overflow:hidden}
+.passport-book-page .passport-ink-stamp{margin-bottom:36px}
+.passport-book-page .department-tourist-stamps{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  display:block;
+  width:100%;
+  height:100%;
+  min-height:0;
+  margin:0;
+  padding:0;
+  overflow:hidden;
+  pointer-events:none;
+  flex:none;
+}
+.passport-book-page .tourist-mini-stamp{
+  position:absolute;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:1px;
+  box-sizing:border-box;
+  width:clamp(43px,25%,58px);
+  height:30px;
+  padding:2px 3px;
+  border:1.5px double currentColor;
+  border-radius:5px;
+  background:rgba(244,229,194,.13);
+  box-shadow:0 0 1px rgba(74,48,23,.22);
+  opacity:.84;
+  filter:saturate(.92) contrast(1.08);
+  mix-blend-mode:multiply;
+}
+.passport-book-page .tourist-mini-stamp svg{width:9px;height:9px;flex:none}
+.passport-book-page .tourist-mini-stamp small{
+  display:block;
+  width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:5px;
+  line-height:1;
+  text-align:center;
+}
+.passport-book-page .tourist-mini-stamp:nth-child(3n){border-radius:2px 7px 3px 6px}
+.passport-book-page .tourist-mini-stamp:nth-child(4n){border-style:dashed}
+.passport-book-page .tourist-mini-stamp:nth-child(5n){opacity:.68}
+.passport-book-page .passport-place-counter,
+.passport-book-page .passport-page-status,
+.passport-book-page .passport-page-footer,
+.passport-book-page .passport-page-open{position:relative;z-index:3}
+@media(max-width:360px){
+  .passport-book-page .passport-ink-stamp{margin-bottom:32px}
+  .passport-book-page .tourist-mini-stamp{width:clamp(38px,25%,52px);height:27px}
+}
