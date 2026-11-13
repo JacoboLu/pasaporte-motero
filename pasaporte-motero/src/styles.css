@@ -1372,3 +1372,30 @@ html[data-theme="light"] .community-feed-tabs button.active,.theme-light .commun
 @media(max-width:360px){
   .passport-book-page .passport-ink-stamp{transform:scale(1.3)}
 }
+
+/* Los tres estados comparten exactamente la misma escala y dimensiones */
+.passport-book-page .passport-ink-stamp,
+.passport-book-page .passport-ink-stamp.unearned,
+.passport-book-page .passport-ink-stamp.pending,
+.passport-book-page .passport-ink-stamp.earned{
+  width:clamp(148px,44vw,184px);
+  height:clamp(148px,44vw,184px);
+  min-width:clamp(148px,44vw,184px);
+  min-height:clamp(148px,44vw,184px);
+  flex:0 0 auto;
+  box-sizing:border-box;
+  transform:scale(1.3) rotate(0deg);
+  transform-origin:center center;
+}
+@media(max-width:360px){
+  .passport-book-page .passport-ink-stamp,
+  .passport-book-page .passport-ink-stamp.unearned,
+  .passport-book-page .passport-ink-stamp.pending,
+  .passport-book-page .passport-ink-stamp.earned{
+    width:clamp(132px,44vw,160px);
+    height:clamp(132px,44vw,160px);
+    min-width:clamp(132px,44vw,160px);
+    min-height:clamp(132px,44vw,160px);
+    transform:scale(1.3) rotate(0deg);
+  }
+}
