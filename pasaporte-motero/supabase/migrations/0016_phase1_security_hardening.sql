@@ -5,6 +5,7 @@
 -- In particular, clients must never update validation_status/reviewed_by/rejection_reason.
 drop policy if exists "Owners clear own visit evidence" on public.app_visits;
 revoke update on public.app_visits from authenticated;
+revoke update (evidence_path) on public.app_visits from authenticated;
 grant update (evidence_path) on public.app_visits to authenticated;
 create policy "Owners clear own visit evidence"
   on public.app_visits for update to authenticated
