@@ -1051,3 +1051,107 @@ html[data-theme="light"] .community-feed-tabs button.active,.theme-light .commun
 .destination-passport-stamp:focus-visible{outline:3px solid var(--accent,#b76c39);outline-offset:3px}
 @media(max-width:360px){.destination-stamp-grid{gap:7px}.destination-passport-stamp{min-height:142px;padding:9px 6px}.destination-passport-stamp strong{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.destination-passport-stamp{transition:none}}
+
+
+/* Pasaporte: estado cromático de departamentos, mini sellos turísticos y páginas uniformes */
+.passport-book-page{
+  box-sizing:border-box;
+  height:320px;
+  min-height:320px;
+}
+.passport-ink-stamp.unearned{
+  opacity:.24;
+  filter:grayscale(1) contrast(.9);
+}
+.passport-ink-stamp.pending{
+  opacity:.52;
+  filter:saturate(.58) contrast(.96);
+  border-style:dotted;
+}
+.passport-ink-stamp.earned{
+  opacity:.98;
+  filter:saturate(1.08) contrast(1.28) drop-shadow(1px 1px 0 #65442b24);
+}
+.passport-ink-stamp.pending:after{opacity:.18}
+.passport-ink-stamp.earned:after{opacity:.4}
+.passport-book-page.department-unearned .passport-page-status{color:#8d8981}
+.passport-book-page.department-pending .passport-page-status{color:#98764b;font-weight:700}
+.passport-book-page.department-earned .passport-page-status{color:#76502f;font-weight:800}
+.passport-book-page .passport-ink-stamp{
+  width:clamp(78px,22vw,94px);
+  height:clamp(78px,22vw,94px);
+  margin:8px 0 5px;
+  padding:7px 5px;
+}
+.passport-book-page .passport-ink-stamp.shape-oval,
+.passport-book-page .passport-ink-stamp.shape-rect{
+  width:clamp(88px,25vw,108px);
+  height:clamp(60px,17vw,72px);
+}
+.passport-book-page .passport-ink-stamp .ink-stamp-symbol{font-size:16px;margin:1px 0}
+.passport-book-page .passport-ink-stamp>b{font-size:13px}
+.passport-book-page .passport-ink-stamp>strong{font-size:7px;margin-top:2px}
+.passport-book-page .passport-ink-stamp>small{font-size:4px;margin-top:2px}
+.passport-book-page .passport-ink-stamp>em{font-size:4px;margin-top:2px;padding-top:2px}
+.department-tourist-stamps{
+  position:relative;
+  z-index:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  width:100%;
+  min-height:27px;
+  margin:1px 0 2px;
+  overflow:hidden;
+}
+.tourist-mini-stamp{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:1px;
+  width:43px;
+  height:27px;
+  min-width:0;
+  padding:2px;
+  border:1px dashed currentColor;
+  border-radius:5px;
+  color:#858585;
+  opacity:.28;
+  filter:grayscale(1);
+  overflow:hidden;
+}
+.tourist-mini-stamp small{
+  display:block;
+  width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:5px;
+  line-height:1;
+}
+.tourist-mini-stamp.pending{
+  color:#9a7448;
+  opacity:.58;
+  filter:saturate(.6);
+  border-style:dotted;
+}
+.tourist-mini-stamp.earned{
+  color:#47745f;
+  opacity:1;
+  filter:contrast(1.2) saturate(1.05);
+  border:1.5px double currentColor;
+}
+.tourist-mini-more{
+  flex:0 0 auto;
+  font-size:7px;
+  font-weight:800;
+  color:#876443;
+}
+@media(max-width:360px){
+  .passport-book-page{height:286px;min-height:286px}
+  .passport-book-page .passport-ink-stamp{margin:6px 0 4px}
+  .department-tourist-stamps{min-height:24px;gap:3px}
+  .tourist-mini-stamp{width:38px;height:24px}
+}
