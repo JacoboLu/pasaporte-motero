@@ -9,6 +9,8 @@ assert.match(migration, /revoke update on public\.app_visits from authenticated/
 assert.match(migration, /grant update \(evidence_path\) on public\.app_visits to authenticated/i);
 assert.match(migration, /validation_status = 'pending'/i);
 assert.match(migration, /app_visits_one_pending_per_destination/i);
+assert.match(migration, /add column if not exists accuracy_m/i);
+assert.match(gps, /accuracy_m:accuracy/i);
 assert.match(migration, /notify_destination_stamp_earned/i);
 assert.match(migration, /notify_department_stamp_earned/i);
 assert.match(gps, /accuracy_m/i);
