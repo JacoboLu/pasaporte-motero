@@ -12,7 +12,7 @@
 - [ ] Probar GPS en Android/iOS y permisos denegados.
 - [ ] Probar QR con dos cuentas y caducidad/reutilización.
 - [ ] Validar aprobación/rechazo y generación única de sellos.
-- [ ] Revisar Edge Functions: mantener fuente versionada en GitHub.
+- [x] Versionar en GitHub las 7 Edge Functions activas recuperadas desde Supabase (sin redeplegar ni alterar producción).
 - [ ] Revisar RLS, Storage y recuperación de cuenta.
 
 ## Fase 2 — Pasaporte y destinos
@@ -22,7 +22,7 @@
 
 ## Fase 3 — Comunidad
 - [x] Backend de notificaciones por seguidores, likes y comentarios.
-- [ ] UI de bandeja, contador y marcado como leído.
+- [x] UI de bandeja y marcado como leído (contador persistente pendiente de conectar y probar con la migración).
 - [ ] Flujo de reportes y moderación en el panel.
 - [ ] Probar visibilidad pública/seguidores/privada.
 
