@@ -1051,3 +1051,479 @@ html[data-theme="light"] .community-feed-tabs button.active,.theme-light .commun
 .destination-passport-stamp:focus-visible{outline:3px solid var(--accent,#b76c39);outline-offset:3px}
 @media(max-width:360px){.destination-stamp-grid{gap:7px}.destination-passport-stamp{min-height:142px;padding:9px 6px}.destination-passport-stamp strong{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.destination-passport-stamp{transition:none}}
+
+
+/* Pasaporte: estado cromático de departamentos, mini sellos turísticos y páginas uniformes */
+.passport-book-page{
+  box-sizing:border-box;
+  height:320px;
+  min-height:320px;
+}
+.passport-ink-stamp.unearned{
+  opacity:.24;
+  filter:grayscale(1) contrast(.9);
+}
+.passport-ink-stamp.pending{
+  opacity:.52;
+  filter:saturate(.58) contrast(.96);
+  border-style:dotted;
+}
+.passport-ink-stamp.earned{
+  opacity:.98;
+  filter:saturate(1.08) contrast(1.28) drop-shadow(1px 1px 0 #65442b24);
+}
+.passport-ink-stamp.pending:after{opacity:.18}
+.passport-ink-stamp.earned:after{opacity:.4}
+.passport-book-page.department-unearned .passport-page-status{color:#8d8981}
+.passport-book-page.department-pending .passport-page-status{color:#98764b;font-weight:700}
+.passport-book-page.department-earned .passport-page-status{color:#76502f;font-weight:800}
+.passport-book-page .passport-ink-stamp{
+  width:clamp(78px,22vw,94px);
+  height:clamp(78px,22vw,94px);
+  margin:8px 0 5px;
+  padding:7px 5px;
+}
+.passport-book-page .passport-ink-stamp.shape-oval,
+.passport-book-page .passport-ink-stamp.shape-rect{
+  width:clamp(88px,25vw,108px);
+  height:clamp(60px,17vw,72px);
+}
+.passport-book-page .passport-ink-stamp .ink-stamp-symbol{font-size:16px;margin:1px 0}
+.passport-book-page .passport-ink-stamp>b{font-size:13px}
+.passport-book-page .passport-ink-stamp>strong{font-size:7px;margin-top:2px}
+.passport-book-page .passport-ink-stamp>small{font-size:4px;margin-top:2px}
+.passport-book-page .passport-ink-stamp>em{font-size:4px;margin-top:2px;padding-top:2px}
+.department-tourist-stamps{
+  position:relative;
+  z-index:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:2px 4px;
+  width:100%;
+  min-height:0;
+  margin:2px 0 3px;
+  overflow:hidden;
+}
+.tourist-mini-stamp{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:1px;
+  width:43px;
+  height:27px;
+  min-width:0;
+  padding:2px;
+  border:1px dashed currentColor;
+  border-radius:5px;
+  color:#858585;
+  opacity:.28;
+  filter:grayscale(1);
+  overflow:hidden;
+}
+.tourist-mini-stamp small{
+  display:block;
+  width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:5px;
+  line-height:1;
+}
+.tourist-mini-stamp.pending{
+  color:#9a7448;
+  opacity:.58;
+  filter:saturate(.6);
+  border-style:dotted;
+}
+.tourist-mini-stamp.earned{
+  color:#47745f;
+  opacity:1;
+  filter:contrast(1.2) saturate(1.05);
+  border:1.5px double currentColor;
+}
+.tourist-mini-more{
+  flex:0 0 auto;
+  font-size:7px;
+  font-weight:800;
+  color:#876443;
+}
+@media(max-width:360px){
+  .passport-book-page{height:286px;min-height:286px}
+  .passport-book-page .passport-ink-stamp{margin:6px 0 4px}
+  .department-tourist-stamps{min-height:24px;gap:3px}
+  .tourist-mini-stamp{width:38px;height:24px}
+}
+
+/* Alineación vertical uniforme de los textos en todas las hojas del pasaporte */
+.passport-book-page{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  box-sizing:border-box;
+  height:320px;
+  min-height:320px;
+  padding:19px 14px 14px;
+}
+.passport-page-number{height:9px;line-height:9px;flex:0 0 9px}
+.passport-page-ornament{height:12px;line-height:12px;flex:0 0 12px;margin-top:8px}
+.passport-page-title{height:27px;line-height:27px;flex:0 0 27px;margin-top:8px}
+.passport-page-caption{height:10px;line-height:10px;flex:0 0 10px;margin-top:1px}
+.passport-book-page .passport-ink-stamp{
+  display:flex;
+  flex:0 0 112px;
+  box-sizing:border-box;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  width:108px;
+  height:112px;
+  min-height:112px;
+  margin:8px 0 4px;
+}
+.passport-book-page .passport-ink-stamp.shape-oval,
+.passport-book-page .passport-ink-stamp.shape-rect{
+  width:108px;
+  height:112px;
+  min-height:112px;
+}
+.department-tourist-stamps{
+  flex:0 0 32px;
+  box-sizing:border-box;
+  width:100%;
+  height:32px;
+  min-height:32px;
+  margin:0;
+  align-content:center;
+}
+.passport-place-counter{
+  flex:0 0 25px;
+  box-sizing:border-box;
+  height:25px;
+  min-height:25px;
+  align-items:center;
+  justify-content:center;
+  margin:0;
+  line-height:1;
+}
+.passport-place-counter strong{font-size:21px;line-height:25px}
+.passport-place-counter span{line-height:12px}
+.passport-page-status{
+  display:flex;
+  flex:0 0 18px;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+  width:100%;
+  height:18px;
+  min-height:18px;
+  margin:0;
+  line-height:10px;
+  text-align:center;
+  white-space:nowrap;
+}
+.passport-page-footer{
+  flex:0 0 12px;
+  height:12px;
+  line-height:12px;
+  margin-top:auto;
+  padding-top:0;
+}
+.passport-page-open{
+  flex:0 0 14px;
+  height:14px;
+  line-height:14px;
+  justify-content:center;
+  margin-top:5px;
+}
+@media(max-width:360px){
+  .passport-book-page{height:286px;min-height:286px;padding-top:15px}
+  .passport-book-page .passport-ink-stamp{flex-basis:98px;height:98px;min-height:98px;margin:6px 0 3px}
+  .passport-book-page .passport-ink-stamp.shape-oval,
+  .passport-book-page .passport-ink-stamp.shape-rect{height:98px;min-height:98px}
+  .department-tourist-stamps{flex-basis:28px;height:28px;min-height:28px}
+  .passport-place-counter{flex-basis:23px;height:23px;min-height:23px}
+  .passport-place-counter strong{line-height:23px}
+}
+
+/* Sellos turísticos estampados de forma libre sobre toda la hoja */
+.passport-book-page{position:relative;overflow:hidden}
+.passport-book-page .passport-ink-stamp{margin-bottom:36px}
+.passport-book-page .department-tourist-stamps{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  display:block;
+  width:100%;
+  height:100%;
+  min-height:0;
+  margin:0;
+  padding:0;
+  overflow:hidden;
+  pointer-events:none;
+  flex:none;
+}
+.passport-book-page .tourist-mini-stamp{
+  position:absolute;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:1px;
+  box-sizing:border-box;
+  width:clamp(43px,25%,58px);
+  height:30px;
+  padding:2px 3px;
+  border:1.5px double currentColor;
+  border-radius:5px;
+  background:rgba(244,229,194,.13);
+  box-shadow:0 0 1px rgba(74,48,23,.22);
+  opacity:.84;
+  filter:saturate(.92) contrast(1.08);
+  mix-blend-mode:multiply;
+}
+.passport-book-page .tourist-mini-stamp svg{width:9px;height:9px;flex:none}
+.passport-book-page .tourist-mini-stamp small{
+  display:block;
+  width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:5px;
+  line-height:1;
+  text-align:center;
+}
+.passport-book-page .tourist-mini-stamp:nth-child(3n){border-radius:2px 7px 3px 6px}
+.passport-book-page .tourist-mini-stamp:nth-child(4n){border-style:dashed}
+.passport-book-page .tourist-mini-stamp:nth-child(5n){opacity:.68}
+.passport-book-page .passport-place-counter,
+.passport-book-page .passport-page-status,
+.passport-book-page .passport-page-footer,
+.passport-book-page .passport-page-open{position:relative;z-index:3}
+@media(max-width:360px){
+  .passport-book-page .passport-ink-stamp{margin-bottom:32px}
+  .passport-book-page .tourist-mini-stamp{width:clamp(38px,25%,52px);height:27px}
+}
+
+/* El sello departamental es el protagonista; los turísticos quedan en segundo plano */
+.passport-book-page .passport-ink-stamp{
+  position:relative;
+  z-index:5;
+  opacity:.98;
+  filter:contrast(1.38) saturate(1.12) drop-shadow(0 2px 1px rgba(61,39,19,.24));
+  border-width:3.5px;
+  outline-width:1.5px;
+  background-color:rgba(248,235,207,.16);
+  text-shadow:0 0 .7px currentColor,0 0 1px currentColor;
+}
+.passport-book-page .passport-ink-stamp:before{
+  border-width:1.5px;
+  opacity:.92;
+}
+.passport-book-page .passport-ink-stamp:after{
+  opacity:.48;
+}
+.passport-book-page .passport-ink-stamp.earned{
+  opacity:1;
+  filter:contrast(1.48) saturate(1.2) drop-shadow(0 2px 2px rgba(48,31,15,.3));
+}
+.passport-book-page .passport-ink-stamp.unearned{
+  opacity:.43;
+  filter:grayscale(.35) contrast(.95);
+  text-shadow:none;
+}
+.passport-book-page .department-tourist-stamps{z-index:2}
+.passport-book-page .tourist-mini-stamp{opacity:.72;filter:saturate(.78) contrast(.95)}
+
+/* Sello departamental: mayor tamaño y tinta más intensa, sin alterar la retícula */
+.passport-book-page .passport-ink-stamp{
+  z-index:6;
+  transform:scale(1.18);
+  transform-origin:center center;
+  border-width:4px;
+  outline-width:2px;
+  outline-offset:5px;
+  text-shadow:0 0 .8px currentColor;
+}
+.passport-book-page .passport-ink-stamp.earned{
+  opacity:1;
+  filter:contrast(1.85) saturate(1.42) brightness(.82)
+    drop-shadow(0 2px 2px rgba(48,31,15,.32));
+  text-shadow:0 0 .9px currentColor,0 0 1.5px currentColor;
+}
+.passport-book-page .passport-ink-stamp.earned:before{
+  border-width:1.8px;
+  opacity:1;
+}
+.passport-book-page .passport-ink-stamp.earned:after{opacity:.5}
+.passport-book-page .passport-ink-stamp .ink-stamp-symbol{font-size:25px}
+.passport-book-page .passport-ink-stamp>b{font-size:19px;letter-spacing:2.2px}
+.passport-book-page .passport-ink-stamp>strong{font-size:8px}
+.passport-book-page .department-tourist-stamps{z-index:2}
+.passport-book-page .tourist-mini-stamp{opacity:.64}
+@media(max-width:360px){
+  .passport-book-page .passport-ink-stamp{transform:scale(1.1)}
+}
+
+/* Ajuste solicitado: sello principal al 130% de su tamaño base */
+.passport-book-page .passport-ink-stamp{transform:scale(1.3)}
+@media(max-width:360px){
+  .passport-book-page .passport-ink-stamp{transform:scale(1.3)}
+}
+
+/* Los tres estados comparten exactamente la misma escala y dimensiones */
+.passport-book-page .passport-ink-stamp,
+.passport-book-page .passport-ink-stamp.unearned,
+.passport-book-page .passport-ink-stamp.pending,
+.passport-book-page .passport-ink-stamp.earned{
+  width:clamp(148px,44vw,184px);
+  height:clamp(148px,44vw,184px);
+  min-width:clamp(148px,44vw,184px);
+  min-height:clamp(148px,44vw,184px);
+  flex:0 0 auto;
+  box-sizing:border-box;
+  transform:scale(1.3) rotate(0deg);
+  transform-origin:center center;
+}
+@media(max-width:360px){
+  .passport-book-page .passport-ink-stamp,
+  .passport-book-page .passport-ink-stamp.unearned,
+  .passport-book-page .passport-ink-stamp.pending,
+  .passport-book-page .passport-ink-stamp.earned{
+    width:clamp(132px,44vw,160px);
+    height:clamp(132px,44vw,160px);
+    min-width:clamp(132px,44vw,160px);
+    min-height:clamp(132px,44vw,160px);
+    transform:scale(1.3) rotate(0deg);
+  }
+}
+
+/* El sello validado conserva la misma escala 1.3: la animación no debe sobrescribir transform */
+@keyframes passportStampFadeIn{
+  from{opacity:0}
+  to{opacity:1}
+}
+.passport-book-page .passport-ink-stamp.earned{
+  animation:passportStampFadeIn .58s ease-out both;
+  transform:scale(1.3) rotate(0deg);
+}
+.passport-book-page .passport-ink-stamp.unearned,
+.passport-book-page .passport-ink-stamp.pending{
+  transform:scale(1.3) rotate(0deg);
+}
+
+/* Variedad de troqueles para los sellos departamentales */
+.passport-ink-stamp.shape-triangle{border-radius:18% 18% 8% 8%;outline-style:solid}
+.passport-ink-stamp.shape-triangle:before{clip-path:polygon(50% 0,100% 88%,0 88%);border:2px solid currentColor;inset:4px}
+.passport-ink-stamp.shape-hexagon{border-radius:14%;outline-style:dashed}
+.passport-ink-stamp.shape-hexagon:before{clip-path:polygon(25% 2%,75% 2%,100% 50%,75% 98%,25% 98%,0 50%);border:2px solid currentColor;inset:4px}
+.passport-ink-stamp.shape-octagon{border-radius:18%;outline-style:double}
+.passport-ink-stamp.shape-octagon:before{clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%);border:2px solid currentColor;inset:4px}
+.passport-ink-stamp.shape-diamond{border-radius:12%;outline-style:dotted}
+.passport-ink-stamp.shape-diamond:before{clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);border:2px solid currentColor;inset:4px}
+.passport-ink-stamp.shape-ticket{border-radius:12px 12px 4px 4px;outline-style:dashed}
+.passport-ink-stamp.shape-ticket:before{border-radius:10px 10px 3px 3px;border-style:dashed}
+.passport-ink-stamp.shape-scallop{border-radius:32% 18% 32% 18%;outline-style:dotted}
+.passport-ink-stamp.shape-scallop:before{border-radius:30% 16% 30% 16%;border-style:dotted}
+.passport-book-page .passport-ink-stamp,
+.passport-book-page .passport-ink-stamp.unearned,
+.passport-book-page .passport-ink-stamp.pending,
+.passport-book-page .passport-ink-stamp.earned{transform-origin:center center}
+
+/* Siluetas de troquel: cada departamento tiene una forma propia */
+.passport-ink-stamp.shape-triangle,.department-detail-stamp.shape-triangle{clip-path:polygon(50% 1%,98% 94%,2% 94%)}
+.passport-ink-stamp.shape-round,.department-detail-stamp.shape-round{clip-path:circle(49% at 50% 50%)}
+.passport-ink-stamp.shape-hexagon,.department-detail-stamp.shape-hexagon{clip-path:polygon(25% 2%,75% 2%,99% 50%,75% 98%,25% 98%,1% 50%)}
+.passport-ink-stamp.shape-octagon,.department-detail-stamp.shape-octagon{clip-path:polygon(29% 1%,71% 1%,99% 29%,99% 71%,71% 99%,29% 99%,1% 71%,1% 29%)}
+.passport-ink-stamp.shape-oval,.department-detail-stamp.shape-oval{clip-path:ellipse(49% 43% at 50% 50%)}
+.passport-ink-stamp.shape-diamond,.department-detail-stamp.shape-diamond{clip-path:polygon(50% 1%,99% 50%,50% 99%,1% 50%)}
+.passport-ink-stamp.shape-rectangle,.department-detail-stamp.shape-rectangle{clip-path:inset(8% 1% round 8px)}
+.passport-ink-stamp.shape-scallop,.department-detail-stamp.shape-scallop{clip-path:polygon(50% 0,60% 5%,71% 2%,78% 11%,90% 10%,92% 23%,100% 31%,95% 43%,100% 55%,94% 66%,96% 79%,84% 84%,79% 96%,66% 94%,55% 100%,44% 94%,31% 98%,24% 87%,11% 88%,10% 75%,0 65%,5% 53%,0 41%,7% 30%,6% 17%,19% 14%,28% 3%,40% 7%)}
+.passport-ink-stamp.shape-ticket,.department-detail-stamp.shape-ticket{clip-path:polygon(5% 0,95% 0,95% 35%,100% 40%,95% 48%,100% 56%,95% 64%,95% 100%,5% 100%,5% 64%,0 56%,5% 48%,0 40%,5% 35%)}
+.passport-ink-stamp.shape-heptagon,.department-detail-stamp.shape-heptagon{clip-path:polygon(50% 0,89% 18%,99% 58%,75% 96%,25% 96%,1% 58%,11% 18%)}
+.passport-ink-stamp.shape-capsule,.department-detail-stamp.shape-capsule{clip-path:inset(18% 0 round 999px)}
+.passport-ink-stamp.shape-inverted-triangle,.department-detail-stamp.shape-inverted-triangle{clip-path:polygon(2% 6%,98% 6%,50% 99%)}
+.passport-ink-stamp.shape-decagon,.department-detail-stamp.shape-decagon{clip-path:polygon(50% 0,79% 9%,96% 30%,96% 70%,79% 91%,50% 100%,21% 91%,4% 70%,4% 30%,21% 9%)}
+.passport-ink-stamp.shape-shield,.department-detail-stamp.shape-shield{clip-path:polygon(5% 1%,95% 1%,91% 63%,50% 100%,9% 63%)}
+.passport-ink-stamp.shape-clipped-square,.department-detail-stamp.shape-clipped-square{clip-path:polygon(14% 0,86% 0,100% 14%,100% 86%,86% 100%,14% 100%,0 86%,0 14%)}
+.passport-ink-stamp.shape-cloud,.department-detail-stamp.shape-cloud{clip-path:polygon(25% 75%,12% 73%,4% 62%,4% 48%,12% 37%,24% 34%,27% 20%,39% 12%,52% 15%,61% 5%,76% 10%,83% 23%,94% 29%,99% 43%,95% 57%,88% 65%,87% 77%,74% 85%,58% 82%,46% 91%,33% 85%)}
+.passport-ink-stamp.shape-rosette,.department-detail-stamp.shape-rosette{clip-path:polygon(50% 0,59% 12%,73% 5%,78% 20%,94% 19%,91% 35%,100% 50%,88% 60%,95% 75%,79% 79%,80% 95%,64% 90%,50% 100%,40% 87%,24% 95%,21% 79%,5% 75%,12% 60%,0 50%,10% 36%,5% 20%,22% 21%,27% 5%,41% 12%)}
+.passport-ink-stamp.shape-pentagon,.department-detail-stamp.shape-pentagon{clip-path:polygon(50% 0,99% 37%,80% 98%,20% 98%,1% 37%)}
+.passport-ink-stamp.shape-arch,.department-detail-stamp.shape-arch{clip-path:polygon(2% 99%,2% 45%,8% 23%,22% 7%,50% 0,78% 7%,92% 23%,98% 45%,98% 99%)}
+.passport-ink-stamp.shape-parallelogram,.department-detail-stamp.shape-parallelogram{clip-path:polygon(18% 1%,100% 1%,82% 99%,0 99%)}
+.passport-ink-stamp.shape-starburst,.department-detail-stamp.shape-starburst{clip-path:polygon(50% 0,59% 24%,78% 8%,76% 32%,100% 27%,84% 47%,100% 63%,75% 65%,80% 92%,57% 78%,44% 100%,37% 75%,12% 88%,22% 63%,0 50%,24% 39%,9% 15%,37% 24%)}
+.passport-ink-stamp.shape-cross,.department-detail-stamp.shape-cross{clip-path:polygon(35% 0,65% 0,65% 35%,100% 35%,100% 65%,65% 65%,65% 100%,35% 100%,35% 65%,0 65%,0 35%,35% 35%)}
+.passport-ink-stamp.shape-chevron,.department-detail-stamp.shape-chevron{clip-path:polygon(0 8%,50% 42%,100% 8%,100% 55%,50% 92%,0 55%)}
+.passport-ink-stamp.shape-kite,.department-detail-stamp.shape-kite{clip-path:polygon(50% 0,94% 37%,65% 100%,35% 100%,6% 37%)}
+.passport-ink-stamp.shape-wavy,.department-detail-stamp.shape-wavy{clip-path:polygon(50% 0,61% 5%,75% 1%,83% 11%,97% 17%,94% 31%,100% 43%,94% 57%,99% 71%,86% 80%,82% 94%,67% 91%,54% 100%,43% 94%,28% 99%,19% 87%,5% 82%,9% 67%,0 55%,6% 42%,1% 28%,14% 19%,20% 5%,35% 9%)}
+
+/* Marcos de troquel: la silueta recorta solo la tinta, nunca el contenido del sello */
+.passport-ink-stamp[class*="shape-"],
+.department-detail-stamp[class*="shape-"]{
+  --stamp-cut:circle(49% at 50% 50%);
+  border:0!important;
+  outline:0!important;
+  border-radius:0!important;
+  background:transparent;
+  overflow:visible;
+  clip-path:none!important;
+}
+.passport-ink-stamp[class*="shape-"]::before,
+.department-detail-stamp[class*="shape-"]::before{
+  content:"";
+  position:absolute;
+  inset:-5px;
+  border:3px double currentColor;
+  border-radius:0;
+  clip-path:var(--stamp-cut);
+  opacity:.96;
+  pointer-events:none;
+}
+.passport-ink-stamp[class*="shape-"]::after{
+  content:"";
+  position:absolute;
+  inset:5px;
+  border:0;
+  background:repeating-radial-gradient(circle at 30% 40%,transparent 0 5px,currentColor 5.5px 6.5px,transparent 7px 11px);
+  clip-path:var(--stamp-cut);
+  opacity:.36;
+  mix-blend-mode:multiply;
+  pointer-events:none;
+}
+.department-detail-stamp[class*="shape-"]::after{
+  content:"";
+  position:absolute;
+  inset:8px;
+  border:1px solid currentColor;
+  background:repeating-radial-gradient(circle at 30% 40%,transparent 0 5px,currentColor 5.5px 6.5px,transparent 7px 11px);
+  clip-path:var(--stamp-cut);
+  opacity:.48;
+  pointer-events:none;
+}
+.passport-ink-stamp.shape-triangle,.department-detail-stamp.shape-triangle{--stamp-cut:polygon(50% 1%,98% 94%,2% 94%)}
+.passport-ink-stamp.shape-round,.department-detail-stamp.shape-round{--stamp-cut:circle(49% at 50% 50%)}
+.passport-ink-stamp.shape-hexagon,.department-detail-stamp.shape-hexagon{--stamp-cut:polygon(25% 2%,75% 2%,99% 50%,75% 98%,25% 98%,1% 50%)}
+.passport-ink-stamp.shape-octagon,.department-detail-stamp.shape-octagon{--stamp-cut:polygon(29% 1%,71% 1%,99% 29%,99% 71%,71% 99%,29% 99%,1% 71%,1% 29%)}
+.passport-ink-stamp.shape-oval,.department-detail-stamp.shape-oval{--stamp-cut:ellipse(49% 43% at 50% 50%)}
+.passport-ink-stamp.shape-diamond,.department-detail-stamp.shape-diamond{--stamp-cut:polygon(50% 1%,99% 50%,50% 99%,1% 50%)}
+.passport-ink-stamp.shape-rectangle,.department-detail-stamp.shape-rectangle{--stamp-cut:inset(8% 1% round 8px)}
+.passport-ink-stamp.shape-scallop,.department-detail-stamp.shape-scallop{--stamp-cut:polygon(50% 0,60% 5%,71% 2%,78% 11%,90% 10%,92% 23%,100% 31%,95% 43%,100% 55%,94% 66%,96% 79%,84% 84%,79% 96%,66% 94%,55% 100%,44% 94%,31% 98%,24% 87%,11% 88%,10% 75%,0 65%,5% 53%,0 41%,7% 30%,6% 17%,19% 14%,28% 3%,40% 7%)}
+.passport-ink-stamp.shape-ticket,.department-detail-stamp.shape-ticket{--stamp-cut:polygon(5% 0,95% 0,95% 35%,100% 40%,95% 48%,100% 56%,95% 64%,95% 100%,5% 100%,5% 64%,0 56%,5% 48%,0 40%,5% 35%)}
+.passport-ink-stamp.shape-heptagon,.department-detail-stamp.shape-heptagon{--stamp-cut:polygon(50% 0,89% 18%,99% 58%,75% 96%,25% 96%,1% 58%,11% 18%)}
+.passport-ink-stamp.shape-capsule,.department-detail-stamp.shape-capsule{--stamp-cut:inset(18% 0 round 999px)}
+.passport-ink-stamp.shape-inverted-triangle,.department-detail-stamp.shape-inverted-triangle{--stamp-cut:polygon(2% 6%,98% 6%,50% 99%)}
+.passport-ink-stamp.shape-decagon,.department-detail-stamp.shape-decagon{--stamp-cut:polygon(50% 0,79% 9%,96% 30%,96% 70%,79% 91%,50% 100%,21% 91%,4% 70%,4% 30%,21% 9%)}
+.passport-ink-stamp.shape-shield,.department-detail-stamp.shape-shield{--stamp-cut:polygon(5% 1%,95% 1%,91% 63%,50% 100%,9% 63%)}
+.passport-ink-stamp.shape-clipped-square,.department-detail-stamp.shape-clipped-square{--stamp-cut:polygon(14% 0,86% 0,100% 14%,100% 86%,86% 100%,14% 100%,0 86%,0 14%)}
+.passport-ink-stamp.shape-cloud,.department-detail-stamp.shape-cloud{--stamp-cut:polygon(25% 75%,12% 73%,4% 62%,4% 48%,12% 37%,24% 34%,27% 20%,39% 12%,52% 15%,61% 5%,76% 10%,83% 23%,94% 29%,99% 43%,95% 57%,88% 65%,87% 77%,74% 85%,58% 82%,46% 91%,33% 85%)}
+.passport-ink-stamp.shape-rosette,.department-detail-stamp.shape-rosette{--stamp-cut:polygon(50% 0,59% 12%,73% 5%,78% 20%,94% 19%,91% 35%,100% 50%,88% 60%,95% 75%,79% 79%,80% 95%,64% 90%,50% 100%,40% 87%,24% 95%,21% 79%,5% 75%,12% 60%,0 50%,10% 36%,5% 20%,22% 21%,27% 5%,41% 12%)}
+.passport-ink-stamp.shape-pentagon,.department-detail-stamp.shape-pentagon{--stamp-cut:polygon(50% 0,99% 37%,80% 98%,20% 98%,1% 37%)}
+.passport-ink-stamp.shape-arch,.department-detail-stamp.shape-arch{--stamp-cut:polygon(2% 99%,2% 45%,8% 23%,22% 7%,50% 0,78% 7%,92% 23%,98% 45%,98% 99%)}
+.passport-ink-stamp.shape-parallelogram,.department-detail-stamp.shape-parallelogram{--stamp-cut:polygon(18% 1%,100% 1%,82% 99%,0 99%)}
+.passport-ink-stamp.shape-starburst,.department-detail-stamp.shape-starburst{--stamp-cut:polygon(50% 0,59% 24%,78% 8%,76% 32%,100% 27%,84% 47%,100% 63%,75% 65%,80% 92%,57% 78%,44% 100%,37% 75%,12% 88%,22% 63%,0 50%,24% 39%,9% 15%,37% 24%)}
+.passport-ink-stamp.shape-cross,.department-detail-stamp.shape-cross{--stamp-cut:polygon(35% 0,65% 0,65% 35%,100% 35%,100% 65%,65% 65%,65% 100%,35% 100%,35% 65%,0 65%,0 35%,35% 35%)}
+.passport-ink-stamp.shape-chevron,.department-detail-stamp.shape-chevron{--stamp-cut:polygon(0 8%,50% 42%,100% 8%,100% 55%,50% 92%,0 55%)}
+.passport-ink-stamp.shape-kite,.department-detail-stamp.shape-kite{--stamp-cut:polygon(50% 0,94% 37%,65% 100%,35% 100%,6% 37%)}
+.passport-ink-stamp.shape-wavy,.department-detail-stamp.shape-wavy{--stamp-cut:polygon(50% 0,61% 5%,75% 1%,83% 11%,97% 17%,94% 31%,100% 43%,94% 57%,99% 71%,86% 80%,82% 94%,67% 91%,54% 100%,43% 94%,28% 99%,19% 87%,5% 82%,9% 67%,0 55%,6% 42%,1% 28%,14% 19%,20% 5%,35% 9%)}
