@@ -15,6 +15,28 @@ function json(status: number, body: Record<string, unknown>) {
   });
 }
 
+async function managerDepartmentNames(admin: any, userId: string): Promise<string[]> {
+  const { data: assignments, error: assignmentError } = await admin.from("department_managers")
+    .select("department_code").eq("user_id", userId).eq("is_active", true);
+  if (assignmentError) throw assignmentError;
+  const codes = (assignments || []).map((item: any) => item.department_code).filter(Boolean);
+  if (!codes.length) return [];
+  const { data: departments, error: departmentError } = await admin.from("passport_department_catalog")
+    .select("name").in("code", codes);
+  if (departmentError) throw departmentError;
+  return (departments || []).map((item: any) => String(item.name).trim().toLocaleLowerCase("es-PE"));
+}
+
+async function managerCanManageDestination(admin: any, userId: string, destinationId: number): Promise<boolean> {
+  const [names, destinationResult] = await Promise.all([
+    managerDepartmentNames(admin, userId),
+    admin.from("destination_catalog").select("department").eq("id", destinationId).maybeSingle(),
+  ]);
+  if (destinationResult.error) throw destinationResult.error;
+  const department = String(destinationResult.data?.department || "").trim().toLocaleLowerCase("es-PE");
+  return Boolean(department && names.includes(department));
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { status: 200, headers: corsHeaders });
@@ -78,12 +100,15 @@ Deno.serve(async (req: Request) => {
 
   const { data: destination, error: destinationError } = await admin
     .from("destination_catalog")
-    .select("id")
+    .select("id,department")
     .eq("id", destinationId)
     .eq("is_active", true)
     .maybeSingle();
   if (destinationError) return json(500, { error: "Could not verify destination" });
   if (!destination) return json(404, { error: "Destination not found or inactive" });
+  if (staff.role === "manager" && !await managerCanManageDestination(admin, authData.user.id, destinationId)) {
+    return json(403, { error: "You are not assigned to manage this department" });
+  }
 
   const { data: qr, error: qrError } = await admin
     .from("user_qr_codes")

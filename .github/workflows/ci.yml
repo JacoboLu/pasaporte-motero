@@ -1,0 +1,27 @@
+name: PASAPORTE MOTERO CI
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "pasaporte-motero/**"
+      - ".github/workflows/ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "pasaporte-motero/**"
+      - ".github/workflows/ci.yml"
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pasaporte-motero
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm run build
