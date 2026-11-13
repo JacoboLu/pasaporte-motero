@@ -1399,3 +1399,17 @@ html[data-theme="light"] .community-feed-tabs button.active,.theme-light .commun
     transform:scale(1.3) rotate(0deg);
   }
 }
+
+/* El sello validado conserva la misma escala 1.3: la animación no debe sobrescribir transform */
+@keyframes passportStampFadeIn{
+  from{opacity:0}
+  to{opacity:1}
+}
+.passport-book-page .passport-ink-stamp.earned{
+  animation:passportStampFadeIn .58s ease-out both;
+  transform:scale(1.3) rotate(0deg);
+}
+.passport-book-page .passport-ink-stamp.unearned,
+.passport-book-page .passport-ink-stamp.pending{
+  transform:scale(1.3) rotate(0deg);
+}
