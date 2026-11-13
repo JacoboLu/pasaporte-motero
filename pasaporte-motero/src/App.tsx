@@ -688,10 +688,20 @@ export default function App() {
     setBusy(true)
     navigator.geolocation.getCurrentPosition(async position => {
       const meters = distanceMeters(position.coords, dest.lat, dest.lng)
-      if (meters > dest.radius) {
+      const accuracy = position.coords.accuracy
+      if (!Number.isFinite(accuracy) || accuracy <= 0 || accuracy > 100) {
         setBusy(false)
-        notify(`Estás aproximadamente a ${(meters/1000).toFixed(1)} km de ${dest.title}. Puedes enviar una evidencia fotográfica.`)
-        setVisitMethod('photo')
+        notify('La precisión del GPS es insuficiente (máximo 100 m). Busca un espacio abierto e inténtalo nuevamente o utiliza evidencia fotográfica.')
+        return
+      }
+      if (meters + accuracy > dest.radius) {
+        setBusy(false)
+        if (meters > dest.radius) {
+          notify(`Estás aproximadamente a ${(meters/1000).toFixed(1)} km de ${dest.title}. Puedes enviar una evidencia fotográfica.`)
+          setVisitMethod('photo')
+        } else {
+          notify('Tu ubicación está cerca del límite del destino, pero la precisión del GPS no permite confirmar que estés dentro. Espera una mejor señal e inténtalo nuevamente.')
+        }
         return
       }
       const { data: result, error } = await supabase!.functions.invoke('validate-gps-visit', {
@@ -699,6 +709,7 @@ export default function App() {
           destination_id: dest.id,
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
+          accuracy_m: accuracy,
           notes: visitNote.trim() || null
         }
       })
@@ -742,6 +753,10 @@ export default function App() {
       if (error) {
         await supabase.storage.from('travel-media').remove([uploadedPath])
         uploadedPath = ''
+        if (error.code === '23505') {
+          notify('Ya tienes una visita pendiente de revisión para este destino. Espera la respuesta antes de enviar otra.')
+          return
+        }
         throw error
       }
       uploadedPath = ''
