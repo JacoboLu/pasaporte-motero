@@ -1306,3 +1306,33 @@ html[data-theme="light"] .community-feed-tabs button.active,.theme-light .commun
   .passport-book-page .passport-ink-stamp{margin-bottom:32px}
   .passport-book-page .tourist-mini-stamp{width:clamp(38px,25%,52px);height:27px}
 }
+
+/* El sello departamental es el protagonista; los turísticos quedan en segundo plano */
+.passport-book-page .passport-ink-stamp{
+  position:relative;
+  z-index:5;
+  opacity:.98;
+  filter:contrast(1.38) saturate(1.12) drop-shadow(0 2px 1px rgba(61,39,19,.24));
+  border-width:3.5px;
+  outline-width:1.5px;
+  background-color:rgba(248,235,207,.16);
+  text-shadow:0 0 .7px currentColor,0 0 1px currentColor;
+}
+.passport-book-page .passport-ink-stamp:before{
+  border-width:1.5px;
+  opacity:.92;
+}
+.passport-book-page .passport-ink-stamp:after{
+  opacity:.48;
+}
+.passport-book-page .passport-ink-stamp.earned{
+  opacity:1;
+  filter:contrast(1.48) saturate(1.2) drop-shadow(0 2px 2px rgba(48,31,15,.3));
+}
+.passport-book-page .passport-ink-stamp.unearned{
+  opacity:.43;
+  filter:grayscale(.35) contrast(.95);
+  text-shadow:none;
+}
+.passport-book-page .department-tourist-stamps{z-index:2}
+.passport-book-page .tourist-mini-stamp{opacity:.72;filter:saturate(.78) contrast(.95)}
