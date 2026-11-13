@@ -1527,3 +1527,38 @@ html[data-theme="light"] .community-feed-tabs button.active,.theme-light .commun
 .passport-ink-stamp.shape-chevron,.department-detail-stamp.shape-chevron{--stamp-cut:polygon(0 8%,50% 42%,100% 8%,100% 55%,50% 92%,0 55%)}
 .passport-ink-stamp.shape-kite,.department-detail-stamp.shape-kite{--stamp-cut:polygon(50% 0,94% 37%,65% 100%,35% 100%,6% 37%)}
 .passport-ink-stamp.shape-wavy,.department-detail-stamp.shape-wavy{--stamp-cut:polygon(50% 0,61% 5%,75% 1%,83% 11%,97% 17%,94% 31%,100% 43%,94% 57%,99% 71%,86% 80%,82% 94%,67% 91%,54% 100%,43% 94%,28% 99%,19% 87%,5% 82%,9% 67%,0 55%,6% 42%,1% 28%,14% 19%,20% 5%,35% 9%)}
+
+
+/* Las líneas internas repiten el troquel del sello, no círculos genéricos.
+   Cada contorno sigue la misma silueta exterior definida en --stamp-cut. */
+.passport-ink-stamp[class*="shape-"]::after,
+.department-detail-stamp[class*="shape-"]::after{
+  inset:10px;
+  border:1px solid currentColor;
+  border-radius:0;
+  background:
+    radial-gradient(circle at 22% 28%,currentColor 0 1px,transparent 1.5px),
+    radial-gradient(circle at 76% 68%,currentColor 0 1px,transparent 1.5px);
+  background-size:17px 17px,23px 23px;
+  box-shadow:
+    inset 0 0 0 5px transparent,
+    inset 0 0 0 6px currentColor,
+    inset 0 0 0 11px transparent,
+    inset 0 0 0 12px currentColor,
+    inset 0 0 0 19px transparent,
+    inset 0 0 0 20px currentColor;
+  clip-path:var(--stamp-cut);
+  opacity:.38;
+  mix-blend-mode:multiply;
+}
+.passport-ink-stamp[class*="shape-"]::before,
+.department-detail-stamp[class*="shape-"]::before{
+  clip-path:var(--stamp-cut);
+  border-radius:0;
+}
+.passport-ink-stamp.shape-round::after,
+.department-detail-stamp.shape-round::after,
+.passport-ink-stamp.shape-oval::after,
+.department-detail-stamp.shape-oval::after{
+  border-radius:50%;
+}
