@@ -230,6 +230,7 @@ export default function App() {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [notifications, setNotifications] = useState<any[]>([])
   const [notificationsBusy, setNotificationsBusy] = useState(false)
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
   const [busy, setBusy] = useState(false)
   const [submittingPhotoVisit, setSubmittingPhotoVisit] = useState(false)
   const submittingPhotoVisitRef = useRef(false)
@@ -415,11 +416,13 @@ export default function App() {
       const user = data.session?.user
       setAuthUser(user?.email || null)
       setAuthUserId(user?.id || null)
+      if (user) void loadNotificationCount(user.id); else setUnreadNotificationCount(0)
       if (user) { void loadProfile(user.id); void loadMotorcycle(user.id); void loadTrips(user.id); void loadVisits(user.id); void loadCommunityPosts(); void loadSocialData(user.id); void loadGallery(user.id) } else { void loadCommunityPosts() }
     })
     const {data:{subscription}} = supabase.auth.onAuthStateChange((_event, session) => {
       setAuthUser(session?.user.email || null)
       setAuthUserId(session?.user.id || null)
+      if (session?.user) void loadNotificationCount(session.user.id); else setUnreadNotificationCount(0)
       if (session?.user) { void loadProfile(session.user.id); void loadMotorcycle(session.user.id); void loadTrips(session.user.id); void loadVisits(session.user.id); void loadCommunityPosts(); void loadSocialData(session.user.id); void loadGallery(session.user.id) }
       else { resetSignedOutData(); void loadCommunityPosts() }
     })
@@ -487,6 +490,11 @@ export default function App() {
   function endMotorcycleCrop(){cropDrag.current=null}
   function notify(message: string) { setNotice(message); window.setTimeout(() => setNotice(''), 4200) }
 
+  async function loadNotificationCount(userId = authUserId) {
+    if (!supabase || !userId) { setUnreadNotificationCount(0); return }
+    const { count, error } = await supabase.from('user_notifications').select('id', { count: 'exact', head: true }).eq('recipient_id', userId).is('read_at', null)
+    if (!error) setUnreadNotificationCount(count || 0)
+  }
   async function loadNotifications() {
     if (!supabase || !authUserId) { setNotifications([]); return }
     setNotificationsBusy(true)
@@ -494,6 +502,7 @@ export default function App() {
     setNotificationsBusy(false)
     if (error) { notify('No se pudieron cargar las notificaciones: ' + error.message); return }
     setNotifications(data || [])
+    void loadNotificationCount()
   }
   async function openNotifications() { setNotificationsOpen(true); await loadNotifications() }
   async function markNotificationRead(notificationId: string) {
@@ -502,6 +511,7 @@ export default function App() {
     const { error } = await supabase.from('user_notifications').update({ read_at: now }).eq('id', notificationId).eq('recipient_id', authUserId)
     if (error) { notify('No se pudo marcar como leída: ' + error.message); return }
     setNotifications(items => items.map(item => item.id === notificationId ? { ...item, read_at: now } : item))
+    setUnreadNotificationCount(count => Math.max(0, count - 1))
   }
   async function markAllNotificationsRead() {
     if (!supabase || !authUserId || !notifications.some(item => !item.read_at)) return
@@ -509,6 +519,7 @@ export default function App() {
     const { error } = await supabase.from('user_notifications').update({ read_at: now }).eq('recipient_id', authUserId).is('read_at', null)
     if (error) { notify('No se pudieron marcar todas como leídas: ' + error.message); return }
     setNotifications(items => items.map(item => ({ ...item, read_at: item.read_at || now })))
+    setUnreadNotificationCount(0)
   }
   function resetSignedOutData() {
     void clearPrivateCache()
@@ -517,6 +528,7 @@ export default function App() {
     setVisits([]); setDepartmentStamps([]); setPosts([]); setTrips([]); setSaved([]); setFollowed([]); setSavedPostIds([]); setSavedTripIds([]); setCommunityUsers([]); setSelectedPublicProfile(null); setGalleryItems([])
     setMotorcycleBrand(''); setMotorcycleModel(''); setMotorcycleYear(''); setMotorcycleId(null)
     setAvatarUrl(''); setAvatarFile(null); setDocumentFile(null)
+    setNotifications([]); setUnreadNotificationCount(0); setNotificationsOpen(false)
     setMotorcyclePhoto(''); setMotorcyclePhotoFile(null); setMotorcyclePhotoPreview('')
     setMotorcycleCc(''); setMotorcycleType('Adventure'); setMotorcycleFuel('Gasolina')
     setMotorcycleOdometer(''); setMotorcycleNotes(''); setMaintenance([]); setDocuments([])
@@ -1359,7 +1371,7 @@ export default function App() {
   return <div className={`app-shell theme-${theme}`}>
     <header className="topbar">
       <button className="brand" onClick={() => openTab('explore')} aria-label="Ir a inicio"><span className="brand-mark"><Bike size={21}/></span><span><strong>PASAPORTE MOTERO</strong><small>RUTAS · HISTORIAS · DESTINOS</small></span></button>
-      <div className="top-actions"><span className={`connection-dot ${offline ? 'off' : ''}`} title={offline ? 'Sin conexión' : 'Con conexión'}/><button className="icon-button theme-toggle" aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'} title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'} onClick={() => setTheme(v => v === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? <Sun size={18}/> : <Moon size={18}/>}</button><button className="icon-button notification-trigger" aria-label="Abrir notificaciones" title="Notificaciones" onClick={openNotifications}><Bell size={19}/>{notifications.some(item => !item.read_at) && <i className="notification-dot"/>}</button></div>
+      <div className="top-actions"><span className={`connection-dot ${offline ? 'off' : ''}`} title={offline ? 'Sin conexión' : 'Con conexión'}/><button className="icon-button theme-toggle" aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'} title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'} onClick={() => setTheme(v => v === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? <Sun size={18}/> : <Moon size={18}/>}</button><button className="icon-button notification-trigger" aria-label="Abrir notificaciones" title="Notificaciones" onClick={openNotifications}><Bell size={19}/>{unreadNotificationCount > 0 && <i className="notification-dot"/>}</button></div>
     </header>
     {offline && <div className="offline-banner"><CloudOff size={15}/> Sin conexión. Puedes consultar contenido previamente cargado; las acciones que requieren sincronización estarán disponibles al recuperar Internet.</div>}
 
@@ -1482,7 +1494,7 @@ export default function App() {
     {authOpen && <div className="modal-backdrop auth-backdrop" onClick={() => setAuthOpen(false)}><div className="composer-modal auth-modal" onClick={e => e.stopPropagation()}><div className="auth-brand"><span className="brand-mark"><Bike size={25}/></span><span><strong>PASAPORTE MOTERO</strong><small>RUTAS · HISTORIAS · DESTINOS</small></span></div><div className="modal-head"><h2>{authMode === 'login' ? 'Bienvenido de nuevo' : 'Únete a la ruta'}</h2><button className="icon-button" onClick={() => setAuthOpen(false)}><X/></button></div><p className="muted">Tu cuenta permitirá sincronizar el pasaporte, los viajes y las publicaciones entre dispositivos.</p><div className="social-auth"><button className="google-auth-button" type="button" disabled={authBusy || !supabase} onClick={()=>startOAuth('google')}><b className="google-mark">G</b><span>{authBusy ? 'Conectando…' : 'Continuar con Google'}</span></button></div><div className="auth-divider"><span/> o continúa con correo electrónico <span/></div><div className="feed-switch"><button className={authMode==='login'?'active':''} onClick={()=>setAuthMode('login')}>Iniciar sesión</button><button className={authMode==='register'?'active':''} onClick={()=>setAuthMode('register')}>Registrarme</button></div><label>Correo electrónico<input type="email" autoComplete="email" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} placeholder="correo@ejemplo.com"/></label>{authMode === 'register' && <><label>Nombre completo<input autoComplete="name" value={registerName} onChange={e=>setRegisterName(e.target.value)} placeholder="Tu nombre y apellidos"/></label><label>Nombre de usuario<input autoComplete="username" value={registerUsername} onChange={e=>setRegisterUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g,''))} placeholder="Ej. viajero_motero"/></label><label>Ciudad o región<input autoComplete="address-level2" value={registerCity} onChange={e=>setRegisterCity(e.target.value)} placeholder="Ej. Huancayo, Junín"/></label><label>Motocicleta (opcional)<input value={registerMotorcycle} onChange={e=>setRegisterMotorcycle(e.target.value)} placeholder="Marca y modelo"/></label></>}<label>Contraseña<input type="password" autoComplete={authMode==='login'?'current-password':'new-password'} minLength={8} value={authPassword} onChange={e=>setAuthPassword(e.target.value)} placeholder="Mínimo 8 caracteres"/></label><button className="primary full" disabled={authBusy || !isSupabaseConfigured} onClick={submitAuth}>{authBusy ? 'Procesando…' : authMode==='login' ? 'Iniciar sesión' : 'Crear cuenta'}</button><p className="auth-provider-note">Acceso seguro con tu cuenta de Google. El proveedor debe estar habilitado en Supabase.</p>{!isSupabaseConfigured && <p className="auth-note">Supabase todavía no está conectado. Esta pantalla queda preparada, pero el acceso real se habilitará al configurar la URL pública y la clave anon del proyecto.</p>}</div></div>}
 
     {commentPost !== null && <div className="modal-backdrop" onClick={()=>setCommentPost(null)}><div className="composer-modal" onClick={e=>e.stopPropagation()}><div className="modal-head"><h2>Comentarios</h2><button className="icon-button" onClick={()=>setCommentPost(null)}><X/></button></div><div className="comments-list">{posts.find(p=>p.id===commentPost)?.comments.map((c,i)=><p key={i}>{c}</p>)}</div><label>Escribe un comentario<textarea rows={3} value={commentText} onChange={e=>setCommentText(e.target.value)} placeholder="Tu comentario…"/></label><button className="primary full" onClick={addComment}>Enviar comentario <Send size={16}/></button></div></div>}
-    {notificationsOpen && <div className="modal-backdrop" onClick={()=>setNotificationsOpen(false)}><div className="composer-modal notifications-modal" role="dialog" aria-modal="true" aria-label="Notificaciones" onClick={e=>e.stopPropagation()}><div className="modal-head"><div><span className="eyebrow">TU ACTIVIDAD</span><h2>Notificaciones</h2></div><button className="icon-button" aria-label="Cerrar notificaciones" onClick={()=>setNotificationsOpen(false)}><X/></button></div><div className="notification-toolbar"><span className="muted tiny">{notifications.filter(item=>!item.read_at).length} sin leer</span><button className="text-action" disabled={!notifications.some(item=>!item.read_at)} onClick={markAllNotificationsRead}>Marcar todas como leídas</button></div>{notificationsBusy ? <div className="empty-card"><span className="muted">Cargando notificaciones…</span></div> : notifications.length ? <div className="notification-list">{notifications.map(item=><button type="button" key={item.id} className={"notification-item " + (item.read_at ? "read" : "unread")} onClick={()=>!item.read_at && markNotificationRead(item.id)}><span className="notification-icon"><Bell size={17}/></span><span className="notification-copy"><strong>{item.message || "Tienes una nueva actividad."}</strong><small>{new Date(item.created_at).toLocaleString("es-PE")}</small></span>{!item.read_at && <i className="notification-dot"/>}</button>)}</div> : <div className="empty-card"><Bell size={28}/><h3>Todo al día</h3><p>Aquí aparecerán avisos sobre seguidores, publicaciones y validaciones de tus visitas.</p></div>}</div></div>}
+    {notificationsOpen && <div className="modal-backdrop" onClick={()=>setNotificationsOpen(false)}><div className="composer-modal notifications-modal" role="dialog" aria-modal="true" aria-label="Notificaciones" onClick={e=>e.stopPropagation()}><div className="modal-head"><div><span className="eyebrow">TU ACTIVIDAD</span><h2>Notificaciones</h2></div><button className="icon-button" aria-label="Cerrar notificaciones" onClick={()=>setNotificationsOpen(false)}><X/></button></div><div className="notification-toolbar"><span className="muted tiny">{unreadNotificationCount} sin leer</span><button className="text-action" disabled={!notifications.some(item=>!item.read_at)} onClick={markAllNotificationsRead}>Marcar todas como leídas</button></div>{notificationsBusy ? <div className="empty-card"><span className="muted">Cargando notificaciones…</span></div> : notifications.length ? <div className="notification-list">{notifications.map(item=><button type="button" key={item.id} className={"notification-item " + (item.read_at ? "read" : "unread")} onClick={()=>!item.read_at && markNotificationRead(item.id)}><span className="notification-icon"><Bell size={17}/></span><span className="notification-copy"><strong>{item.message || "Tienes una nueva actividad."}</strong><small>{new Date(item.created_at).toLocaleString("es-PE")}</small></span>{!item.read_at && <i className="notification-dot"/>}</button>)}</div> : <div className="empty-card"><Bell size={28}/><h3>Todo al día</h3><p>Aquí aparecerán avisos sobre seguidores, publicaciones y validaciones de tus visitas.</p></div>}</div></div>}
     {notice && <button className="toast" onClick={()=>setNotice('')}><CheckCircle2 size={16}/>{notice}<b>×</b></button>}
   </div>
 }
