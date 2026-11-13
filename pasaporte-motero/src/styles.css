@@ -1156,3 +1156,94 @@ html[data-theme="light"] .community-feed-tabs button.active,.theme-light .commun
   .department-tourist-stamps{min-height:24px;gap:3px}
   .tourist-mini-stamp{width:38px;height:24px}
 }
+
+/* Alineación vertical uniforme de los textos en todas las hojas del pasaporte */
+.passport-book-page{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  box-sizing:border-box;
+  height:320px;
+  min-height:320px;
+  padding:19px 14px 14px;
+}
+.passport-page-number{height:9px;line-height:9px;flex:0 0 9px}
+.passport-page-ornament{height:12px;line-height:12px;flex:0 0 12px;margin-top:8px}
+.passport-page-title{height:27px;line-height:27px;flex:0 0 27px;margin-top:8px}
+.passport-page-caption{height:10px;line-height:10px;flex:0 0 10px;margin-top:1px}
+.passport-book-page .passport-ink-stamp{
+  display:flex;
+  flex:0 0 112px;
+  box-sizing:border-box;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  width:108px;
+  height:112px;
+  min-height:112px;
+  margin:8px 0 4px;
+}
+.passport-book-page .passport-ink-stamp.shape-oval,
+.passport-book-page .passport-ink-stamp.shape-rect{
+  width:108px;
+  height:112px;
+  min-height:112px;
+}
+.department-tourist-stamps{
+  flex:0 0 32px;
+  box-sizing:border-box;
+  width:100%;
+  height:32px;
+  min-height:32px;
+  margin:0;
+  align-content:center;
+}
+.passport-place-counter{
+  flex:0 0 25px;
+  box-sizing:border-box;
+  height:25px;
+  min-height:25px;
+  align-items:center;
+  justify-content:center;
+  margin:0;
+  line-height:1;
+}
+.passport-place-counter strong{font-size:21px;line-height:25px}
+.passport-place-counter span{line-height:12px}
+.passport-page-status{
+  display:flex;
+  flex:0 0 18px;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+  width:100%;
+  height:18px;
+  min-height:18px;
+  margin:0;
+  line-height:10px;
+  text-align:center;
+  white-space:nowrap;
+}
+.passport-page-footer{
+  flex:0 0 12px;
+  height:12px;
+  line-height:12px;
+  margin-top:auto;
+  padding-top:0;
+}
+.passport-page-open{
+  flex:0 0 14px;
+  height:14px;
+  line-height:14px;
+  justify-content:center;
+  margin-top:5px;
+}
+@media(max-width:360px){
+  .passport-book-page{height:286px;min-height:286px;padding-top:15px}
+  .passport-book-page .passport-ink-stamp{flex-basis:98px;height:98px;min-height:98px;margin:6px 0 3px}
+  .passport-book-page .passport-ink-stamp.shape-oval,
+  .passport-book-page .passport-ink-stamp.shape-rect{height:98px;min-height:98px}
+  .department-tourist-stamps{flex-basis:28px;height:28px;min-height:28px}
+  .passport-place-counter{flex-basis:23px;height:23px;min-height:23px}
+  .passport-place-counter strong{line-height:23px}
+}
