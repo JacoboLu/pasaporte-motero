@@ -44,7 +44,7 @@ Deno.serve(async (req: Request) => {
   const {data:visit,error:insertError}=await admin.from("app_visits").insert({
     user_id:user.id,destination_id:id,visited_at:new Date().toISOString(),validation_method:"gps",
     validation_status:"pending",notes:typeof body.notes==="string"?body.notes.slice(0,500):null,
-    latitude:lat,longitude:lng
+    latitude:lat,longitude:lng,accuracy_m:accuracy
   }).select("id,destination_id,visited_at,validation_method,validation_status").single();
   if (insertError) {
     if (insertError.code === "23505") return json(409,{error:"You already have a pending visit for this destination."});
