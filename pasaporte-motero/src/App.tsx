@@ -753,6 +753,10 @@ export default function App() {
       if (error) {
         await supabase.storage.from('travel-media').remove([uploadedPath])
         uploadedPath = ''
+        if (error.code === '23505') {
+          notify('Ya tienes una visita pendiente de revisión para este destino. Espera la respuesta antes de enviar otra.')
+          return
+        }
         throw error
       }
       uploadedPath = ''
