@@ -1,6 +1,28 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"POST, OPTIONS"};
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,"Content-Type":"application/json"}});
+async function managerDepartmentNames(admin: any, userId: string): Promise<string[]> {
+  const { data: assignments, error: assignmentError } = await admin.from("department_managers")
+    .select("department_code").eq("user_id", userId).eq("is_active", true);
+  if (assignmentError) throw assignmentError;
+  const codes = (assignments || []).map((item: any) => item.department_code).filter(Boolean);
+  if (!codes.length) return [];
+  const { data: departments, error: departmentError } = await admin.from("passport_department_catalog")
+    .select("name").in("code", codes);
+  if (departmentError) throw departmentError;
+  return (departments || []).map((item: any) => String(item.name).trim().toLocaleLowerCase("es-PE"));
+}
+
+async function managerCanManageDestination(admin: any, userId: string, destinationId: number): Promise<boolean> {
+  const [names, destinationResult] = await Promise.all([
+    managerDepartmentNames(admin, userId),
+    admin.from("destination_catalog").select("department").eq("id", destinationId).maybeSingle(),
+  ]);
+  if (destinationResult.error) throw destinationResult.error;
+  const department = String(destinationResult.data?.department || "").trim().toLocaleLowerCase("es-PE");
+  return Boolean(department && names.includes(department));
+}
+
 Deno.serve(async(req:Request)=>{
  if(req.method==="OPTIONS")return new Response("ok",{headers:cors});
  if(req.method!=="POST")return json({error:"Método no permitido"},405);
@@ -16,6 +38,7 @@ Deno.serve(async(req:Request)=>{
   if(!Number.isInteger(destinationId))return json({error:"Destino inválido"},400);
   const {data:destination,error:de}=await admin.from("destination_catalog").select("id,name,is_active").eq("id",destinationId).eq("is_active",true).maybeSingle();
   if(de)throw de;if(!destination)return json({error:"Destino no disponible"},404);
+  if(profile.role === "manager" && !await managerCanManageDestination(admin, ud.user.id, destinationId))return json({error:"No tienes asignación para emitir códigos en este departamento"},403);
   const bytes=crypto.getRandomValues(new Uint8Array(32));
   const raw=Array.from(bytes).map(b=>b.toString(16).padStart(2,"0")).join("");
   const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(raw));
