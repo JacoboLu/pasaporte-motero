@@ -1,6 +1,15 @@
 -- PASAPORTE MOTERO · Fase 1: hardening de visitas, sellos y notificaciones
 -- Safe/idempotent: preserves historical visits and stamps.
 
+-- Persist the GPS accuracy used for geofence decisions for audit/support.
+alter table public.app_visits
+  add column if not exists accuracy_m double precision;
+alter table public.app_visits
+  drop constraint if exists app_visits_accuracy_m_check;
+alter table public.app_visits
+  add constraint app_visits_accuracy_m_check
+  check (accuracy_m is null or (accuracy_m > 0 and accuracy_m <= 100));
+
 -- A signed-in rider may only clear their own evidence pointer.
 -- In particular, clients must never update validation_status/reviewed_by/rejection_reason.
 drop policy if exists "Owners clear own visit evidence" on public.app_visits;
@@ -29,6 +38,7 @@ create policy "Create pending app visits"
     and (notes is null or char_length(notes) <= 500)
     and (latitude is null or latitude between -90 and 90)
     and (longitude is null or longitude between -180 and 180)
+    and (accuracy_m is null or (accuracy_m > 0 and accuracy_m <= 100))
     and (
       evidence_path is null
       or evidence_path like (select auth.uid())::text || '/visits/%'
