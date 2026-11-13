@@ -17,6 +17,9 @@ begin
   if has_column_privilege('authenticated', 'public.app_visits', 'reviewed_by', 'UPDATE') then
     raise exception 'authenticated can modify reviewed_by';
   end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='app_visits' and column_name='accuracy_m') then
+    raise exception 'GPS accuracy audit column is missing';
+  end if;
   if to_regclass('public.app_visits_one_pending_per_destination') is null then
     raise exception 'pending visit uniqueness index is missing';
   end if;
