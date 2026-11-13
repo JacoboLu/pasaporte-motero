@@ -1413,3 +1413,21 @@ html[data-theme="light"] .community-feed-tabs button.active,.theme-light .commun
 .passport-book-page .passport-ink-stamp.pending{
   transform:scale(1.3) rotate(0deg);
 }
+
+/* Variedad de troqueles para los sellos departamentales */
+.passport-ink-stamp.shape-triangle{border-radius:18% 18% 8% 8%;outline-style:solid}
+.passport-ink-stamp.shape-triangle:before{clip-path:polygon(50% 0,100% 88%,0 88%);border:2px solid currentColor;inset:4px}
+.passport-ink-stamp.shape-hexagon{border-radius:14%;outline-style:dashed}
+.passport-ink-stamp.shape-hexagon:before{clip-path:polygon(25% 2%,75% 2%,100% 50%,75% 98%,25% 98%,0 50%);border:2px solid currentColor;inset:4px}
+.passport-ink-stamp.shape-octagon{border-radius:18%;outline-style:double}
+.passport-ink-stamp.shape-octagon:before{clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%);border:2px solid currentColor;inset:4px}
+.passport-ink-stamp.shape-diamond{border-radius:12%;outline-style:dotted}
+.passport-ink-stamp.shape-diamond:before{clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);border:2px solid currentColor;inset:4px}
+.passport-ink-stamp.shape-ticket{border-radius:12px 12px 4px 4px;outline-style:dashed}
+.passport-ink-stamp.shape-ticket:before{border-radius:10px 10px 3px 3px;border-style:dashed}
+.passport-ink-stamp.shape-scallop{border-radius:32% 18% 32% 18%;outline-style:dotted}
+.passport-ink-stamp.shape-scallop:before{border-radius:30% 16% 30% 16%;border-style:dotted}
+.passport-book-page .passport-ink-stamp,
+.passport-book-page .passport-ink-stamp.unearned,
+.passport-book-page .passport-ink-stamp.pending,
+.passport-book-page .passport-ink-stamp.earned{transform-origin:center center}
