@@ -1420,12 +1420,21 @@ export default function App() {
           <p>{selectedDepartmentPage.earned ? 'Este departamento ya forma parte de tu ruta. Sigue explorando para completar todos sus destinos.' : 'Visita y valida al menos un lugar de este departamento para conseguir tu sello oficial.'}</p>
         </div>
         {selectedDepartmentPage.places.length === 0 ? <div className="empty-card department-empty"><MapPinned size={28}/><h3>Estamos incorporando destinos</h3><p>Pronto añadiremos lugares para descubrir en este departamento.</p></div> : <>
-          <div className="section-heading"><h2>Lugares visitados</h2><span className="muted tiny">{selectedDepartmentPage.visitedPlaces.length}</span></div>
-          {selectedDepartmentPage.visitedPlaces.length ? <div className="department-place-list">{selectedDepartmentPage.visitedPlaces.map(place => <button className="department-place-row visited" key={place.id} onClick={() => { setSelected(place); setSelectedDepartment(null) }}><span className="place-status-icon"><BadgeCheck size={19}/></span><span><strong>{place.title}</strong><small>{place.city}, {place.province}</small></span><b>Visitado</b><ChevronRight size={16}/></button>)}</div> : <div className="department-list-empty">Aún no tienes lugares sellados en este departamento.</div>}
-          <div className="section-heading"><h2>Visitas en validación</h2><span className="muted tiny">{selectedDepartmentPage.pendingPlaces.length}</span></div>
-          {selectedDepartmentPage.pendingPlaces.length ? <div className="department-place-list">{selectedDepartmentPage.pendingPlaces.map(place => <button className="department-place-row pending" key={place.id} onClick={() => { setSelected(place); setSelectedDepartment(null) }}><span className="place-status-icon"><Clock3 size={19}/></span><span><strong>{place.title}</strong><small>{place.city}, {place.province}</small></span><b>En revisión</b><ChevronRight size={16}/></button>)}</div> : <div className="department-list-empty">No tienes visitas pendientes de aprobación.</div>}
-          <div className="section-heading"><h2>Por descubrir</h2><span className="muted tiny">{Math.max(0, selectedDepartmentPage.places.length - selectedDepartmentPage.visitedPlaces.length - selectedDepartmentPage.pendingPlaces.length)}</span></div>
-          <div className="department-place-list">{selectedDepartmentPage.places.filter(place => !visitedIds.has(place.id) && !selectedDepartmentPage.pendingPlaces.some(pending => pending.id === place.id)).map(place => <button className="department-place-row" key={place.id} onClick={() => { setSelected(place); setSelectedDepartment(null) }}><span className="place-status-icon"><MapPin size={18}/></span><span><strong>{place.title}</strong><small>{place.city}, {place.province}</small></span><b>Por visitar</b><ChevronRight size={16}/></button>)}</div>
+          <div className="section-heading"><h2>Colección de sellos</h2><span className="muted tiny">{selectedDepartmentPage.visitedPlaces.length}/{selectedDepartmentPage.places.length} obtenidos</span></div>
+          <p className="destination-stamp-hint">Cada lugar tiene su propio sello. Se activa a color únicamente cuando tu visita queda validada.</p>
+          <div className="destination-stamp-grid">{selectedDepartmentPage.places.map(place => {
+            const isVisited = visitedIds.has(place.id)
+            const isPending = selectedDepartmentPage.pendingPlaces.some(item => item.id === place.id)
+            const visit = visits.find(item => item.destinationId === place.id && item.status === 'validated')
+            const ink = departmentStampThemes[selectedDepartmentPage.name]?.ink || '#6f7780'
+            return <button type="button" className={`destination-passport-stamp ${isVisited ? 'earned' : isPending ? 'pending' : 'unearned'}`} key={place.id} onClick={() => { setSelected(place); setSelectedDepartment(null) }} style={{color:isVisited ? ink : undefined}} aria-label={`${place.title}: ${isVisited ? 'visitado y validado' : isPending ? 'visita en validación' : 'pendiente de visitar'}`}>
+              <span className="destination-stamp-top">PASAPORTE MOTERO · PERÚ</span>
+              <Stamp size={25} strokeWidth={1.5}/>
+              <strong>{place.title}</strong>
+              <small>{place.city} · {place.province}</small>
+              <em>{isVisited ? (visit?.date ? new Date(visit.date).toLocaleDateString('es-PE') : 'VALIDADO') : isPending ? 'EN VALIDACIÓN' : 'POR VISITAR'}</em>
+            </button>
+          })}</div>
         </>}
       </section> : selected ? <section className="destination-detail">
         <button className="back-link" onClick={() => setSelected(null)}><ArrowLeft size={17}/> Volver a destinos</button>
