@@ -1099,10 +1099,11 @@ html[data-theme="light"] .community-feed-tabs button.active,.theme-light .commun
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:4px;
+  flex-wrap:wrap;
+  gap:2px 4px;
   width:100%;
-  min-height:27px;
-  margin:1px 0 2px;
+  min-height:0;
+  margin:2px 0 3px;
   overflow:hidden;
 }
 .tourist-mini-stamp{
