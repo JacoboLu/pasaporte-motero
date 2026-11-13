@@ -14,5 +14,5 @@ assert.match(migration, /notify_department_stamp_earned/i);
 assert.match(gps, /accuracy_m/i);
 assert.match(gps, /distance \+ accuracy/i);
 assert.match(gps, /validation_status.*pending/i);
-assert.match(app, /accuracy_m:\s*position\.coords\.accuracy/i);
+assert.match(app, /accuracy_m:\s*accuracy/i);
 console.log('Phase 1 security regression checks passed.');
