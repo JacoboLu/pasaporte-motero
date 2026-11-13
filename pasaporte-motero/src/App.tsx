@@ -1077,12 +1077,26 @@ export default function App() {
 
   async function searchCommunityUsers() {
     if (!supabase) return
-    const term=communitySearch.trim().replace(/[,%()_*]/g,' ').replace(/\s+/g,' ')
-    if (term.length<2) { notify('Escribe al menos 2 caracteres para buscar viajeros.'); return }
+    const user = await getCurrentAuthUser()
+    if (!user) {
+      setAuthMode('login')
+      setAuthOpen(true)
+      notify('Inicia sesión para descubrir otros viajeros.')
+      return
+    }
+    // Remove PostgREST filter delimiters and LIKE wildcards before building the OR expression.
+    const term = communitySearch.trim().replace(/[\\\\,%()_*]/g, ' ').replace(/\\s+/g, ' ')
+    if (term.length < 2) { notify('Escribe al menos 2 caracteres para buscar viajeros.'); return }
     setSearchingUsers(true)
-    const {data,error}=await supabase.from('public_profiles').select('id,username,full_name,avatar_url,city,bio,motorcycle_brand,motorcycle_model,motorcycle_year').or('username.ilike.%'+term+'%,full_name.ilike.%'+term+'%,city.ilike.%'+term+'%').neq('id',authUserId || '').limit(20)
+    const pattern = '%' + term + '%'
+    const { data, error } = await supabase
+      .from('public_profiles')
+      .select('id,username,full_name,avatar_url,city,bio,motorcycle_brand,motorcycle_model,motorcycle_year')
+      .or('username.ilike.' + pattern + ',full_name.ilike.' + pattern + ',city.ilike.' + pattern)
+      .neq('id', user.id)
+      .limit(20)
     setSearchingUsers(false)
-    if (error) { notify('No se pudo buscar viajeros: '+error.message); return }
+    if (error) { notify('No se pudo buscar viajeros: ' + error.message); return }
     setCommunityUsers(data || [])
     if (!data?.length) notify('No encontramos viajeros con ese nombre. Prueba con su usuario.')
   }
