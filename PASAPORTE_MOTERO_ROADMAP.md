@@ -22,7 +22,7 @@
 
 ## Fase 3 — Comunidad
 - [x] Backend de notificaciones por seguidores, likes y comentarios.
-- [x] UI de bandeja y marcado como leído (contador persistente pendiente de conectar y probar con la migración).
+- [x] UI de bandeja, contador de no leídas y marcado como leído (pendiente prueba end-to-end con la migración aplicada).
 - [ ] Flujo de reportes y moderación en el panel.
 - [ ] Probar visibilidad pública/seguidores/privada.
 
