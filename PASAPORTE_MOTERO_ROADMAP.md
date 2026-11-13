@@ -29,6 +29,7 @@
 ## Fase 4 — Administración
 - [x] Esquema de asignación de encargados por departamento y lectura regional acotada.
 - [ ] UI de administración para asignaciones.
+- [x] Restringir en código las Edge Functions de revisión y QR para que los encargados solo operen en departamentos asignados (requiere aplicar y probar migración 0014 antes del despliegue).
 - [ ] Cola de revisión de visitas y de reportes.
 - [ ] CRUD seguro del catálogo con auditoría.
 
