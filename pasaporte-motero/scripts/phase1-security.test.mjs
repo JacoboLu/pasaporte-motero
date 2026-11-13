@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const migration = readFileSync(new URL('../pasaporte-motero/supabase/migrations/0016_phase1_security_hardening.sql', import.meta.url), 'utf8');
-const gps = readFileSync(new URL('../pasaporte-motero/supabase/functions/validate-gps-visit/index.ts', import.meta.url), 'utf8');
-const app = readFileSync(new URL('../pasaporte-motero/src/App.tsx', import.meta.url), 'utf8');
+const migration = readFileSync(new URL('../supabase/migrations/0016_phase1_security_hardening.sql', import.meta.url), 'utf8');
+const gps = readFileSync(new URL('../supabase/functions/validate-gps-visit/index.ts', import.meta.url), 'utf8');
+const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
 
 assert.match(migration, /revoke update on public\.app_visits from authenticated/i);
 assert.match(migration, /grant update \(evidence_path\) on public\.app_visits to authenticated/i);
