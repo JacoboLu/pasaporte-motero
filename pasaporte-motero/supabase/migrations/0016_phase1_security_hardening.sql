@@ -11,10 +11,7 @@ create policy "Owners clear own visit evidence"
   using (user_id = (select auth.uid()))
   with check (
     user_id = (select auth.uid())
-    and (
-      evidence_path is null
-      or evidence_path like (select auth.uid())::text || '/visits/%'
-    )
+    and evidence_path is null
   );
 
 -- Clients can only submit pending visits; staff review remains server-side.
