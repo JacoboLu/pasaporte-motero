@@ -6,6 +6,28 @@ const cors = {
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
 };
 
+async function managerDepartmentNames(admin: any, userId: string): Promise<string[]> {
+  const { data: assignments, error: assignmentError } = await admin.from("department_managers")
+    .select("department_code").eq("user_id", userId).eq("is_active", true);
+  if (assignmentError) throw assignmentError;
+  const codes = (assignments || []).map((item: any) => item.department_code).filter(Boolean);
+  if (!codes.length) return [];
+  const { data: departments, error: departmentError } = await admin.from("passport_department_catalog")
+    .select("name").in("code", codes);
+  if (departmentError) throw departmentError;
+  return (departments || []).map((item: any) => String(item.name).trim().toLocaleLowerCase("es-PE"));
+}
+
+async function managerCanManageDestination(admin: any, userId: string, destinationId: number): Promise<boolean> {
+  const [names, destinationResult] = await Promise.all([
+    managerDepartmentNames(admin, userId),
+    admin.from("destination_catalog").select("department").eq("id", destinationId).maybeSingle(),
+  ]);
+  if (destinationResult.error) throw destinationResult.error;
+  const department = String(destinationResult.data?.department || "").trim().toLocaleLowerCase("es-PE");
+  return Boolean(department && names.includes(department));
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
@@ -27,6 +49,8 @@ Deno.serve(async (req: Request) => {
     if (profileError) throw profileError;
     if (!profile || !["admin", "manager"].includes(profile.role)) return json({ error: "Se requiere rol de encargado o administrador" }, 403);
 
+    const allowedDepartments = profile.role === "manager" ? await managerDepartmentNames(admin, authData.user.id) : null;
+
     if (req.method === "GET") {
       const { data, error } = await admin.from("app_visits")
         .select("id,user_id,destination_id,visited_at,validation_method,validation_status,notes,evidence_path")
@@ -38,9 +62,10 @@ Deno.serve(async (req: Request) => {
           admin.from("profiles").select("username,full_name,avatar_url").eq("id", visit.user_id).maybeSingle(),
           visit.evidence_path ? admin.storage.from("travel-media").createSignedUrl(visit.evidence_path, 900) : Promise.resolve({ data: null }),
         ]);
+        if (allowedDepartments && !allowedDepartments.includes(String(destination?.department || "").trim().toLocaleLowerCase("es-PE"))) return null;
         return { ...visit, destination, rider, evidence_url: signed.data?.signedUrl || null };
       }));
-      return json({ visits: rows });
+      return json({ visits: rows.filter(Boolean) });
     }
 
     if (req.method === "POST") {
@@ -51,9 +76,10 @@ Deno.serve(async (req: Request) => {
       if (!visitId || !["validated", "rejected"].includes(decision)) return json({ error: "Solicitud inválida" }, 400);
       if (decision === "rejected" && !reason) return json({ error: "Indica el motivo del rechazo" }, 400);
       const { data: visit, error: readError } = await admin.from("app_visits")
-        .select("id,validation_status").eq("id", visitId).maybeSingle();
+        .select("id,destination_id,validation_status").eq("id", visitId).maybeSingle();
       if (readError) throw readError;
       if (!visit) return json({ error: "Visita no encontrada" }, 404);
+      if (profile.role === "manager" && !await managerCanManageDestination(admin, authData.user.id, visit.destination_id)) return json({ error: "No tienes asignación para gestionar este departamento" }, 403);
       if (visit.validation_status !== "pending") return json({ error: "La visita ya fue revisada" }, 409);
       const { data: updated, error: updateError } = await admin.from("app_visits")
         .update({
