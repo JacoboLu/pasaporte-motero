@@ -348,7 +348,7 @@ export default function App() {
           const latitude = row.latitude === null || row.latitude === undefined || row.latitude === '' ? null : Number(row.latitude)
           const longitude = row.longitude === null || row.longitude === undefined || row.longitude === '' ? null : Number(row.longitude)
           const note = String(row.source_note || '')
-          const credit = note.match(/Fotografía:\\s*([^;]+);\\s*Wikimedia Commons;\\s*(CC BY-SA [^;]+);\\s*(https:\\/\\/commons\\.wikimedia\\.org\\/wiki\\/File:[^;]+)/i)
+          const credit = note.match(/Fotografía:\s*([^;]+);\s*Wikimedia Commons;\s*(CC BY-SA [^;]+);\s*(https:[^;]+)/i)
           return { id:Number(row.id), title:row.name, region:row.department || 'Perú', province:row.province || row.department || '', city:row.city || row.province || '', category, distance:'—', image:typeof row.image_url === 'string' ? row.image_url : '', imageCredit:credit ? `${credit[1].trim()} · ${credit[2].trim()}` : '', imageCreditUrl:credit ? credit[3].trim() : '', description:row.description || '', lat:Number.isFinite(latitude) ? latitude : null, lng:Number.isFinite(longitude) ? longitude : null, radius:Number(row.geofence_radius_m) || 250 }
         })
         if (rows.length) setMapDestinations(rows)
