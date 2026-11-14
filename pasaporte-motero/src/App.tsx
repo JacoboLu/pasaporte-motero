@@ -147,6 +147,7 @@ function distanceMeters(a: GeolocationCoordinates, lat: number, lng: number) {
   return 6371000 * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x))
 }
 function initials(name: string) { return name.split(' ').filter(Boolean).slice(0,2).map(x => x[0]).join('').toUpperCase() || 'VM' }
+function normalizeSearchText(value: string) { return value.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLocaleLowerCase('es-PE').replace(/[^a-z0-9]+/g, ' ').trim() }
 function distanceKmBetween(lat1: number, lng1: number, lat2: number, lng2: number) {
   const rad = (value: number) => value * Math.PI / 180
   const dLat = rad(lat2 - lat1), dLng = rad(lng2 - lng1)
@@ -159,6 +160,7 @@ export default function App() {
   const [tab, setTab] = useState<Tab>('explore')
   const [subview, setSubview] = useState('')
   const [query, setQuery] = useState('')
+  const [searchFocused, setSearchFocused] = useState(false)
   const [category, setCategory] = useState('Todos')
   const [regionFilter, setRegionFilter] = useState('Todos')
   const [selected, setSelected] = useState<Destination | null>(null)
@@ -445,7 +447,30 @@ export default function App() {
   const visitedRegionCount = authUserId ? departmentPages.filter(page => page.earned).length : 0
   const progress = Math.round(visitedRegionCount / 25 * 100)
   const passportSpreadCount = Math.ceil(departmentPages.length / 2)
-  const filteredDestinations = mapDestinations.filter(d => (category === 'Todos' || d.category === category) && (regionFilter === 'Todos' || d.region === regionFilter) && `${d.title} ${d.region} ${d.province} ${d.city}`.toLowerCase().includes(query.toLowerCase()))
+  const normalizedQuery = normalizeSearchText(query)
+  const filteredDestinations = mapDestinations.filter(d => {
+    const categoryMatch = category === 'Todos' || d.category === category
+    const regionMatch = regionFilter === 'Todos' || normalizeSearchText(d.region) === normalizeSearchText(regionFilter)
+    const searchable = normalizeSearchText(`${d.title} ${d.region} ${d.province} ${d.city} ${d.category}`)
+    const queryMatch = !normalizedQuery || normalizedQuery.split(' ').every(term => searchable.includes(term))
+    return categoryMatch && regionMatch && queryMatch
+  })
+  const searchSuggestions = useMemo(() => {
+    if (normalizedQuery.length < 2) return []
+    const values = new Map<string, {label:string; kind:string; count:number; rank:number}>()
+    const add = (label:string, kind:string, rank:number) => {
+      const key = `${kind}:${normalizeSearchText(label)}`
+      const current = values.get(key)
+      values.set(key, {label,kind,count:(current?.count || 0)+1,rank})
+    }
+    mapDestinations.forEach(d => {
+      if (normalizeSearchText(d.title).includes(normalizedQuery) || normalizedQuery.split(' ').every(term => normalizeSearchText(d.title).includes(term))) add(d.title,'Lugar',0)
+      if (normalizeSearchText(d.city).includes(normalizedQuery)) add(d.city,'Ciudad',1)
+      if (normalizeSearchText(d.province).includes(normalizedQuery)) add(d.province,'Provincia',2)
+      if (normalizeSearchText(d.region).includes(normalizedQuery)) add(d.region,'Departamento',3)
+    })
+    return [...values.values()].sort((a,b)=>a.rank-b.rank || b.count-a.count || a.label.localeCompare(b.label,'es')).slice(0,7)
+  }, [mapDestinations, normalizedQuery])
   const visibleDestinations = filteredDestinations.slice(0, destinationPage * 8)
   const nearbyDestinations = useMemo(() => mapDestinations
     .filter(destination => !visitedIds.has(destination.id) && !visits.some(visit => visit.destinationId === destination.id && visit.status === 'pending'))
@@ -453,7 +478,7 @@ export default function App() {
     .sort((a, b) => exploreLocation ? (a.distanceFromUser ?? Infinity) - (b.distanceFromUser ?? Infinity) : a.id - b.id)
     .slice(0, 4), [mapDestinations, visitedIds, visits, exploreLocation])
   const catalogOpen = showAllDestinations || !!query.trim() || regionFilter !== 'Todos' || category !== 'Todos'
-  const filteredMapDestinations = mapDestinations.filter(d => (category === 'Todos' || d.category === category) && (regionFilter === 'Todos' || d.region === regionFilter) && `${d.title} ${d.region} ${d.province} ${d.city}`.toLowerCase().includes(query.toLowerCase()))
+  const filteredMapDestinations = filteredDestinations
   const visiblePosts = posts.filter(p => p.visibility !== 'private').filter(p => feedMode === 'all' || (!!p.authorId && followed.includes(p.authorId)))
 
   function openTab(next: Tab) { setSubview(''); setSelected(null); setSelectedDepartment(null); setTab(next) }
@@ -1447,11 +1472,12 @@ export default function App() {
       </section> : <>
         {tab === 'explore' && <section>
           <div className="page-heading"><div><span className="eyebrow">DESCUBRE EL PERÚ</span><h1>Tu próxima aventura te espera.</h1><p className="muted">Encuentra rutas, paisajes y lugares para sumar a tu pasaporte.</p></div><div className="heading-icon"><Compass size={23}/></div></div>
-          <div className="search-row"><div className="searchbox"><Search size={18}/><input aria-label="Buscar destinos" placeholder="Buscar destinos, ciudades..." value={query} onChange={e => setQuery(e.target.value)}/></div></div>
+          <div className="search-row search-row-autocomplete"><div className={`searchbox ${searchFocused ? 'is-focused' : ''}`}><Search size={18}/><input aria-label="Buscar destinos, ciudades, provincias o departamentos" placeholder="Buscar destinos, ciudades, departamentos..." value={query} onFocus={() => setSearchFocused(true)} onChange={e => {setQuery(e.target.value);setShowAllDestinations(true);setDestinationPage(1)}} onKeyDown={e => {if(e.key==='Escape')setSearchFocused(false);if(e.key==='Enter' && searchSuggestions[0]){setQuery(searchSuggestions[0].label);setShowAllDestinations(true);setSearchFocused(false)}}}/>{query && <button type="button" className="search-clear" aria-label="Limpiar búsqueda" onClick={() => {setQuery('');setSearchFocused(true)}}><X size={16}/></button>}</div></div>
+          {searchFocused && searchSuggestions.length > 0 && <div className="search-suggestions" role="listbox" aria-label="Sugerencias de búsqueda">{searchSuggestions.map((item,index)=><button type="button" key={`${item.kind}-${item.label}-${index}`} role="option" aria-selected={false} onMouseDown={e=>e.preventDefault()} onClick={()=>{setQuery(item.label);setShowAllDestinations(true);setDestinationPage(1);setSearchFocused(false);setCategory('Todos');setRegionFilter('Todos')}}><span className="search-suggestion-icon"><Search size={14}/></span><span className="search-suggestion-copy"><strong>{item.label}</strong><small>{item.kind}{item.kind==='Ciudad' || item.kind==='Provincia' ? ` · ${item.count} destinos` : ''}</small></span><ChevronRight size={15}/></button>)}</div>}
           <div className="explore-location-panel"><div className="explore-location-copy"><span className="explore-location-icon"><LocateFixed size={17}/></span><div><strong>{exploreLocation ? 'Ubicación activa' : 'Descubre destinos cerca de ti'}</strong><small>{exploreLocation ? 'Distancias aproximadas en línea recta' : 'Activa el GPS para ordenar los lugares por cercanía'}</small></div></div><button className="explore-location-button" onClick={requestExploreLocation} disabled={locationBusy}><LocateFixed size={15}/>{locationBusy ? 'Localizando…' : exploreLocation ? 'Actualizar' : 'Usar mi ubicación'}</button></div>
           <div className="section-heading explore-section-heading"><div><h2>{exploreLocation ? 'Cerca de tu ubicación' : 'Destinos destacados'}</h2><small>{exploreLocation ? 'Los más próximos a tu posición actual' : 'Activa tu ubicación para ver distancias y ordenar por cercanía'}</small></div><button className="text-action" onClick={() => setMapMode(!mapMode)}><Map size={15}/>{mapMode ? 'Ver lista' : 'Ver mapa'}</button></div>
           {!mapMode && <div className="nearby-destination-list">{nearbyDestinations.map(dest => <button className="nearby-destination-card" key={dest.id} onClick={() => setSelected(dest)}><img src={dest.image} alt=""/><span className="nearby-destination-copy"><strong>{dest.title}</strong><small><MapPin size={12}/> {dest.city}, {dest.region}</small><span className="nearby-destination-meta"><i>{dest.category}</i>{dest.distanceFromUser !== null ? <b>{formatDistanceKm(dest.distanceFromUser)}</b> : <em>Activa GPS para ver distancia</em>}</span></span><ChevronRight size={17}/></button>)}</div>}
-          <button className="catalog-toggle" onClick={() => { setShowAllDestinations(value => !value); setMapMode(false); setDestinationPage(1) }}><span><Compass size={16}/>{catalogOpen ? 'Ocultar catálogo completo' : 'Explorar todos los destinos'}</span><span>{mapDestinations.length} lugares <ChevronDown size={15} className={catalogOpen ? 'rotated' : ''}/></span></button>
+          <button className="catalog-toggle" onClick={() => { setShowAllDestinations(value => !value); setMapMode(false); setDestinationPage(1); setSearchFocused(false) }}><span><Compass size={16}/>{catalogOpen ? 'Ocultar catálogo completo' : 'Explorar todos los destinos'}</span><span>{mapDestinations.length} lugares <ChevronDown size={15} className={catalogOpen ? 'rotated' : ''}/></span></button>
           {mapMode && <div className="map-placeholder map-frame"><iframe title="Mapa de destinos registrados en Pasaporte Motero" srcDoc={`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>html,body,#map{height:100%;margin:0;font-family:Arial} .leaflet-popup-content{font-size:13px}</style></head><body><div id="map"></div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>const map=L.map('map').setView([-9.19,-75.02],5);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);const points=${JSON.stringify(filteredMapDestinations.map(d=>({name:d.title,city:d.city,region:d.region,lat:d.lat,lng:d.lng})))};const valid=points.filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lng));valid.forEach(p=>{const marker=L.marker([p.lat,p.lng]).addTo(map);marker.bindPopup('<strong>'+String(p.name).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))+'</strong><br>'+p.city+', '+p.region)});if(valid.length){const bounds=L.latLngBounds(valid.map(p=>[p.lat,p.lng]));if(bounds.isValid())map.fitBounds(bounds.pad(.12));}setTimeout(()=>map.invalidateSize(),180)</script></body></html>`} loading="lazy"/><span>{filteredMapDestinations.length} destinos registrados en el catálogo · Selecciona un marcador para ver su nombre.</span><button className="text-action" onClick={() => setMapMode(false)}>Volver a la lista</button></div>}
           {catalogOpen && <div className="explore-catalog-panel"><div className="catalog-filter-row"><label>Departamento<select value={regionFilter} onChange={e => {setRegionFilter(e.target.value);setDestinationPage(1)}}><option value="Todos">Todo el Perú</option>{allRegions.map(region => <option key={region} value={region}>{region}</option>)}</select></label><label>Categoría<select value={category} onChange={e => {setCategory(e.target.value);setDestinationPage(1)}}>{categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}</select></label></div>
             <div className="chips">{categories.map(cat => <button key={cat} className={category === cat ? 'chip active' : 'chip'} onClick={() => {setCategory(cat);setDestinationPage(1)}}>{cat}</button>)}</div>
