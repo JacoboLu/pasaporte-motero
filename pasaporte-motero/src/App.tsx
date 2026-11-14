@@ -15,7 +15,7 @@ import { clearPrivateCache, migrateLegacyPrivateCache, readPrivateCache, writePr
 
 type Tab = 'explore' | 'passport' | 'community' | 'profile'
 type VisitStatus = 'validated' | 'pending' | 'rejected'
-type Destination = { id: number; title: string; region: string; province: string; city: string; category: string; distance: string; image: string; description: string; lat: number | null; lng: number | null; radius: number }
+type Destination = { id: number; title: string; region: string; province: string; city: string; category: string; distance: string; image: string; imageCredit?: string; imageCreditUrl?: string; description: string; lat: number | null; lng: number | null; radius: number }
 type Post = { id: string | number; title: string; text: string; place: string; date: string; likes: number; liked?: boolean; saved?: boolean; visibility: 'public'|'followers'|'private'; image?: string; comments: string[]; kind?: 'post'|'trip'; tripStops?: string[]; tripPhotos?: string[]; authorName?: string; authorUsername?: string; authorAvatar?: string | null; authorId?: string; createdAt?: string }
 type Visit = { id: string | number; destinationId: number; date: string; method: 'gps'|'photo'|'qr'; status: VisitStatus; note?: string; image?: string }
 type TripStop = { name: string; catalogDestinationId: number | null; sortOrder: number }
@@ -338,7 +338,7 @@ export default function App() {
     if (!supabase) return
     let active = true
     void supabase.from('destination_catalog')
-      .select('id,name,department,province,city,category,description,latitude,longitude,geofence_radius_m,image_url')
+      .select('id,name,department,province,city,category,description,latitude,longitude,geofence_radius_m,image_url,source_note')
       .eq('is_active', true)
       .then(({ data, error }) => {
         if (!active) return
@@ -347,7 +347,9 @@ export default function App() {
           const category = row.category || 'Destino'
           const latitude = row.latitude === null || row.latitude === undefined || row.latitude === '' ? null : Number(row.latitude)
           const longitude = row.longitude === null || row.longitude === undefined || row.longitude === '' ? null : Number(row.longitude)
-          return { id:Number(row.id), title:row.name, region:row.department || 'Perú', province:row.province || row.department || '', city:row.city || row.province || '', category, distance:'—', image:typeof row.image_url === 'string' ? row.image_url : '', description:row.description || '', lat:Number.isFinite(latitude) ? latitude : null, lng:Number.isFinite(longitude) ? longitude : null, radius:Number(row.geofence_radius_m) || 250 }
+          const note = String(row.source_note || '')
+          const credit = note.match(/Fotografía:\s*([^;]+);\s*Wikimedia Commons;\s*(CC BY-SA [^;]+);\s*(https:[^;]+)/i)
+          return { id:Number(row.id), title:row.name, region:row.department || 'Perú', province:row.province || row.department || '', city:row.city || row.province || '', category, distance:'—', image:typeof row.image_url === 'string' ? row.image_url : '', imageCredit:credit ? `${credit[1].trim()} · ${credit[2].trim()}` : '', imageCreditUrl:credit ? credit[3].trim() : '', description:row.description || '', lat:Number.isFinite(latitude) ? latitude : null, lng:Number.isFinite(longitude) ? longitude : null, radius:Number(row.geofence_radius_m) || 250 }
         })
         if (rows.length) setMapDestinations(rows)
       })
@@ -1465,7 +1467,7 @@ export default function App() {
         </>}
       </section> : selected ? <section className="destination-detail">
         <button className="back-link" onClick={() => setSelected(null)}><ArrowLeft size={17}/> Volver a destinos</button>
-        <div className="destination-hero">{selected.image ? <img src={selected.image} alt={selected.title}/> : <div className="destination-photo-placeholder destination-hero-placeholder"><Compass size={34}/><span>Fotografía pendiente de verificación</span></div>}<div className="hero-shade"/><span className="hero-category">{selected.category}</span><h1>{selected.title}</h1><p><MapPin size={14}/> {selected.city}, {selected.region}</p></div>
+        <div className="destination-hero">{selected.image ? <img src={selected.image} alt={selected.title}/> : <div className="destination-photo-placeholder destination-hero-placeholder"><Compass size={34}/><span>Fotografía pendiente de verificación</span></div>}<div className="hero-shade"/><span className="hero-category">{selected.category}</span><h1>{selected.title}</h1><p><MapPin size={14}/> {selected.city}, {selected.region}</p></div>{selected.imageCredit && selected.imageCreditUrl && <p className="destination-image-credit">Fotografía: <a href={selected.imageCreditUrl} target="_blank" rel="noreferrer">{selected.imageCredit}</a> · Wikimedia Commons</p>}
         <div className="detail-actions"><button className="primary" onClick={() => { setVisitDestination(selected.id); openAction('visit') }}><ShieldCheck size={17}/> Validar visita</button><button className="secondary" onClick={() => toggleSaved(selected.id)}><Bookmark size={17}/> {saved.includes(selected.id) ? 'Guardado' : 'Guardar'}</button></div>
         <p className="detail-description">{selected.description}</p>
         <div className="detail-info"><span><MapPinned size={16}/> {selected.province}, {selected.region}</span>{exploreLocation && selected.lat !== null && selected.lng !== null && <span><LocateFixed size={16}/> A {formatDistanceKm(distanceKmBetween(exploreLocation.lat, exploreLocation.lng, selected.lat, selected.lng))} en línea recta</span>}<span><LocateFixed size={16}/> Radio de validación: {selected.radius} m</span></div>

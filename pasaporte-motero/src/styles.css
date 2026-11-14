@@ -1721,3 +1721,8 @@ html[data-theme="light"] .destination-compact .destination-card>img,
  .destination-compact .destination-copy small{font-size:9px!important}
  .destination-compact .destination-distance{right:7px!important;max-width:72px!important;padding:7px 6px!important;font-size:9px!important}
 }
+
+.destination-image-credit{margin:8px 0 14px;color:var(--muted-text,#697786);font-size:9px;line-height:1.5}
+.destination-image-credit a{color:#b85b1c;text-decoration:underline;text-underline-offset:2px}
+.theme-dark .destination-image-credit{color:#aeb7c1}
+.theme-dark .destination-image-credit a{color:#ffad78}
