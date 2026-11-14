@@ -467,7 +467,7 @@ export default function App() {
   })
   const searchSuggestions = useMemo(() => {
     if (normalizedQuery.length < 2) return []
-    const values = new Map<string, {label:string; kind:string; count:number; rank:number}>()
+    const values = new globalThis.Map<string, {label:string; kind:string; count:number; rank:number}>()
     const add = (label:string, kind:string, rank:number) => {
       const key = `${kind}:${normalizeSearchText(label)}`
       const current = values.get(key)
