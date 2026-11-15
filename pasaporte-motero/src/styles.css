@@ -524,7 +524,7 @@ html[data-theme="light"] .community-trip-caption{color:#647180}
 .theme-light .community-route li{color:#566473}
 .theme-light .community-post-actions{border-color:#e7ebef}
 .theme-light .community-post-actions button{color:#566473}
-@media(max-width:380px){.community-post-content h3{font-size:17px}.community-post-cover{aspect-ratio:4/3}.community-post-actions button{gap:5px;padding:0 4px;font-size:10px}.community-post-gallery img{height:82px}}
+@media(max-width:380px){.community-post-content h3{font-size:17px}.community-post-actions button{gap:5px;padding:0 4px;font-size:10px}.community-post-gallery img{height:82px}}
 
 
 /* Descubrimiento de viajeros, perfiles públicos y galería administrable */
@@ -1729,3 +1729,7 @@ html[data-theme="light"] .destination-compact .destination-card>img,
 
 /* Las fotos de publicaciones conservan su relación de aspecto original. */
 .post-image-guidance{margin:-5px 2px 10px}
+
+/* Override mobile legacy ratio: post images must determine their own height. */
+.community-post .community-post-cover{height:auto!important;max-height:none!important;aspect-ratio:auto!important}
+.community-post .community-post-cover>img{display:block;width:100%;height:auto!important;max-height:none!important;aspect-ratio:auto!important;object-fit:contain!important;object-position:center}
