@@ -663,7 +663,7 @@ export default function App() {
 
   async function shareCommunityPost(post: Post) {
     const routeText = post.kind === 'trip' && post.tripStops?.length
-      ? '\\n\\nRuta: ' + post.tripStops.join(' → ')
+      ? '\n\nRuta: ' + post.tripStops.join(' → ')
       : ''
     const shareText = [
       post.title,
@@ -674,7 +674,7 @@ export default function App() {
       'Compartido desde Pasaporte Motero 🏍️',
       'Descubre destinos, registra tus viajes y comparte tus aventuras.',
       '#PasaporteMotero #AventuraEnMoto #RutasDelPerú'
-    ].filter(Boolean).join('\\n')
+    ].filter(Boolean).join('\n')
     let brandedFile: File | undefined
     if (post.image) {
       try { brandedFile = await makeBrandedShareImage(post.image, post.title, post.place) }
