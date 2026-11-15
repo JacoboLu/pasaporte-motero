@@ -1522,9 +1522,31 @@ export default function App() {
     { id: 'community', label: 'Comunidad', icon: Users }, { id: 'profile', label: 'Perfil', icon: UserRound },
   ]
 
+  const subviewTitles: Record<string, string> = {
+    preferences: 'Configuración', settings: 'Perfil y privacidad', motorcycle: 'Mi motocicleta',
+    trips: 'Mis viajes', memories: 'Galería de viajes', saved: 'Guardados',
+    activity: 'Mi actividad', 'personal-qr': 'Mi QR de viajero', 'public-profile': 'Perfil viajero',
+  }
+  const activeHeaderTitle = selectedDepartmentPage
+    ? selectedDepartmentPage.name
+    : selected
+      ? selected.title
+      : subview
+        ? (subview === 'public-profile' && selectedPublicProfile
+            ? (selectedPublicProfile.full_name || selectedPublicProfile.username || 'Perfil viajero')
+            : (subviewTitles[subview] || 'Pasaporte Motero'))
+        : navItems.find(item => item.id === tab)?.label || 'Pasaporte Motero'
+  const activeHeaderSubtitle = selectedDepartmentPage
+    ? 'Tu colección de sellos'
+    : selected
+      ? 'Detalle del destino'
+      : subview
+        ? 'Pasaporte Motero · Perú'
+        : ({ explore: 'Rutas · Historias · Destinos', passport: 'Tus destinos y sellos', community: 'Viajeros y experiencias', profile: 'Tu identidad viajera' } as Record<Tab,string>)[tab]
+
   return <div className={`app-shell theme-${theme}`}>
-    <header className="topbar">
-      <button className="brand" onClick={() => openTab('explore')} aria-label="Ir a inicio"><span className="brand-mark"><Bike size={21}/></span><span><strong>PASAPORTE MOTERO</strong><small>RUTAS · HISTORIAS · DESTINOS</small></span></button>
+    <header className={`topbar ${tab !== 'explore' || subview || selected || selectedDepartment ? 'topbar-contextual' : ''}`}>
+      <button className="brand" onClick={() => { if (subview) { setSubview(''); setSelectedPublicProfile(null) } else if (selected || selectedDepartment) { setSelected(null); setSelectedDepartment(null) } else openTab('explore') }} aria-label="Volver a la sección principal"><span className="brand-mark"><Bike size={21}/></span><span className="brand-heading"><strong>{activeHeaderTitle}</strong><small>{activeHeaderSubtitle}</small></span></button>
       <div className="top-actions"><span className={`connection-dot ${offline ? 'off' : ''}`} title={offline ? 'Sin conexión' : 'Con conexión'}/><button className="icon-button theme-toggle" aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'} title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'} onClick={() => setTheme(v => v === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? <Sun size={18}/> : <Moon size={18}/>}</button><button className="icon-button notification-trigger" aria-label="Abrir notificaciones" title="Notificaciones" onClick={openNotifications}><Bell size={19}/>{unreadNotificationCount > 0 && <span className="notification-count">{unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}</span>}</button></div>
     </header>
     {offline && <div className="offline-banner"><CloudOff size={15}/> Sin conexión. Puedes consultar contenido previamente cargado; las acciones que requieren sincronización estarán disponibles al recuperar Internet.</div>}
@@ -1571,7 +1593,7 @@ export default function App() {
         <div className="section-heading"><h2>Tu estado</h2></div><div className="status-card">{visitedIds.has(selected.id) ? <><BadgeCheck/><div><strong>Destino visitado</strong><small>Ya tienes este sello en tu pasaporte.</small></div></> : <><Lock/><div><strong>Pendiente de visitar</strong><small>Completa una visita para obtener el sello.</small></div></>}</div>
       </section> : <>
         {tab === 'explore' && <section className="explore-screen">
-          <div className="explore-heading">
+          <div className="explore-heading tab-page-heading">
             <div><span className="eyebrow">PASAPORTE MOTERO · PERÚ</span><h1>Explora el Perú</h1><p className="muted">Encuentra tu próxima ruta y descubre nuevos destinos.</p></div>
             <div className="heading-icon"><Compass size={22}/></div>
           </div>
@@ -1598,7 +1620,7 @@ export default function App() {
           </div>}
         </section>}
         {tab === 'passport' && <section>
-          <div className="page-heading"><div><span className="eyebrow">DOCUMENTA CADA AVENTURA</span><h1>Mi pasaporte</h1><p className="muted">Cada destino visitado deja una historia y un sello.</p></div><div className="heading-icon"><ShieldCheck size={23}/></div></div>
+          <div className="page-heading tab-page-heading"><div><span className="eyebrow">DOCUMENTA CADA AVENTURA</span><h1>Mi pasaporte</h1><p className="muted">Cada destino visitado deja una historia y un sello.</p></div><div className="heading-icon"><ShieldCheck size={23}/></div></div>
           <div className="passport-cover"><div className="passport-security passport-security-one"/><div className="passport-security passport-security-two"/><div className="passport-watermark"><Compass size={190}/></div><div className="cover-top"><span>✦</span> REPÚBLICA DEL PERÚ <span>✦</span></div><div className="cover-emblem"><Bike size={39}/><span className="emblem-orbit"/></div><div className="cover-title">PASAPORTE<br/>MOTERO</div><div className="cover-subtitle">DOCUMENTO DE RUTA Y AVENTURA</div><div className="cover-divider"><span/><i/><span/></div><div className="cover-bottom"><span>TRAVEL</span><i/> <span>EXPLORE</span><i/> <span>REPEAT</span></div><div className="passport-serial">PM · PER · 2026</div><div className="passport-microtext">RUTAS QUE NOS UNEN · PERÚ · LIBERTAD SOBRE RUEDAS</div></div>
           <div className="stats-grid"><div className="stat"><strong>{Math.max(0, Number(visitedCount) || 0)}</strong><span>Lugares visitados</span></div><div className="stat"><strong>{Math.max(0, Number(departmentStamps?.length) || 0)}</strong><span>Sellos obtenidos</span></div><div className="stat"><strong>{Math.max(0, authUserId ? Number(trips?.length) || 0 : 0)}</strong><span>Viajes</span></div></div>
           <div className="section-heading"><h2>Exploración del Perú</h2><span className="muted tiny">{progress}% · {visitedRegionCount}/25 departamentos</span></div><div className="progress"><span style={{width: `${progress}%`}}/></div>
@@ -1619,7 +1641,7 @@ export default function App() {
         {tab === 'community' && <section>
           {subview === 'public-profile' && selectedPublicProfile ? <div className="public-profile-view"><button className="back-link" onClick={()=>{setSubview('');setSelectedPublicProfile(null)}}><ArrowLeft size={17}/> Volver a Comunidad</button>{publicProfileBusy ? <div className="empty-card"><span className="muted">Cargando perfil…</span></div> : <><div className="public-profile-card"><div className="public-profile-avatar">{selectedPublicProfile.avatar_url ? <img src={selectedPublicProfile.avatar_url} alt=""/> : initials(selectedPublicProfile.full_name || selectedPublicProfile.username || 'Viajero')}</div><h1>{selectedPublicProfile.full_name || selectedPublicProfile.username || 'Viajero Motero'}</h1><span className="muted">@{selectedPublicProfile.username || 'viajero'}</span>{selectedPublicProfile.bio && <p>{selectedPublicProfile.bio}</p>}{(selectedPublicProfile.city || selectedPublicProfile.country) && <small><MapPin size={14}/> {[selectedPublicProfile.city,selectedPublicProfile.country].filter(Boolean).join(', ')}</small>}{(selectedPublicProfile.motorcycle_brand || selectedPublicProfile.motorcycle_model) && <small><Bike size={14}/> {[selectedPublicProfile.motorcycle_brand,selectedPublicProfile.motorcycle_model,selectedPublicProfile.motorcycle_year].filter(Boolean).join(' ')}</small>}<div className="public-profile-stats"><span><b>{posts.filter(p=>p.authorId===selectedPublicProfile.id).length}</b> publicaciones y viajes</span></div><button className={followed.includes(selectedPublicProfile.id)?'secondary full':'primary full'} onClick={()=>void followUser(selectedPublicProfile)}>{followed.includes(selectedPublicProfile.id)?'Dejar de seguir':'Seguir viajero'} <UserPlus size={16}/></button></div><div className="section-heading"><h2>Su actividad pública</h2></div><div className="public-profile-feed">{posts.filter(p=>p.authorId===selectedPublicProfile.id && p.visibility!=='private').map(post=><article className="community-post public-profile-post" key={post.id}>{post.image && <img className="public-profile-post-image" src={post.image} alt=""/>}<div className="community-post-content"><span className="community-post-location">{post.kind==='trip'?'BITÁCORA DE VIAJE':'PUBLICACIÓN'} · {post.date}</span><h3>{post.title}</h3><p>{post.text}</p>{!!post.tripStops?.length && <div className="community-route"><strong><Route size={15}/> Ruta del viaje</strong><ol>{post.tripStops.map((stop,index)=><li key={index}>{stop}</li>)}</ol></div>}</div></article>)}{posts.every(p=>p.authorId!==selectedPublicProfile.id) && <div className="empty-card"><Users size={28}/><h3>Aún no hay publicaciones</h3><p>Este viajero todavía no ha compartido historias públicas.</p></div>}</div></>}</div> : <>
           <div className="community-topbar">
-            <div className="page-heading"><div><span className="eyebrow">TU COMUNIDAD VIAJERA</span><h1>Comunidad</h1><p className="muted">Conecta con viajeros y comparte cada ruta.</p></div><div className="heading-icon"><Users size={23}/></div></div>
+            <div className="page-heading tab-page-heading"><div><span className="eyebrow">TU COMUNIDAD VIAJERA</span><h1>Comunidad</h1><p className="muted">Conecta con viajeros y comparte cada ruta.</p></div><div className="heading-icon"><Users size={23}/></div></div>
             <div className="community-discovery-bar">
               <div className="community-search-input"><Search size={18}/><input aria-label="Buscar viajeros" value={communitySearch} onChange={e=>setCommunitySearch(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')void searchCommunityUsers()}} placeholder="Buscar personas, usuarios o ciudades"/></div>
               <button className="community-search-submit" aria-label="Buscar viajeros" disabled={searchingUsers} onClick={()=>void searchCommunityUsers()}>{searchingUsers?<span className="community-search-spinner"/>:<Search size={19}/>}</button>
