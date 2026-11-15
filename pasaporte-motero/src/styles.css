@@ -1780,3 +1780,54 @@ html[data-theme="light"] .destination-compact .destination-card>img,
  .explore-screen .nearby-destination-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible;margin:0 0 15px;padding:0}
  .explore-screen .nearby-destination-card{width:100%;min-width:0;flex-basis:auto}
 }
+
+
+/* PM V3.1 — cabecera contextual y jerarquía unificada entre pestañas */
+.topbar{
+  position:sticky;top:0;z-index:15;min-height:68px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:10px 18px calc(10px + env(safe-area-inset-top));
+  background:var(--app-bg,#111);border-bottom:1px solid var(--line-color,#ffffff12);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)
+}
+.topbar .brand{min-width:0;flex:1;gap:11px}
+.topbar .brand-mark{width:42px;height:42px;flex:0 0 42px;border-radius:13px}
+.topbar .brand-heading{display:flex;min-width:0;flex-direction:column;gap:3px}
+.topbar .brand-heading strong{
+  display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  max-width:min(58vw,360px);font-size:14px;line-height:1.2;letter-spacing:.15px;
+  color:var(--main-text,#f6f6f6);font-weight:800
+}
+.topbar .brand-heading small{
+  display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  max-width:min(58vw,360px);margin:0;font-size:9px;letter-spacing:.7px;
+  color:var(--muted-text,#929aa4)
+}
+.topbar .top-actions{flex:0 0 auto;gap:5px}
+.topbar .icon-button{width:42px;height:42px;border:1px solid var(--line-color,#ffffff16);border-radius:13px;color:var(--main-text,#ddd)}
+.topbar .connection-dot{margin:0 3px}
+.content{padding-top:17px}
+.tab-page-heading{display:none!important}
+.explore-screen .explore-heading{display:none!important}
+.community-topbar .page-heading{display:none!important}
+.profile-title-row{margin:0 0 13px}
+.profile-title-row>div:first-child{display:none}
+.profile-title-row:has(.profile-settings-button){justify-content:flex-end;margin:0 0 10px}
+.passport-cover{margin:4px 0 13px}
+.stats-grid{margin-bottom:17px}
+.explore-screen .explore-search-line{margin-top:2px}
+.explore-screen .explore-quick-categories{padding-top:10px}
+.explore-screen .explore-location-panel{margin-top:9px}
+.community-topbar{margin-top:0}
+.community-discovery-bar{margin-top:2px}
+@media(max-width:480px){
+ .topbar{min-height:64px;padding-left:15px;padding-right:15px}
+ .topbar .brand-mark{width:39px;height:39px;flex-basis:39px}
+ .topbar .brand-heading strong{font-size:13px;max-width:54vw}
+ .topbar .brand-heading small{font-size:8px;max-width:54vw}
+ .topbar .icon-button{width:39px;height:39px}
+ .content{padding-top:14px}
+}
+@media(min-width:700px){
+ .topbar{padding-left:max(22px,calc((100% - 760px)/2));padding-right:max(22px,calc((100% - 760px)/2))}
+}
