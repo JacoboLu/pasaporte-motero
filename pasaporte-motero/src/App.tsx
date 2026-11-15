@@ -623,6 +623,85 @@ export default function App() {
     } catch (error:any) { notify(error?.message || 'No se pudo comprimir esta fotografía.') }
   }
 
+  async function makeBrandedShareImage(imageUrl: string, title: string, place: string): Promise<File> {
+    const image = new Image()
+    image.crossOrigin = 'anonymous'
+    image.src = imageUrl
+    await new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve()
+      image.onerror = () => reject(new Error('No se pudo cargar la fotografía para compartir.'))
+    })
+    const maxWidth = 1600
+    const scale = Math.min(1, maxWidth / image.naturalWidth)
+    const imageWidth = Math.max(1, Math.round(image.naturalWidth * scale))
+    const imageHeight = Math.max(1, Math.round(image.naturalHeight * scale))
+    const footerHeight = Math.max(112, Math.round(imageWidth * 0.105))
+    const canvas = document.createElement('canvas')
+    canvas.width = imageWidth
+    canvas.height = imageHeight + footerHeight
+    const ctx = canvas.getContext('2d')
+    if (!ctx) throw new Error('No se pudo preparar la imagen para compartir.')
+    ctx.fillStyle = '#111820'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.drawImage(image, 0, 0, imageWidth, imageHeight)
+    ctx.fillStyle = '#f28b32'
+    ctx.fillRect(0, imageHeight, imageWidth, 5)
+    ctx.fillStyle = '#ffffff'
+    ctx.font = `700 ${Math.max(22, Math.round(imageWidth * 0.034))}px Arial, sans-serif`
+    ctx.fillText('PASAPORTE MOTERO', Math.round(imageWidth * 0.045), imageHeight + Math.round(footerHeight * 0.48))
+    ctx.fillStyle = '#f5a45e'
+    ctx.font = `500 ${Math.max(13, Math.round(imageWidth * 0.019))}px Arial, sans-serif`
+    const subtitle = [title, place].filter(Boolean).join(' · ')
+    ctx.fillText(subtitle.slice(0, 90), Math.round(imageWidth * 0.045), imageHeight + Math.round(footerHeight * 0.76), imageWidth * 0.9)
+    ctx.fillStyle = '#d7dde3'
+    ctx.textAlign = 'right'
+    ctx.font = `500 ${Math.max(12, Math.round(imageWidth * 0.016))}px Arial, sans-serif`
+    ctx.fillText('Rutas · destinos · aventuras', imageWidth - Math.round(imageWidth * 0.045), imageHeight + Math.round(footerHeight * 0.48))
+    const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error('No se pudo exportar la imagen.')), 'image/jpeg', 0.92))
+    return new File([blob], 'pasaporte-motero-compartir.jpg', { type: 'image/jpeg', lastModified: Date.now() })
+  }
+
+  async function shareCommunityPost(post: Post) {
+    const routeText = post.kind === 'trip' && post.tripStops?.length
+      ? '\\n\\nRuta: ' + post.tripStops.join(' → ')
+      : ''
+    const shareText = [
+      post.title,
+      post.text,
+      post.place ? '📍 ' + post.place : '',
+      routeText,
+      '',
+      'Compartido desde Pasaporte Motero 🏍️',
+      'Descubre destinos, registra tus viajes y comparte tus aventuras.',
+      '#PasaporteMotero #AventuraEnMoto #RutasDelPerú'
+    ].filter(Boolean).join('\\n')
+    let brandedFile: File | undefined
+    if (post.image) {
+      try { brandedFile = await makeBrandedShareImage(post.image, post.title, post.place) }
+      catch { notify('No se pudo aplicar el marco a la foto. Compartiremos el texto de la publicación.'); }
+    }
+    try {
+      if (navigator.share) {
+        const shareData: ShareData = { title: post.title || 'Pasaporte Motero', text: shareText, url: window.location.origin }
+        if (brandedFile && navigator.canShare?.({ files: [brandedFile] })) shareData.files = [brandedFile]
+        await navigator.share(shareData)
+        return
+      }
+      await navigator.clipboard?.writeText(shareText)
+      if (brandedFile) {
+        const objectUrl = URL.createObjectURL(brandedFile)
+        const link = document.createElement('a')
+        link.href = objectUrl
+        link.download = brandedFile.name
+        link.click()
+        URL.revokeObjectURL(objectUrl)
+      }
+      notify('Descripción copiada. La fotografía con marca se descargó para adjuntarla.')
+    } catch (error: any) {
+      if (error?.name !== 'AbortError') notify('No se pudo abrir el menú para compartir. Inténtalo nuevamente.')
+    }
+  }
+
   async function makePersonalQr() {
     setQr('')
     const user = await getCurrentAuthUser()
@@ -1527,7 +1606,7 @@ export default function App() {
           </div>
           <button className="composer-shortcut community-composer" onClick={() => openAction('post')}><span className="avatar small">{initials(displayName)}</span><span>¿Qué aventura quieres compartir?</span><span className="round-add"><Plus size={18}/></span></button>
           {communityUsers.length>0 && <div className="community-user-results"><div className="section-heading"><h3>Viajeros encontrados</h3><button className="text-action" onClick={()=>setCommunityUsers([])}>Cerrar</button></div>{communityUsers.map(person=><div className="community-user-result" key={person.id}><button className="community-user-identity" onClick={()=>void openPublicProfile(person)}><span className="community-author-avatar">{person.avatar_url?<img src={person.avatar_url} alt=""/>:initials(person.full_name || person.username || 'V')}</span><span><strong>{person.full_name || person.username}</strong><small>@{person.username || 'viajero'}{person.city?' · '+person.city:''}</small></span></button><button className={followed.includes(person.id)?'secondary':'primary'} onClick={()=>void followUser(person)}>{followed.includes(person.id)?'Siguiendo':'Seguir'}</button></div>)}</div>}
-          {visiblePosts.map(post => <article className={`post-card community-post ${post.kind === 'trip' ? 'trip-feed-card' : ''}`} key={post.id}><header className="community-post-header"><button className="community-author-avatar" onClick={()=>post.authorId && void openPublicProfile({id:post.authorId,username:post.authorUsername,full_name:post.authorName,avatar_url:post.authorAvatar})}>{post.authorAvatar ? <img src={post.authorAvatar} alt=""/> : initials(post.authorName || displayName)}</button><button className="community-author-meta community-author-open" onClick={()=>post.authorId && void openPublicProfile({id:post.authorId,username:post.authorUsername,full_name:post.authorName,avatar_url:post.authorAvatar})}><strong>{post.authorName || displayName}</strong><span>@{post.authorUsername || username}</span><small>{post.date} · {post.kind === 'trip' ? 'Bitácora de viaje' : 'Publicación'}</small></button><button className="community-more" aria-label="Más opciones" onClick={() => notify('Opciones de publicación disponibles próximamente.')}><MoreHorizontal size={20}/></button></header>{post.kind === 'trip' && <div className="community-post-type"><Route size={14}/> BITÁCORA PÚBLICA</div>}{post.image && <div className="community-post-cover"><img src={post.image} alt={post.kind === 'trip' ? 'Fotografía de la bitácora' : 'Fotografía compartida'}/></div>}{post.kind === 'trip' && post.tripPhotos && post.tripPhotos.length > 1 && <div className="community-post-gallery">{post.tripPhotos.slice(1,4).map((url,index)=><img key={index} src={url} alt={`Fotografía adicional ${index+2}`}/>)}</div>}<div className="community-post-content"><div className="community-post-location"><MapPin size={14}/>{post.place}</div><h3>{post.title}</h3><p>{post.text}</p>{post.kind === 'trip' && !!post.tripStops?.length && <div className="community-route"><strong><Route size={15}/> Ruta del viaje <span>{post.tripStops.length} paradas</span></strong><ol>{post.tripStops.map((stop,index)=><li key={index}>{stop}</li>)}</ol></div>}</div><footer className="community-post-actions">{post.kind === 'post' ? <><button onClick={() => toggleLike(post.id)} className={post.liked ? 'liked' : ''}><Heart size={18} fill={post.liked ? 'currentColor' : 'none'}/><span>{post.likes || 'Me gusta'}</span></button><button onClick={() => setCommentPost(post.id)}><MessageCircle size={18}/><span>{post.comments.length || 'Comentar'}</span></button></> : <span className="community-trip-caption"><ShieldCheck size={15}/> Compartida públicamente</span>}<button onClick={() => { if (navigator.share) navigator.share({title: post.title, text: post.text}).catch(() => undefined); else notify('Comparte esta publicación copiando su enlace cuando esté publicada en línea.') }}><Share2 size={18}/><span>Compartir</span></button><button className={(post.kind==='trip'?savedTripIds.includes(String(post.id).replace('trip:','')):savedPostIds.includes(String(post.id)))?'community-bookmark saved':'community-bookmark'} aria-label="Guardar publicación" title="Guardar en favoritos" onClick={()=>void toggleCommunitySaved(post)}><Bookmark size={18} fill={(post.kind==='trip'?savedTripIds.includes(String(post.id).replace('trip:','')):savedPostIds.includes(String(post.id)))?'currentColor':'none'}/></button></footer></article>)}
+          {visiblePosts.map(post => <article className={`post-card community-post ${post.kind === 'trip' ? 'trip-feed-card' : ''}`} key={post.id}><header className="community-post-header"><button className="community-author-avatar" onClick={()=>post.authorId && void openPublicProfile({id:post.authorId,username:post.authorUsername,full_name:post.authorName,avatar_url:post.authorAvatar})}>{post.authorAvatar ? <img src={post.authorAvatar} alt=""/> : initials(post.authorName || displayName)}</button><button className="community-author-meta community-author-open" onClick={()=>post.authorId && void openPublicProfile({id:post.authorId,username:post.authorUsername,full_name:post.authorName,avatar_url:post.authorAvatar})}><strong>{post.authorName || displayName}</strong><span>@{post.authorUsername || username}</span><small>{post.date} · {post.kind === 'trip' ? 'Bitácora de viaje' : 'Publicación'}</small></button><button className="community-more" aria-label="Más opciones" onClick={() => notify('Opciones de publicación disponibles próximamente.')}><MoreHorizontal size={20}/></button></header>{post.kind === 'trip' && <div className="community-post-type"><Route size={14}/> BITÁCORA PÚBLICA</div>}{post.image && <div className="community-post-cover"><img src={post.image} alt={post.kind === 'trip' ? 'Fotografía de la bitácora' : 'Fotografía compartida'}/></div>}{post.kind === 'trip' && post.tripPhotos && post.tripPhotos.length > 1 && <div className="community-post-gallery">{post.tripPhotos.slice(1,4).map((url,index)=><img key={index} src={url} alt={`Fotografía adicional ${index+2}`}/>)}</div>}<div className="community-post-content"><div className="community-post-location"><MapPin size={14}/>{post.place}</div><h3>{post.title}</h3><p>{post.text}</p>{post.kind === 'trip' && !!post.tripStops?.length && <div className="community-route"><strong><Route size={15}/> Ruta del viaje <span>{post.tripStops.length} paradas</span></strong><ol>{post.tripStops.map((stop,index)=><li key={index}>{stop}</li>)}</ol></div>}</div><footer className="community-post-actions">{post.kind === 'post' ? <><button onClick={() => toggleLike(post.id)} className={post.liked ? 'liked' : ''}><Heart size={18} fill={post.liked ? 'currentColor' : 'none'}/><span>{post.likes || 'Me gusta'}</span></button><button onClick={() => setCommentPost(post.id)}><MessageCircle size={18}/><span>{post.comments.length || 'Comentar'}</span></button></> : <span className="community-trip-caption"><ShieldCheck size={15}/> Compartida públicamente</span>}<button onClick={() => void shareCommunityPost(post)}><Share2 size={18}/><span>Compartir</span></button><button className={(post.kind==='trip'?savedTripIds.includes(String(post.id).replace('trip:','')):savedPostIds.includes(String(post.id)))?'community-bookmark saved':'community-bookmark'} aria-label="Guardar publicación" title="Guardar en favoritos" onClick={()=>void toggleCommunitySaved(post)}><Bookmark size={18} fill={(post.kind==='trip'?savedTripIds.includes(String(post.id).replace('trip:','')):savedPostIds.includes(String(post.id)))?'currentColor':'none'}/></button></footer></article>)}
           {visiblePosts.length === 0 && <div className="empty-card"><Users size={30}/><h3>{feedMode==='following'?'Aún no sigues viajeros':'Aún no hay publicaciones'}</h3><p>Busca viajeros para seguirlos y ver sus aventuras aquí.</p><button className="primary" onClick={() => setFeedMode('all')}>Ver comunidad</button></div>}
           </>}
         </section>}
