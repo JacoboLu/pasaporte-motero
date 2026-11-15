@@ -1787,7 +1787,7 @@ html[data-theme="light"] .destination-compact .destination-card>img,
   position:sticky;top:0;z-index:15;min-height:68px;
   display:flex;align-items:center;justify-content:space-between;gap:12px;
   padding:10px 18px calc(10px + env(safe-area-inset-top));
-  background:var(--app-bg,#111);border-bottom:1px solid var(--line-color,#ffffff12);
+  background:var(--topbar-bg,#111);border-bottom:1px solid var(--line-color,#ffffff12);
   backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)
 }
 .topbar .brand{min-width:0;flex:1;gap:11px}
