@@ -1969,3 +1969,41 @@ h2,h3{color:var(--main-text)}
  .topbar .brand-heading small{font-size:7px;letter-spacing:.8px}
  .bottom-nav button span{font-size:8px}
 }
+
+
+/* Information architecture refresh — Explore, Passport, Community and Profile */
+.explore-heading-actions{display:flex;align-items:center;gap:14px;flex:0 0 auto}
+.explore-heading-actions .text-action{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-size:11px}
+.explore-heading-actions .gps-inline-action{color:var(--muted-text)}
+.explore-screen .explore-section-heading{align-items:flex-end}
+.explore-screen .explore-section-heading>div:first-child{min-width:0}
+.explore-screen .explore-section-heading small{display:block;margin-top:4px;line-height:1.35}
+.explore-screen .explore-quick-categories{margin-top:7px;margin-bottom:5px}
+.explore-screen .nearby-destination-list{margin-top:0}
+.explore-screen .catalog-toggle{margin-top:12px}
+.explore-screen .explore-location-panel{display:none}
+.passport-cover{min-height:170px!important;padding:16px!important;border-radius:8px!important}
+.passport-watermark{opacity:.12}
+.cover-emblem{width:48px!important;height:48px!important}
+.cover-emblem svg{width:26px!important;height:26px!important}
+.cover-title{font-size:22px!important;line-height:1.02!important;letter-spacing:1.5px!important}
+.cover-subtitle{font-size:8px!important;letter-spacing:1px!important}
+.cover-top,.cover-bottom,.passport-microtext{font-size:8px!important}
+.passport-serial{font-size:8px!important}
+.stats-grid{margin-top:12px;margin-bottom:18px}
+.passport-book-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 8px}
+.passport-book-heading>div span{display:block;margin-top:4px;color:var(--muted-text);font-size:10px}
+.passport-book-controls{margin:8px 0}
+.passport-book-viewport{margin-top:0}
+.community-topbar{display:flex;flex-direction:column;gap:10px}
+.community-composer{margin:8px 0 10px}
+.community-feed-tabs{display:flex;gap:0;border-bottom:1px solid var(--line-color);margin:0 0 13px}
+.community-feed-tabs button{flex:1;justify-content:center;min-height:42px;border-radius:0}
+.community-feed-tabs button.active{border-bottom:2px solid var(--accent);background:transparent!important}
+.profile-quick-access{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:12px 0 20px}
+.profile-quick-access button{min-width:0;min-height:83px;padding:10px 6px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;text-align:left;background:var(--card-bg);border:1px solid var(--line-color);border-radius:9px;color:var(--accent-strong)}
+.profile-quick-access button strong{font-size:10px;line-height:1.15;color:var(--main-text);white-space:nowrap}
+.profile-quick-access button small{font-size:8px;line-height:1.2;color:var(--muted-text);white-space:nowrap}
+.profile-activity-feed>.section-heading{margin-top:0}
+@media(max-width:360px){.explore-heading-actions{gap:8px}.explore-heading-actions .text-action{font-size:9px}.profile-quick-access{gap:5px}.profile-quick-access button strong{font-size:9px}.profile-quick-access button small{font-size:7px}}
+@media(min-width:600px){.profile-quick-access{gap:10px}.profile-quick-access button{min-height:92px;padding:13px}}
