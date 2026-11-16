@@ -2007,3 +2007,34 @@ h2,h3{color:var(--main-text)}
 .profile-activity-feed>.section-heading{margin-top:0}
 @media(max-width:360px){.explore-heading-actions{gap:8px}.explore-heading-actions .text-action{font-size:9px}.profile-quick-access{gap:5px}.profile-quick-access button strong{font-size:9px}.profile-quick-access button small{font-size:7px}}
 @media(min-width:600px){.profile-quick-access{gap:10px}.profile-quick-access button{min-height:92px;padding:13px}}
+
+/* Pasaporte Motero: identidad visual propia, inspirada en el patrimonio peruano */
+.topbar .passport-brand-mark,.auth-brand .passport-brand-mark{position:relative;overflow:hidden;display:grid;place-items:center;background:linear-gradient(145deg,#7b1820,#3d0d14)!important;color:#f2c879!important;border:1px solid #b77b45;border-radius:9px!important;box-shadow:inset 0 0 0 2px #f5d99a22,0 3px 9px #0003!important}
+.passport-brand-mark .brand-passport-book{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px)}
+.passport-brand-mark .brand-passport-bike{position:absolute;left:50%;top:49%;transform:translate(-50%,-50%);color:#fff0d0}
+.passport-brand-mark i{position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(#f3d69b,#b98a4b,#f3d69b)}
+.passport-cover-premium{position:relative;isolation:isolate;overflow:hidden;min-height:330px!important;padding:25px 18px 23px 42px!important;border:1px solid #c69b5c!important;border-radius:17px!important;color:#f2d49d!important;background:radial-gradient(ellipse at 72% 43%,#7b2930 0,#5b171f 40%,transparent 72%),repeating-linear-gradient(115deg,#651922 0,#651922 2px,#711e27 3px,#5b151d 5px),linear-gradient(135deg,#7e252b,#3e0d15 78%)!important;box-shadow:0 18px 35px #0006,inset 0 0 0 2px #e7c17c26,inset 0 0 28px #170408a8!important;display:flex;flex-direction:column;justify-content:space-between}
+.passport-cover-premium:before{content:"";position:absolute;z-index:-1;inset:9px;border:1px solid #e8c88b80;border-radius:10px;box-shadow:inset 0 0 0 3px #f4d69b12}
+.passport-cover-premium:after{content:"";position:absolute;z-index:-1;inset:0;background:radial-gradient(ellipse at 50% 48%,transparent 35%,#1d050a55 100%);pointer-events:none}
+.passport-cover-premium .passport-binding{position:absolute;left:0;top:0;bottom:0;width:29px;background:repeating-linear-gradient(45deg,#b78a4e 0 2px,#671820 2px 5px,#e0bd7b 5px 6px,#4d1019 6px 10px);border-right:2px solid #d2a65e;box-shadow:3px 0 9px #16030766}
+.passport-binding span{position:absolute;left:5px;right:5px;height:8px;border-top:1px solid #f2d99a;border-bottom:1px solid #f2d99a66}
+.passport-binding span:nth-child(1){top:15%}.passport-binding span:nth-child(2){top:38%}.passport-binding span:nth-child(3){top:61%}.passport-binding span:nth-child(4){top:84%}
+.passport-cover-premium .passport-cover-inner{position:absolute;z-index:-1;inset:16px 16px 16px 37px;border:1px solid #d5b47725;border-radius:6px;pointer-events:none}
+.passport-cover-premium .passport-watermark{top:53%;left:65%;opacity:.10;color:#f4d99f}
+.passport-cover-premium .passport-watermark svg{stroke-width:.8}
+.passport-cover-top{display:flex;justify-content:center;align-items:center;gap:10px;font-family:'Playfair Display',serif;font-size:clamp(10px,2.8vw,14px);font-weight:700;letter-spacing:2.4px;color:#f3d49b;text-align:center;text-shadow:0 2px 5px #21070a}
+.passport-cover-top span{color:#e5b86e;font-size:13px}
+.passport-cover-main{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:10px 0 6px}
+.passport-cover-emblem{position:relative;display:grid;place-items:center;width:66px;height:66px;border-radius:50%;color:#f5d69b;background:radial-gradient(circle,#8d4a35,#4c1b20 75%);border:1px solid #e8c987;box-shadow:0 0 0 5px #e9c88818,0 0 0 10px #e9c8880b,inset 0 0 15px #21070a88}
+.passport-cover-emblem .emblem-orbit{position:absolute;inset:6px;border:1px dashed #f0d39b80;border-radius:50%}
+.passport-cover-art{position:absolute;left:7%;top:35%;display:flex;align-items:center;gap:0;color:#e8c17e;opacity:.42;transform:rotate(-8deg)}
+.passport-cover-art svg:last-child{margin-left:-17px;margin-top:26px}
+.passport-cover-premium .cover-title{margin-top:9px;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(28px,7vw,39px)!important;line-height:1.02;letter-spacing:3px!important;color:#f2d19a;text-shadow:0 2px 0 #6b3422,0 4px 12px #190509}
+.passport-cover-premium .cover-subtitle{margin-top:12px;font-size:8px;letter-spacing:2px;text-align:center;color:#e6c18c}
+.passport-cover-flag{display:flex;width:44px;height:19px;margin-top:15px;border:1px solid #f4dfc0aa;box-shadow:0 2px 5px #18050966}
+.passport-cover-flag i{flex:1;background:#d92732}.passport-cover-flag i:nth-child(2){background:#fff8eb}
+.passport-cover-bottom{display:flex;align-items:center;justify-content:space-between;gap:7px;border-top:1px solid #e2bd7b66;padding-top:10px;font-size:7px;letter-spacing:1.2px;color:#e5c18a}
+.passport-cover-bottom b{display:grid;place-items:center;width:28px;height:28px;flex:0 0 28px;border:1px solid #e6c58c;border-radius:50%;font-family:'Playfair Display',serif;font-size:11px;color:#f5d79f}
+.passport-cover-premium .passport-serial{position:absolute;right:22px;bottom:4px;font-size:5px;letter-spacing:1px;color:#e6c48b70}
+.theme-light .passport-cover-premium{color:#f2d49d!important}
+@media(max-width:380px){.passport-cover-premium{min-height:300px!important;padding:21px 14px 20px 37px!important}.passport-cover-premium .cover-title{font-size:29px!important;letter-spacing:2px!important}.passport-cover-top{letter-spacing:1.6px}.passport-cover-bottom{font-size:6px;letter-spacing:.7px}.passport-cover-art{left:3%}}
