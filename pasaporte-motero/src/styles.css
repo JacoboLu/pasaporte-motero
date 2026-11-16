@@ -2042,3 +2042,24 @@ h2,h3{color:var(--main-text)}
 /* Primary brand symbol: motorcyclist riding against mountain peaks */
 .passport-brand-mark .brand-mountain{position:absolute;left:5px;top:5px;width:calc(100% - 10px);height:calc(100% - 10px);color:#f2c879;stroke-width:1.8}
 .passport-brand-mark .brand-passport-bike{position:absolute;left:50%;top:59%;transform:translate(-50%,-50%);width:17px;height:17px;color:#fff3d7;stroke-width:2.5;filter:drop-shadow(0 1px 1px #3d0d14)}
+
+
+/* Unified scenic rider-and-mountains identity */
+.topbar .brand-mark.passport-brand-mark,
+.auth-brand .brand-mark.passport-brand-mark{
+  display:grid;place-items:center;position:relative;overflow:hidden;
+  width:38px;height:38px;flex:0 0 38px;border-radius:10px;
+  color:#f4d18b;
+  background:linear-gradient(145deg,#792c32 0%,#4b171f 72%,#321016 100%);
+  border:1px solid #c99b55;
+  box-shadow:inset 0 1px 5px #f4d18b30,0 2px 5px #2b0b1050;
+}
+.topbar .brand-mark.passport-brand-mark .brand-scenic-logo,
+.auth-brand .brand-mark.passport-brand-mark .brand-scenic-logo{
+  display:block;width:31px;height:27px;color:#f5d99d;
+  filter:drop-shadow(0 1px 1px #21090b);
+}
+.brand-mark.passport-brand-mark>i{display:none}
+.passport-cover-emblem{width:78px;height:78px}
+.passport-cover-emblem .cover-scenic-logo{width:47px;height:40px;color:#f7d99c;filter:drop-shadow(0 1px 2px #25090c)}
+.passport-cover-art{display:none!important}
