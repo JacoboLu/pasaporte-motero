@@ -270,7 +270,7 @@ export default function App() {
   const passportTouchStartX = useRef<number | null>(null)
   const [authOpen, setAuthOpen] = useState(false)
   const [authMode, setAuthMode] = useState<'login'|'register'>('login')
-  const [theme, setTheme] = useState<'dark'|'light'>(() => (localStorage.getItem('pm_theme') as 'dark'|'light') || 'light')
+  const [theme, setTheme] = useState<'dark'|'light'>(() => (localStorage.getItem('pm_theme') as 'dark'|'light') || 'dark')
   const [registerName, setRegisterName] = useState('')
   const [registerUsername, setRegisterUsername] = useState('')
   const [registerCity, setRegisterCity] = useState('')
@@ -1546,7 +1546,7 @@ export default function App() {
 
   return <div className={`app-shell theme-${theme}`}>
     <header className={`topbar ${tab !== 'explore' || subview || selected || selectedDepartment ? 'topbar-contextual' : ''}`}>
-      <button className="brand" onClick={() => { if (subview) { setSubview(''); setSelectedPublicProfile(null) } else if (selected || selectedDepartment) { setSelected(null); setSelectedDepartment(null) } else openTab('explore') }} aria-label="Volver a la sección principal"><span className="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48" role="img"><path d="M8 32.5 17.2 16h9.3l8.7 16.5H41" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"/><circle cx="12" cy="34" r="5.2" fill="none" stroke="currentColor" strokeWidth="2.8"/><circle cx="36" cy="34" r="5.2" fill="none" stroke="currentColor" strokeWidth="2.8"/><path d="M20 16h-5.2l-3.2-4.2M24 9.5l4.5 6.5M24 9.5h7" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round"/><path d="M24 4.5 26 8l4 .6-2.9 2.8.7 4-3.8-1.9-3.7 1.9.7-4-2.9-2.8 4-.6z" fill="#fff0dc" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round"/></svg></span><span className="brand-heading"><strong>{activeHeaderTitle}</strong><small>{activeHeaderSubtitle}</small></span></button>
+      <button className="brand" onClick={() => { if (subview) { setSubview(''); setSelectedPublicProfile(null) } else if (selected || selectedDepartment) { setSelected(null); setSelectedDepartment(null) } else openTab('explore') }} aria-label="Volver a la sección principal"><span className="brand-mark" aria-hidden="true"><Bike size={24} strokeWidth={2.2}/></span><span className="brand-heading"><strong>{activeHeaderTitle}</strong><small>{activeHeaderSubtitle}</small></span></button>
       <div className="top-actions"><span className={`connection-dot ${offline ? 'off' : ''}`} title={offline ? 'Sin conexión' : 'Con conexión'}/><button className="icon-button theme-toggle" aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'} title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'} onClick={() => setTheme(v => v === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? <Sun size={18}/> : <Moon size={18}/>}</button><button className="icon-button notification-trigger" aria-label="Abrir notificaciones" title="Notificaciones" onClick={openNotifications}><Bell size={19}/>{unreadNotificationCount > 0 && <span className="notification-count">{unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}</span>}</button></div>
     </header>
     {offline && <div className="offline-banner"><CloudOff size={15}/> Sin conexión. Puedes consultar contenido previamente cargado; las acciones que requieren sincronización estarán disponibles al recuperar Internet.</div>}
