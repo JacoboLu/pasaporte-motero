@@ -2038,3 +2038,7 @@ h2,h3{color:var(--main-text)}
 .passport-cover-premium .passport-serial{position:absolute;right:22px;bottom:4px;font-size:5px;letter-spacing:1px;color:#e6c48b70}
 .theme-light .passport-cover-premium{color:#f2d49d!important}
 @media(max-width:380px){.passport-cover-premium{min-height:300px!important;padding:21px 14px 20px 37px!important}.passport-cover-premium .cover-title{font-size:29px!important;letter-spacing:2px!important}.passport-cover-top{letter-spacing:1.6px}.passport-cover-bottom{font-size:6px;letter-spacing:.7px}.passport-cover-art{left:3%}}
+
+/* Primary brand symbol: motorcyclist riding against mountain peaks */
+.passport-brand-mark .brand-mountain{position:absolute;left:5px;top:5px;width:calc(100% - 10px);height:calc(100% - 10px);color:#f2c879;stroke-width:1.8}
+.passport-brand-mark .brand-passport-bike{position:absolute;left:50%;top:59%;transform:translate(-50%,-50%);width:17px;height:17px;color:#fff3d7;stroke-width:2.5;filter:drop-shadow(0 1px 1px #3d0d14)}
