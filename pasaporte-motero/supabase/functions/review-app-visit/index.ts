@@ -52,20 +52,37 @@ Deno.serve(async (req: Request) => {
     const allowedDepartments = profile.role === "manager" ? await managerDepartmentNames(admin, authData.user.id) : null;
 
     if (req.method === "GET") {
-      const { data, error } = await admin.from("app_visits")
+      let visitQuery = admin.from("app_visits")
         .select("id,user_id,destination_id,visited_at,validation_method,validation_status,notes,evidence_path")
-        .eq("validation_status", "pending").order("visited_at", { ascending: true }).limit(100);
+        .eq("validation_status", "pending")
+        .order("visited_at", { ascending: true });
+
+      // Apply the manager's department scope before limiting the queue,
+      // otherwise the first 100 global visits can hide their own region's items.
+      if (allowedDepartments) {
+        const destinationResults = await Promise.all(allowedDepartments.map((department: string) =>
+          admin.from("destination_catalog").select("id").ilike("department", department)
+        ));
+        const destinationError = destinationResults.find((result: any) => result.error)?.error;
+        if (destinationError) throw destinationError;
+        const destinationIds = destinationResults.flatMap((result: any) =>
+          (result.data || []).map((destination: any) => destination.id)
+        );
+        if (!destinationIds.length) return json({ visits: [] });
+        visitQuery = visitQuery.in("destination_id", destinationIds);
+      }
+
+      const { data, error } = await visitQuery.limit(100);
       if (error) throw error;
-      const rows = await Promise.all((data || []).map(async (visit) => {
+      const rows = await Promise.all((data || []).map(async (visit: any) => {
         const [{ data: destination }, { data: rider }, signed] = await Promise.all([
           admin.from("destination_catalog").select("name,department,province,city").eq("id", visit.destination_id).maybeSingle(),
           admin.from("profiles").select("username,full_name,avatar_url").eq("id", visit.user_id).maybeSingle(),
           visit.evidence_path ? admin.storage.from("travel-media").createSignedUrl(visit.evidence_path, 900) : Promise.resolve({ data: null }),
         ]);
-        if (allowedDepartments && !allowedDepartments.includes(String(destination?.department || "").trim().toLocaleLowerCase("es-PE"))) return null;
         return { ...visit, destination, rider, evidence_url: signed.data?.signedUrl || null };
       }));
-      return json({ visits: rows.filter(Boolean) });
+      return json({ visits: rows });
     }
 
     if (req.method === "POST") {
