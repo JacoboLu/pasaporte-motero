@@ -12,6 +12,7 @@ import {
 import { allRegions, regions } from './data'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
 import { clearPrivateCache, migrateLegacyPrivateCache, readPrivateCache, writePrivateCache } from './lib/secure-storage'
+import { addQueuedPhotoVisit, getQueuedPhotoVisits, removeQueuedPhotoVisit, type QueuedPhotoVisit } from './lib/offline-photo-visits'
 
 type Tab = 'explore' | 'passport' | 'community' | 'profile'
 type VisitStatus = 'validated' | 'pending' | 'rejected'
@@ -235,6 +236,9 @@ export default function App() {
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
   const [busy, setBusy] = useState(false)
   const [submittingPhotoVisit, setSubmittingPhotoVisit] = useState(false)
+  const [offlinePhotoQueueCount, setOfflinePhotoQueueCount] = useState(0)
+  const [syncingPhotoVisits, setSyncingPhotoVisits] = useState(false)
+  const syncingPhotoVisitsRef = useRef(false)
   const submittingPhotoVisitRef = useRef(false)
   const [offline, setOffline] = useState(!navigator.onLine)
   const [feedMode, setFeedMode] = useState<'all'|'following'>('all')
@@ -433,7 +437,20 @@ export default function App() {
     })
     return () => { alive = false; subscription.unsubscribe() }
   }, [])
-  useEffect(() => { const on = () => setOffline(false); const off = () => setOffline(true); window.addEventListener('online', on); window.addEventListener('offline', off); return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off) } }, [])
+  useEffect(() => {
+    let active = true
+    const refreshQueue = async () => {
+      try { const items = await getQueuedPhotoVisits(authUserId || undefined); if (active) setOfflinePhotoQueueCount(items.length) }
+      catch (error) { console.warn('No se pudo leer la cola local de evidencias:', error) }
+    }
+    void refreshQueue()
+    const on = () => { setOffline(false); void syncQueuedPhotoVisits() }
+    const off = () => setOffline(true)
+    window.addEventListener('online', on)
+    window.addEventListener('offline', off)
+    if (navigator.onLine && authUserId) void syncQueuedPhotoVisits()
+    return () => { active = false; window.removeEventListener('online', on); window.removeEventListener('offline', off) }
+  }, [authUserId])
   // Los enlaces externos abren Comunidad y enfocan la publicación compartida.
   useEffect(() => {
     const sharedPostId = new URLSearchParams(window.location.search).get('post')
@@ -849,6 +866,48 @@ export default function App() {
     }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 })
   }
 
+  async function syncQueuedPhotoVisits() {
+    if (!supabase || !navigator.onLine || syncingPhotoVisitsRef.current) return
+    syncingPhotoVisitsRef.current = true
+    setSyncingPhotoVisits(true)
+    try {
+      const user = await getCurrentAuthUser()
+      if (!user) return
+      const queued = await getQueuedPhotoVisits(user.id)
+      let synced = 0
+      for (const item of queued) {
+        let path = ''
+        try {
+          const extension = item.blob.type === 'image/png' ? 'png' : item.blob.type === 'image/webp' ? 'webp' : 'jpg'
+          path = user.id + '/visits/' + item.id + '.' + extension
+          const { error: uploadError } = await supabase.storage.from('travel-media').upload(path, item.blob, { contentType: item.blob.type || 'image/jpeg', upsert: true })
+          if (uploadError) throw uploadError
+          const { error } = await supabase.from('app_visits').insert({
+            user_id: user.id, destination_id: item.destinationId, visited_at: item.visitedAt,
+            validation_method: 'photo', validation_status: 'pending', notes: item.note || null, evidence_path: path
+          })
+          if (error && error.code !== '23505') throw error
+          await removeQueuedPhotoVisit(item.id)
+          synced += 1
+        } catch (error) {
+          console.warn('La evidencia continúa guardada localmente; se reintentará:', error)
+          break
+        }
+      }
+      const remaining = await getQueuedPhotoVisits(user.id)
+      setOfflinePhotoQueueCount(remaining.length)
+      if (synced) {
+        await loadVisits(user.id)
+        notify(synced === 1 ? 'Tu evidencia pendiente se sincronizó y quedó en revisión.' : synced + ' evidencias se sincronizaron y quedaron en revisión.')
+      }
+    } catch (error) {
+      console.warn('No se pudo sincronizar las evidencias pendientes:', error)
+    } finally {
+      syncingPhotoVisitsRef.current = false
+      setSyncingPhotoVisits(false)
+    }
+  }
+
   async function submitPhotoVisit() {
     // Bloqueo inmediato en un ref: evita dobles clics incluso antes del siguiente render.
     if (submittingPhotoVisitRef.current) return
@@ -861,32 +920,50 @@ export default function App() {
       const user = await getCurrentAuthUser()
       if (!supabase || !user) {
         setAuthMode('login'); setAuthOpen(true)
-        notify('Inicia sesión para enviar evidencia sincronizada.')
+        notify('Inicia sesión al menos una vez antes de guardar evidencias sin conexión.')
         return
       }
       const dest = mapDestinations.find(d => d.id === visitDestination)
       if (!dest) { notify('Selecciona un destino válido.'); return }
       const blob = await (await fetch(visitPhoto)).blob()
-      const ext = blob.type === 'image/png' ? 'png' : blob.type === 'image/webp' ? 'webp' : 'jpg'
-      uploadedPath = user.id + '/visits/' + crypto.randomUUID() + '.' + ext
-      const { error: uploadError } = await supabase.storage.from('travel-media').upload(uploadedPath, blob, { contentType: blob.type, upsert: false })
-      if (uploadError) throw uploadError
+      const queuedItem: QueuedPhotoVisit = { id: crypto.randomUUID(), userId: user.id, destinationId: dest.id, visitedAt: new Date().toISOString(), note: visitNote.trim(), blob }
+      if (!navigator.onLine) {
+        await addQueuedPhotoVisit(queuedItem)
+        setOfflinePhotoQueueCount(count => count + 1)
+        notify('Evidencia guardada en este iPhone. Se enviará automáticamente cuando vuelva internet.')
+        closeModal()
+        return
+      }
+      uploadedPath = user.id + '/visits/' + queuedItem.id + '.' + (blob.type === 'image/png' ? 'png' : blob.type === 'image/webp' ? 'webp' : 'jpg')
+      const { error: uploadError } = await supabase.storage.from('travel-media').upload(uploadedPath, blob, { contentType: blob.type || 'image/jpeg', upsert: false })
+      if (uploadError) {
+        if (!navigator.onLine || /fetch|network|load failed|timeout|offline/i.test(uploadError.message || '')) {
+          await addQueuedPhotoVisit(queuedItem); setOfflinePhotoQueueCount(count => count + 1); uploadedPath = ''
+          notify('Sin conexión: evidencia guardada en este iPhone y pendiente de envío.')
+          closeModal(); return
+        }
+        throw uploadError
+      }
       const { error } = await supabase.from('app_visits').insert({
-        user_id: user.id, destination_id: dest.id, visited_at: new Date().toISOString(),
+        user_id: user.id, destination_id: dest.id, visited_at: queuedItem.visitedAt,
         validation_method: 'photo', validation_status: 'pending', notes: visitNote.trim() || null, evidence_path: uploadedPath
       })
       if (error) {
-        await supabase.storage.from('travel-media').remove([uploadedPath])
-        uploadedPath = ''
         if (error.code === '23505') {
+          await supabase.storage.from('travel-media').remove([uploadedPath]); uploadedPath = ''
           notify('Ya tienes una visita pendiente de revisión para este destino. Espera la respuesta antes de enviar otra.')
           return
+        }
+        if (!navigator.onLine || /fetch|network|load failed|timeout|offline/i.test(error.message || '')) {
+          await addQueuedPhotoVisit(queuedItem); setOfflinePhotoQueueCount(count => count + 1); uploadedPath = ''
+          notify('La conexión se interrumpió. Guardamos la evidencia en este iPhone para enviarla después.')
+          closeModal(); return
         }
         throw error
       }
       uploadedPath = ''
       await loadVisits(user.id)
-      notify('Evidencia enviada y sincronizada. El sello quedará pendiente hasta su revisión.')
+      notify('Evidencia enviada. La visita quedó pendiente de revisión.')
       closeModal()
     } catch (err: any) {
       if (uploadedPath && supabase) await supabase.storage.from('travel-media').remove([uploadedPath])
@@ -1549,7 +1626,7 @@ export default function App() {
       <button className="brand" onClick={() => { if (subview) { setSubview(''); setSelectedPublicProfile(null) } else if (selected || selectedDepartment) { setSelected(null); setSelectedDepartment(null) } else openTab('explore') }} aria-label="Volver a la sección principal"><span className="brand-mark passport-brand-mark" aria-hidden="true"><svg className="brand-scenic-logo" viewBox="0 0 48 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 30 15 12l8 11 7-9 15 16H3Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/><path d="m10 30 5-7 5 7M28 30l3-5 5 5" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/><circle cx="15" cy="31" r="4" stroke="currentColor" strokeWidth="2.2"/><circle cx="35" cy="31" r="4" stroke="currentColor" strokeWidth="2.2"/><path d="m15 31 7-10 6 10H15Zm7-10 5-5m-7 5-3-4m8 4 4 1" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="24" cy="12" r="2.3" fill="currentColor"/><path d="m24 15-3 5 6 2 2-5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg><i/></span><span className="brand-heading"><strong>{activeHeaderTitle}</strong><small>{activeHeaderSubtitle}</small></span></button>
       <div className="top-actions"><span className={`connection-dot ${offline ? 'off' : ''}`} title={offline ? 'Sin conexión' : 'Con conexión'}/><button className="icon-button theme-toggle" aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'} title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'} onClick={() => setTheme(v => v === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? <Sun size={18}/> : <Moon size={18}/>}</button><button className="icon-button notification-trigger" aria-label="Abrir notificaciones" title="Notificaciones" onClick={openNotifications}><Bell size={19}/>{unreadNotificationCount > 0 && <span className="notification-count">{unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}</span>}</button></div>
     </header>
-    {offline && <div className="offline-banner"><CloudOff size={15}/> Sin conexión. Puedes consultar contenido previamente cargado; las acciones que requieren sincronización estarán disponibles al recuperar Internet.</div>}
+    {(offline || offlinePhotoQueueCount > 0) && <div className="offline-banner"><CloudOff size={15}/> {offline ? "Sin conexión." : "Conexión recuperada."} {offlinePhotoQueueCount > 0 ? `${offlinePhotoQueueCount} evidencia(s) guardada(s) en este dispositivo ${syncingPhotoVisits ? "· sincronizando…" : "· pendiente(s) de envío"}.` : "Tus evidencias se sincronizarán al recuperar Internet."} {offlinePhotoQueueCount > 0 && !offline && <button type="button" className="text-action" onClick={()=>void syncQueuedPhotoVisits()}>Reintentar</button>}</div>}
 
     <main className="content" key={`${tab}-${subview}`}>
       {selectedDepartment && selectedDepartmentPage ? <section className="department-detail-view">
