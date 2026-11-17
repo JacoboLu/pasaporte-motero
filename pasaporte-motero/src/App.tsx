@@ -155,6 +155,10 @@ function distanceKmBetween(lat1: number, lng1: number, lat2: number, lng2: numbe
   return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 function formatDistanceKm(km: number) { return km < 1 ? `${Math.max(50, Math.round(km * 1000 / 50) * 50)} m` : `${km.toFixed(1).replace('.', ',')} km` }
+async function generateQrDataUrl(payload: string, options: { width: number; margin: number; errorCorrectionLevel: 'M' | 'Q' }) {
+  const { default: QRCode } = await import('qrcode')
+  return QRCode.toDataURL(payload, options)
+}
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('explore')
@@ -746,8 +750,7 @@ export default function App() {
     try {
       setQrChallengeExpires('')
       const payload = JSON.stringify({ type: 'pasaporte-motero-user', code: data.code })
-      const { default: QRCode } = await import('qrcode')
-      setQr(await QRCode.toDataURL(payload, { width: 260, margin: 2, errorCorrectionLevel: 'M' }))
+      setQr(await generateQrDataUrl(payload, { width: 260, margin: 2, errorCorrectionLevel: 'M' }))
       notify('QR de identificación generado. No concede sellos ni autoriza visitas por sí solo.')
     } catch { notify('No se pudo generar el QR.') }
   }
@@ -761,7 +764,7 @@ export default function App() {
     if (error || !data?.token) { notify('No se pudo generar el QR: ' + (data?.error || error?.message || 'Error')); return }
     const payload = JSON.stringify({ type: 'pasaporte-motero-visit', token: data.token })
     try {
-      setQr(await QRCode.toDataURL(payload, { width: 280, margin: 2, errorCorrectionLevel: 'Q' }))
+      setQr(await generateQrDataUrl(payload, { width: 280, margin: 2, errorCorrectionLevel: 'Q' }))
       setQrChallengeExpires(data.expires_at)
       notify('QR presencial generado. Es válido por 2 minutos y admite un solo uso.')
     } catch { notify('No se pudo generar la imagen QR.') }
