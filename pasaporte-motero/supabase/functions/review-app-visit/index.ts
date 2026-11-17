@@ -114,6 +114,6 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Método no permitido" }, 405);
   } catch (error) {
     console.error("review-app-visit:", error);
-    return json({ error: error instanceof Error ? error.message : "Error interno" }, 500);
+    return json({ error: "Error interno" }, 500);
   }
 });

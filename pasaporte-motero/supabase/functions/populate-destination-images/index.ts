@@ -1,3 +1,5 @@
+import { createClient } from "npm:@supabase/supabase-js@2";
+
 const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -76,7 +78,6 @@ Deno.serve(async (req: Request) => {
       11: "File:Puka Pukara 2025.jpg",
       12: "File:Tambomachay.jpg",
       16: "File:Salineras de Maras.JPG",
-      28: "File:Laguna Paron.jpg",
       15: "File:Moray - Peru.jpg"
     };
     const results: any[] = [];

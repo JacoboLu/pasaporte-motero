@@ -23,6 +23,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install
+      - name: Instalar dependencias
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            echo "::warning::Falta package-lock.json; se usa npm install (compilación no reproducible)."
+            npm install
+          fi
       - run: npm run build
       - run: npm run test:phase1

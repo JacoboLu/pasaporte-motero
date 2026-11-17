@@ -25,5 +25,5 @@ Deno.serve(async(req:Request)=>{
   if(visitError){await admin.from("visit_qr_challenges").update({redeemed_at:null,redeemed_by:null}).eq("id",challenge.id);throw visitError;}
   await admin.from("visit_qr_challenges").update({visit_id:visit.id}).eq("id",challenge.id);
   return json({visit});
- }catch(e){console.error(e);return json({error:e instanceof Error?e.message:"Error interno"},500)}
+ }catch(e){console.error(e);return json({error:"Error interno"},500)}
 });

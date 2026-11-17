@@ -47,5 +47,5 @@ Deno.serve(async(req:Request)=>{
   const {error:insertError}=await admin.from("visit_qr_challenges").insert({destination_id:destinationId,token_hash:hash,issued_by:ud.user.id,expires_at:expiresAt});
   if(insertError)throw insertError;
   return json({token:raw,expires_at:expiresAt,destination});
- }catch(e){console.error(e);return json({error:e instanceof Error?e.message:"Error interno"},500)}
+ }catch(e){console.error(e);return json({error:"Error interno"},500)}
 });
