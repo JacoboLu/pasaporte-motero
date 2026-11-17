@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import QRCode from 'qrcode'
 import {
   Search, MapPin, Compass, BookOpen, Plus, Users, UserRound, ChevronRight,
   Award, Lock, Map, Mountain, Sunrise, Tent, Navigation, CheckCircle2,
@@ -747,6 +746,7 @@ export default function App() {
     try {
       setQrChallengeExpires('')
       const payload = JSON.stringify({ type: 'pasaporte-motero-user', code: data.code })
+      const { default: QRCode } = await import('qrcode')
       setQr(await QRCode.toDataURL(payload, { width: 260, margin: 2, errorCorrectionLevel: 'M' }))
       notify('QR de identificación generado. No concede sellos ni autoriza visitas por sí solo.')
     } catch { notify('No se pudo generar el QR.') }
