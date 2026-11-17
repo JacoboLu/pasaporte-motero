@@ -2063,3 +2063,53 @@ h2,h3{color:var(--main-text)}
 .passport-cover-emblem{width:78px;height:78px}
 .passport-cover-emblem .cover-scenic-logo{width:47px;height:40px;color:#f7d99c;filter:drop-shadow(0 1px 2px #25090c)}
 .passport-cover-art{display:none!important}
+
+/* Responsive layout audit · navegación y márgenes en todas las pestañas */
+.app-shell{width:100%;max-width:560px;min-width:0;overflow:hidden}
+.content{width:100%;min-width:0;padding-left:clamp(14px,4vw,22px)!important;padding-right:clamp(14px,4vw,22px)!important;padding-bottom:calc(104px + env(safe-area-inset-bottom))!important}
+.content>section,.content>section>*,.content .tab-page-heading,.content .page-heading,.content .explore-screen{min-width:0;max-width:100%}
+.content img,.content iframe,.content video{max-width:100%}
+.content button,.content input,.content select,.content textarea{max-width:100%}
+.content :where(.community-post,.post-card,.profile-card,.profile-menu,.settings-card,.empty-card,.qr-card,.trip-card,.history-row,.passport-cover,.destination-hero,.catalog-toggle,.map-placeholder){min-width:0;max-width:100%}
+.content :where(h1,h2,h3,p,strong,small,span){overflow-wrap:anywhere}
+.bottom-nav{position:absolute!important;inset:auto 0 0 0!important;width:100%!important;min-height:calc(76px + env(safe-area-inset-bottom))!important;height:auto!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;align-items:center!important;justify-items:stretch!important;gap:0!important;padding:7px 8px calc(7px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important}
+.bottom-nav>button:not(.nav-plus){width:100%!important;min-width:0!important;max-width:100%!important;min-height:54px!important;flex:none!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;padding:4px 1px!important;white-space:nowrap!important}
+.bottom-nav>button:not(.nav-plus) svg{width:22px!important;height:22px!important;flex:none!important}
+.bottom-nav>button:not(.nav-plus) span{display:block!important;max-width:100%!important;font-size:clamp(8px,2.5vw,11px)!important;line-height:1.15!important;white-space:nowrap!important;letter-spacing:-.02em!important}
+.bottom-nav .nav-plus{grid-column:3!important;grid-row:1!important;justify-self:center!important;align-self:center!important;width:54px!important;height:54px!important;min-width:54px!important;min-height:54px!important;max-width:54px!important;flex:none!important;margin:0!important;transform:translateY(-10px)!important;border-width:4px!important}
+.bottom-nav>button:nth-child(1){grid-column:1!important;grid-row:1!important}
+.bottom-nav>button:nth-child(2){grid-column:2!important;grid-row:1!important}
+.bottom-nav>button:nth-child(4){grid-column:4!important;grid-row:1!important}
+.bottom-nav>button:nth-child(5){grid-column:5!important;grid-row:1!important}
+.explore-screen{width:100%;min-width:0}
+.explore-search-line,.explore-quick-categories,.explore-section-heading,.explore-catalog-panel{width:100%;min-width:0;max-width:100%}
+.explore-quick-categories{display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;padding:12px 2px 6px;margin:0;scrollbar-width:none}
+.explore-quick-categories::-webkit-scrollbar{display:none}
+.explore-category-chip{flex:0 0 auto;max-width:calc(100vw - 36px)}
+.explore-section-heading{align-items:flex-end;gap:10px;flex-wrap:wrap}
+.explore-section-heading>div:first-child{flex:1 1 180px;min-width:0}
+.explore-heading-actions{flex:0 1 auto;min-width:0;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.nearby-destination-list{display:flex!important;width:100%!important;max-width:100%!important;min-width:0!important;gap:12px!important;overflow-x:auto!important;overflow-y:hidden!important;padding:2px 2px 10px!important;margin:0!important;scroll-padding-inline:2px;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:none}
+.nearby-destination-list::-webkit-scrollbar{display:none}
+.nearby-destination-card{flex:0 0 clamp(224px,78%,320px)!important;width:clamp(224px,78%,320px)!important;min-width:0!important;max-width:calc(100% - 8px)!important;scroll-snap-align:start;overflow:hidden!important;border-radius:16px!important}
+.nearby-destination-card img{display:block;max-width:100%;min-width:0}
+.nearby-destination-copy{min-width:0;max-width:100%;overflow:hidden}
+.nearby-destination-copy strong,.nearby-destination-copy small{overflow-wrap:anywhere}
+.catalog-toggle{display:flex;width:100%;min-width:0;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:18px 0 0}
+.catalog-toggle>span{min-width:0}
+.destination-list,.destination-grid{width:100%;min-width:0}
+.destination-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.destination-grid .destination-card,.destination-compact .destination-card{min-width:0;width:100%}
+.destination-copy{min-width:0;overflow:hidden}
+.destination-copy strong{overflow-wrap:anywhere}
+.explore-catalog-panel{overflow:hidden}
+.catalog-filter-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.catalog-filter-row>label{min-width:0}
+.catalog-filter-row select{width:100%;min-width:0}
+.map-frame{width:100%;min-width:0;overflow:hidden}
+.map-frame iframe{max-width:100%}
+.content :where(.stats-grid,.stamp-grid,.destination-stamp-grid,.passport-book-spread,.memory-grid,.trip-photo-grid,.public-profile-stats){min-width:0;max-width:100%}
+.content :where(.form-grid,.maintenance-fields,.trip-date-grid){grid-template-columns:repeat(2,minmax(0,1fr))}
+.content :where(.form-grid>*,.maintenance-fields>*,.trip-date-grid>*){min-width:0;max-width:100%}
+@media(max-width:380px){.content{padding-left:13px!important;padding-right:13px!important}.bottom-nav{padding-left:4px!important;padding-right:4px!important}.bottom-nav .nav-plus{width:50px!important;height:50px!important;min-width:50px!important;min-height:50px!important}.bottom-nav>button:not(.nav-plus) span{font-size:8px!important}.nearby-destination-card{flex-basis:84%!important;width:84%!important}.explore-section-heading{align-items:flex-start}.explore-heading-actions{align-items:flex-start}}
+@media(min-width:700px){.app-shell{max-width:560px}.content{padding-left:22px!important;padding-right:22px!important}}
