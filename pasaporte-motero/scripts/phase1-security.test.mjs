@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const migration = readFileSync(new URL('../supabase/migrations/0016_phase1_security_hardening.sql', import.meta.url), 'utf8');
+const migration = readFileSync(new URL('../supabase/migrations/20261113144208_0016_phase1_security_hardening.sql', import.meta.url), 'utf8');
 const gps = readFileSync(new URL('../supabase/functions/validate-gps-visit/index.ts', import.meta.url), 'utf8');
 const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
 

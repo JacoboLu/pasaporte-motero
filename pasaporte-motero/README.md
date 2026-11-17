@@ -25,8 +25,8 @@ Este frontend funciona en modo local sin credenciales y permite probar los flujo
 
 Para producción todavía se requiere:
 
-1. Configurar `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` (clave pública anon/publishable, nunca `service_role`).
-2. Ejecutar la migración SQL en Supabase.
+1. La URL del proyecto Supabase y la clave publishable (pública por diseño; nunca `service_role`) están definidas en `src/lib/supabase.ts`. Si cambias de proyecto, edita ese archivo.
+2. Aplicar las migraciones de `supabase/migrations/` (ver el README de esa carpeta).
 3. Implementar sincronización real de perfiles, destinos, visitas, viajes, publicaciones, comentarios, likes y fotos con Supabase.
 4. Crear buckets privados de Storage y sus políticas de acceso.
 5. Implementar Edge Functions para validación GPS server-side, QR temporal de un solo uso, aprobación de visitas y asignación de logros.
@@ -42,10 +42,10 @@ Para producción todavía se requiere:
 - Base directory en el repositorio actual: `pasaporte-motero`
 - Package directory: vacío
 
-No se necesita instalar herramientas en el equipo del usuario: GitHub y Netlify pueden ejecutar el build en la nube.
+El sitio está publicado en Cloudflare Pages (`pasaporte-motero.pages.dev`).
 
 ## Supabase
 
-Ejecuta `supabase/migrations/0001_initial_schema.sql` desde SQL Editor. La base incluye perfiles, QR, catálogo, visitas, fotos, publicaciones, relaciones sociales, comentarios, encargados, validaciones, reportes, viajes, destinos asociados, destinos guardados y logros.
+Las migraciones están en `supabase/migrations/` y deben aplicarse en orden de versión (ver `supabase/migrations/README.md`). La base incluye perfiles, QR, catálogo, visitas, fotos, publicaciones, relaciones sociales, comentarios, encargados, validaciones, reportes, viajes, destinos asociados, destinos guardados y logros.
 
 La validación de QR, la aprobación definitiva de visitas y el otorgamiento de logros deben ejecutarse en backend confiable. No habilitar actualizaciones directas del estado de visita desde el navegador.
