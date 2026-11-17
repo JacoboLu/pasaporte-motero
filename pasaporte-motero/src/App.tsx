@@ -338,6 +338,8 @@ export default function App() {
   }, [qrScanning])
   useEffect(() => { try { localStorage.setItem('pm_destination_view', destinationView) } catch { /* La preferencia seguirá activa durante esta sesión */ } }, [destinationView])
   useEffect(() => { setDestinationPage(1) }, [query, category, regionFilter])
+  // Al abrir la app, intenta recuperar la ubicación para ordenar automáticamente los destinos cercanos.
+  useEffect(() => { requestExploreLocation(false) }, [])
   useEffect(() => {
     if (!supabase) return
     let active = true
@@ -519,17 +521,17 @@ export default function App() {
   const visiblePosts = posts.filter(p => p.visibility !== 'private').filter(p => feedMode === 'all' || (!!p.authorId && followed.includes(p.authorId)))
 
   function openTab(next: Tab) { setSubview(''); setSelected(null); setSelectedDepartment(null); setTab(next) }
-  function requestExploreLocation() {
+  function requestExploreLocation(showNotice = true) {
     if (!navigator.geolocation) { notify('Este dispositivo no ofrece geolocalización. Puedes explorar los destinos sin distancia personalizada.'); return }
     setLocationBusy(true)
     navigator.geolocation.getCurrentPosition(position => {
       setExploreLocation({ lat: position.coords.latitude, lng: position.coords.longitude })
       setLocationBusy(false)
-      notify('Ubicación actualizada. Ordenamos los destinos por cercanía.')
+      if (showNotice) notify('Ubicación actualizada. Ordenamos los destinos por cercanía.')
     }, error => {
       setLocationBusy(false)
       const message = error.code === error.PERMISSION_DENIED ? 'No se concedió permiso de ubicación. Puedes activarlo desde los ajustes del navegador.' : error.code === error.POSITION_UNAVAILABLE ? 'No pudimos determinar tu ubicación. Inténtalo en un lugar con mejor señal.' : 'La solicitud de ubicación tardó demasiado. Inténtalo nuevamente.'
-      notify(message)
+      if (showNotice || error.code === error.PERMISSION_DENIED) notify(message)
     }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 })
   }
   function formatDisplayDate(value: string) {
