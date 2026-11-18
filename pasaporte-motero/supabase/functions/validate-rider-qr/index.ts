@@ -121,6 +121,14 @@ Deno.serve(async (req: Request) => {
     return json(400, { error: "You cannot validate your own visit" });
   }
 
+  const {data:existing,error:existingError}=await admin.from("app_visits")
+    .select("id,user_id,destination_id,validation_status,visited_at")
+    .eq("user_id",qr.user_id).eq("destination_id",destinationId)
+    .in("validation_status",["pending","validated"]).order("visited_at",{ascending:false}).limit(1).maybeSingle();
+  if(existingError)return json(500,{error:"Could not check previous visits"});
+  if(existing?.validation_status==="validated")return json(200,{ok:true,already_validated:true,visit:existing});
+  if(existing?.validation_status==="pending")return json(409,{error:"El viajero ya tiene una evidencia fotográfica pendiente de revisión para este destino."});
+
   const now = new Date().toISOString();
   const { data: visit, error: insertError } = await admin
     .from("app_visits")
