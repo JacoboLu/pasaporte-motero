@@ -863,7 +863,7 @@ export default function App() {
       setBusy(false)
       if (error || !result?.visit) { notify('No se pudo validar la ubicación: ' + (result?.error || error?.message || 'Error desconocido')); return }
       await loadVisits(user.id)
-      notify('Ubicación verificada dentro del radio del destino. La visita quedó pendiente de aprobación para obtener el sello.')
+      notify(result.already_pending ? 'Esta visita ya estaba registrada y continúa pendiente de aprobación. No necesitas enviarla nuevamente.' : 'Ubicación verificada dentro del radio del destino. La visita quedó pendiente de aprobación para obtener el sello.')
       closeModal(); setTab('passport')
     }, error => {
       setBusy(false)
