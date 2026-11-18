@@ -2113,3 +2113,24 @@ h2,h3{color:var(--main-text)}
 .content :where(.form-grid>*,.maintenance-fields>*,.trip-date-grid>*){min-width:0;max-width:100%}
 @media(max-width:380px){.content{padding-left:13px!important;padding-right:13px!important}.bottom-nav{padding-left:4px!important;padding-right:4px!important}.bottom-nav .nav-plus{width:50px!important;height:50px!important;min-width:50px!important;min-height:50px!important}.bottom-nav>button:not(.nav-plus) span{font-size:8px!important}.nearby-destination-card{flex-basis:84%!important;width:84%!important}.explore-section-heading{align-items:flex-start}.explore-heading-actions{align-items:flex-start}}
 @media(min-width:700px){.app-shell{max-width:560px}.content{padding-left:22px!important;padding-right:22px!important}}
+
+/* Logros del pasaporte motero */
+.achievement-summary{display:flex;align-items:center;gap:18px;padding:18px;margin:18px 0 22px;border:1px solid var(--border,#e5e7eb);border-radius:18px;background:var(--surface,#fff)}
+.achievement-summary>div:first-child{display:flex;flex-direction:column;min-width:112px}
+.achievement-summary strong{font-size:27px;line-height:1.1}
+.achievement-summary strong span{font-size:15px;color:var(--muted,#777);font-weight:500}
+.achievement-summary small,.achievement-card small{color:var(--muted,#777);font-size:12px}
+.achievement-summary-track,.achievement-progress{height:7px;overflow:hidden;border-radius:99px;background:var(--border,#e5e7eb)}
+.achievement-summary-track{flex:1}
+.achievement-summary-track i,.achievement-progress i{display:block;height:100%;border-radius:inherit;background:var(--accent,#c56b35);transition:width .25s ease}
+.achievement-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:24px}
+.achievement-card{display:flex;align-items:flex-start;gap:14px;padding:15px;border:1px solid var(--border,#e5e7eb);border-radius:16px;background:var(--surface,#fff);min-width:0}
+.achievement-card.is-locked{opacity:.72}
+.achievement-icon{width:48px;height:48px;flex:0 0 48px;display:grid;place-items:center;border-radius:14px;background:var(--surface-soft,#f3f3f3);font-size:25px}
+.achievement-copy{flex:1;min-width:0}
+.achievement-title-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.achievement-title-row h3{font-size:15px;margin:1px 0 4px}
+.achievement-title-row svg{color:var(--accent,#c56b35);flex:0 0 auto}
+.achievement-copy p{font-size:13px;color:var(--muted,#777);margin:0 0 10px}
+.achievement-progress{height:5px;margin-bottom:6px}
+@media(min-width:600px){.achievement-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
