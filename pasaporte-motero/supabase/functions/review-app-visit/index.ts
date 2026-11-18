@@ -55,6 +55,7 @@ Deno.serve(async (req: Request) => {
       let visitQuery = admin.from("app_visits")
         .select("id,user_id,destination_id,visited_at,validation_method,validation_status,notes,evidence_path")
         .eq("validation_status", "pending")
+        .eq("validation_method", "photo")
         .order("visited_at", { ascending: true });
 
       // Apply the manager's department scope before limiting the queue,
@@ -93,10 +94,11 @@ Deno.serve(async (req: Request) => {
       if (!visitId || !["validated", "rejected"].includes(decision)) return json({ error: "Solicitud inválida" }, 400);
       if (decision === "rejected" && !reason) return json({ error: "Indica el motivo del rechazo" }, 400);
       const { data: visit, error: readError } = await admin.from("app_visits")
-        .select("id,destination_id,validation_status").eq("id", visitId).maybeSingle();
+        .select("id,destination_id,validation_status,validation_method").eq("id", visitId).maybeSingle();
       if (readError) throw readError;
       if (!visit) return json({ error: "Visita no encontrada" }, 404);
       if (profile.role === "manager" && !await managerCanManageDestination(admin, authData.user.id, visit.destination_id)) return json({ error: "No tienes asignación para gestionar este departamento" }, 403);
+      if (visit.validation_method !== "photo") return json({ error: "Solo las evidencias fotográficas requieren revisión manual." }, 403);
       if (visit.validation_status !== "pending") return json({ error: "La visita ya fue revisada" }, 409);
       const { data: updated, error: updateError } = await admin.from("app_visits")
         .update({
