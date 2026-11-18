@@ -1084,7 +1084,7 @@ export default function App() {
       return {id:'trip:'+row.id,authorId:row.user_id,title:row.name,text:row.description || 'Una nueva bitácora de viaje compartida con la comunidad.',place:stops.join(' · ') || 'Ruta motera',date,likes:0,visibility:row.visibility,image:tripPhotos.find(Boolean),tripPhotos:tripPhotos.filter(Boolean),tripStops:stops,comments:[],kind:'trip',authorName:profile?.full_name || 'Motero',authorUsername:profile?.username || 'viajero',authorAvatar:profile?.avatar_url || null,createdAt:row.created_at} as Post
     }))
     // Re-fetches happen after auth/session events and writes; merge by id to avoid duplicating feed cards.
-    const mergedPosts = new Map<string, Post>()
+    const mergedPosts = new globalThis.Map<string, Post>()
     for (const item of [...posts, ...publicTrips]) mergedPosts.set(String(item.id), item)
     setPosts([...mergedPosts.values()].sort((a,b)=>new Date(b.createdAt || 0).getTime()-new Date(a.createdAt || 0).getTime()))
   }
