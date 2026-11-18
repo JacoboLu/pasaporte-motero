@@ -38,13 +38,19 @@ Deno.serve(async (req: Request) => {
   const distance=distanceMeters(lat,lng,destination.latitude,destination.longitude);
   if (distance + accuracy > destination.geofence_radius_m) return json(422,{error:"GPS uncertainty overlaps the destination geofence boundary. Improve GPS accuracy or submit photo evidence.",distance_m:Math.round(distance),accuracy_m:Math.round(accuracy),radius_m:destination.geofence_radius_m});
   const {data:pendingVisit,error:pendingError}=await admin.from("app_visits")
-    .select("id,destination_id,visited_at,validation_method,validation_status").eq("user_id",user.id).eq("destination_id",id).eq("validation_status","pending").maybeSingle();
-  if (pendingError) return json(500,{error:"Could not check pending visits"});
-  // Idempotent response: repeated taps must not turn an already-registered visit into a technical error.
-  if (pendingVisit) return json(200,{visit:pendingVisit,already_pending:true,message:"This visit is already awaiting review."});
+    .select("id,destination_id,visited_at,validation_method,validation_status").eq("user_id",user.id).eq("destination_id",id).in("validation_status",["pending","validated"]).order("visited_at",{ascending:false}).limit(1).maybeSingle();
+  if (pendingError) return json(500,{error:"Could not check existing visits"});
+  // GPS is an automatic validation method. Upgrade legacy pending GPS visits without asking staff to review them.
+  if (pendingVisit?.validation_status === "validated") return json(200,{visit:pendingVisit,already_validated:true,message:"This GPS visit is already validated."});
+  if (pendingVisit?.validation_status === "pending" && pendingVisit.validation_method === "gps") {
+    const {data:updated,error:updateError}=await admin.from("app_visits").update({validation_status:"validated",reviewed_by:null,reviewed_at:null,rejection_reason:null}).eq("id",pendingVisit.id).eq("validation_status","pending").select("id,destination_id,visited_at,validation_method,validation_status").single();
+    if (updateError) return json(500,{error:"Could not automatically validate the existing GPS visit"});
+    return json(200,{visit:updated,already_validated:true,message:"GPS visit automatically validated."});
+  }
+  if (pendingVisit?.validation_status === "pending") return json(409,{error:"A photo visit for this destination is already awaiting staff review.",visit_id:pendingVisit.id});
   const {data:visit,error:insertError}=await admin.from("app_visits").insert({
     user_id:user.id,destination_id:id,visited_at:new Date().toISOString(),validation_method:"gps",
-    validation_status:"pending",notes:typeof body.notes==="string"?body.notes.slice(0,500):null,
+    validation_status:"validated",notes:typeof body.notes==="string"?body.notes.slice(0,500):null,
     latitude:lat,longitude:lng,accuracy_m:accuracy
   }).select("id,destination_id,visited_at,validation_method,validation_status").single();
   if (insertError) {
@@ -54,5 +60,5 @@ Deno.serve(async (req: Request) => {
     }
     return json(500,{error:"Could not save visit"});
   }
-  return json(201,{visit,distance_m:Math.round(distance),accuracy_m:Math.round(accuracy),message:"Visit submitted for review"});
+  return json(201,{visit,distance_m:Math.round(distance),accuracy_m:Math.round(accuracy),message:"GPS visit automatically validated"});
 });
