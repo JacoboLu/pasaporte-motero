@@ -38,16 +38,20 @@ Deno.serve(async (req: Request) => {
   const distance=distanceMeters(lat,lng,destination.latitude,destination.longitude);
   if (distance + accuracy > destination.geofence_radius_m) return json(422,{error:"GPS uncertainty overlaps the destination geofence boundary. Improve GPS accuracy or submit photo evidence.",distance_m:Math.round(distance),accuracy_m:Math.round(accuracy),radius_m:destination.geofence_radius_m});
   const {data:pendingVisit,error:pendingError}=await admin.from("app_visits")
-    .select("id").eq("user_id",user.id).eq("destination_id",id).eq("validation_status","pending").maybeSingle();
+    .select("id,destination_id,visited_at,validation_method,validation_status").eq("user_id",user.id).eq("destination_id",id).eq("validation_status","pending").maybeSingle();
   if (pendingError) return json(500,{error:"Could not check pending visits"});
-  if (pendingVisit) return json(409,{error:"You already have a pending visit for this destination.",visit_id:pendingVisit.id});
+  // Idempotent response: repeated taps must not turn an already-registered visit into a technical error.
+  if (pendingVisit) return json(200,{visit:pendingVisit,already_pending:true,message:"This visit is already awaiting review."});
   const {data:visit,error:insertError}=await admin.from("app_visits").insert({
     user_id:user.id,destination_id:id,visited_at:new Date().toISOString(),validation_method:"gps",
     validation_status:"pending",notes:typeof body.notes==="string"?body.notes.slice(0,500):null,
     latitude:lat,longitude:lng,accuracy_m:accuracy
   }).select("id,destination_id,visited_at,validation_method,validation_status").single();
   if (insertError) {
-    if (insertError.code === "23505") return json(409,{error:"You already have a pending visit for this destination."});
+    if (insertError.code === "23505") {
+      const {data:existingVisit} = await admin.from("app_visits").select("id,destination_id,visited_at,validation_method,validation_status").eq("user_id",user.id).eq("destination_id",id).eq("validation_status","pending").maybeSingle();
+      if (existingVisit) return json(200,{visit:existingVisit,already_pending:true,message:"This visit is already awaiting review."});
+    }
     return json(500,{error:"Could not save visit"});
   }
   return json(201,{visit,distance_m:Math.round(distance),accuracy_m:Math.round(accuracy),message:"Visit submitted for review"});
