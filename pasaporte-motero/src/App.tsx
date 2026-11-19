@@ -872,7 +872,20 @@ export default function App() {
         }
       })
       setBusy(false)
-      if (error || !result?.visit) { notify('No se pudo validar la ubicación: ' + (result?.error || error?.message || 'Error desconocido')); return }
+      if (error || !result?.visit) {
+        let detail = result?.error || error?.message || 'Error desconocido'
+        const response = (error as any)?.context
+        if (response && typeof response.clone === 'function') {
+          try {
+            const payload = await response.clone().json()
+            detail = payload?.error || payload?.message || detail
+            if (payload?.accuracy_m != null) detail += ` (precisión: ${Math.round(payload.accuracy_m)} m)`
+            if (payload?.distance_m != null && payload?.radius_m != null) detail += ` (distancia: ${payload.distance_m} m; radio: ${payload.radius_m} m)`
+          } catch { /* Keep the original Supabase error when the response is not JSON. */ }
+        }
+        notify('No se pudo validar la ubicación: ' + detail)
+        return
+      }
       await loadVisits(user.id)
       notify(result.already_validated ? 'Esta visita ya estaba validada. Tu sello está en el pasaporte.' : '¡Ubicación verificada! Tu visita quedó validada automáticamente y el sello ya está en tu pasaporte.')
       closeModal(); setTab('passport')
