@@ -295,8 +295,6 @@ export default function App() {
   const [showAllDestinations, setShowAllDestinations] = useState(false)
   const [passportSpread, setPassportSpread] = useState(0)
   const [passportOpen, setPassportOpen] = useState(false)
-  const [passportOpening, setPassportOpening] = useState(false)
-  const [passportFlip, setPassportFlip] = useState<'next'|'previous'|''>('')
   const passportTouchStartX = useRef<number | null>(null)
   const [authOpen, setAuthOpen] = useState(false)
   const [authMode, setAuthMode] = useState<'login'|'register'>('login')
@@ -543,7 +541,7 @@ export default function App() {
   const passportSpreadCount = departmentPages.length
 
   const renderPassportPage = (page: (typeof departmentPages)[number], index: number, face: 'front'|'back') => {
-    const stampState = page.visitedPlaces.length ? 'earned' : page.pendingPlaces.length ? 'pending' : 'unearned'
+    const stampState = page.earned || page.stamp ? 'earned' : page.pendingPlaces.length ? 'pending' : 'unearned'
     const stampInk = departmentStampThemes[page.name]?.ink || '#858585'
     const artPosition = index === 7 ? '0% 50%' : index % 2 === 0 ? '0% 50%' : '100% 50%'
     return <div className={`passport-page-face ${face} department-${stampState}`} key={`${face}-${page.name}`}>
@@ -551,7 +549,10 @@ export default function App() {
       <span className="passport-page-ornament">✦ REPÚBLICA DEL PERÚ ✦</span>
       <h3 className="passport-page-title">{page.name}</h3>
       <span className="passport-page-caption">DEPARTAMENTO · PASAPORTE MOTERO</span>
-      <div className="passport-page-art" style={{backgroundPosition:artPosition}} role="img" aria-label={index===7?'Sello ilustrado de Machu Picchu':'Sello ilustrado de una llama andina'} />
+      <div className={`passport-page-art ${stampState}`} style={{backgroundPosition:artPosition}} role="img" aria-label={`Sello ilustrado del pasaporte para ${page.name}`}>
+        {stampState==='earned' && <span className="passport-earned-overprint"><Stamp size={12}/> SELLO OBTENIDO</span>}
+        {stampState==='pending' && <span className="passport-earned-overprint pending">EN VALIDACIÓN</span>}
+      </div>
       <div className={`passport-page-inkline ${stampState}`} style={{'--stamp-ink':stampInk} as React.CSSProperties}>
         <strong>{page.code}</strong><span>{departmentStampThemes[page.name]?.route || 'RUTA PERUANA'}</span>
         <small>{stampState==='earned' && page.earnedAt ? new Date(page.earnedAt).toLocaleDateString('es-PE') : stampState==='pending' ? 'VISITA EN VALIDACIÓN' : 'SELLO POR CONSEGUIR'}</small>
@@ -1829,24 +1830,24 @@ export default function App() {
 
           {passportOpen ? <div className="passport-interactive-area passport-is-open">
             <div className="passport-open-toolbar">
-              <button type="button" className="passport-close-book" onClick={()=>{setPassportOpen(false);setPassportFlip('');setPassportSpread(0)}}><ArrowLeft size={15}/> Cerrar pasaporte</button>
+              <button type="button" className="passport-close-book" onClick={()=>{setPassportOpen(false);setPassportSpread(0)}}><ArrowLeft size={15}/> Cerrar pasaporte</button>
               <span className="passport-book-page-indicator">PÁGINA {passportSpread+1} DE {departmentPages.length}</span>
             </div>
             <div className="passport-book-controls">
-              <button type="button" className="book-turn-button" disabled={passportSpread===0 || !!passportFlip} onClick={()=>setPassportFlip('previous')} aria-label="Página anterior"><ArrowLeft size={17}/></button>
-              <span>DESLIZA O PASA LA HOJA <small>· {passportSpread+1}/{passportSpreadCount}</small></span>
-              <button type="button" className="book-turn-button" disabled={passportSpread>=passportSpreadCount-1 || !!passportFlip} onClick={()=>setPassportFlip('next')} aria-label="Página siguiente"><ChevronRight size={17}/></button>
+              <button type="button" className="book-turn-button" disabled={passportSpread===0} onClick={()=>setPassportSpread(current=>Math.max(0,current-1))} aria-label="Página anterior"><ArrowLeft size={17}/></button>
+              <span>CONSULTA LAS PÁGINAS <small>· {passportSpread+1}/{passportSpreadCount}</small></span>
+              <button type="button" className="book-turn-button" disabled={passportSpread>=passportSpreadCount-1} onClick={()=>setPassportSpread(current=>Math.min(passportSpreadCount-1,current+1))} aria-label="Página siguiente"><ChevronRight size={17}/></button>
             </div>
-            <div className="passport-book-viewport" onTouchStart={event=>{passportTouchStartX.current=event.changedTouches[0]?.clientX ?? null}} onTouchEnd={event=>{const startX=passportTouchStartX.current;const endX=event.changedTouches[0]?.clientX;passportTouchStartX.current=null;if(startX===null||endX===undefined||passportFlip)return;const delta=endX-startX;if(Math.abs(delta)>45){if(delta<0 && passportSpread<passportSpreadCount-1)setPassportFlip('next');else if(delta>0 && passportSpread>0)setPassportFlip('previous')}}}>
-              <div className={`passport-page-turn ${passportFlip ? `turn-${passportFlip}` : ''}`} onAnimationEnd={event=>{if(event.target!==event.currentTarget || !passportFlip)return;setPassportSpread(current=>Math.max(0,Math.min(passportSpreadCount-1,current+(passportFlip==='next'?1:-1))));setPassportFlip('')}}>
+            <div className="passport-book-viewport" onTouchStart={event=>{passportTouchStartX.current=event.changedTouches[0]?.clientX ?? null}} onTouchEnd={event=>{const startX=passportTouchStartX.current;const endX=event.changedTouches[0]?.clientX;passportTouchStartX.current=null;if(startX===null||endX===undefined)return;const delta=endX-startX;if(Math.abs(delta)>45){if(delta<0)setPassportSpread(current=>Math.min(passportSpreadCount-1,current+1));else setPassportSpread(current=>Math.max(0,current-1))}}}>
+              <div className="passport-page-turn">
                 {renderPassportPage(departmentPages[passportSpread],passportSpread,'front')}
-                {renderPassportPage(departmentPages[passportFlip==='previous'?Math.max(0,passportSpread-1):Math.min(departmentPages.length-1,passportSpread+1)],passportFlip==='previous'?Math.max(0,passportSpread-1):Math.min(departmentPages.length-1,passportSpread+1),'back')}
+                {renderPassportPage(departmentPages[Math.min(departmentPages.length-1,passportSpread+1)],Math.min(departmentPages.length-1,passportSpread+1),'back')}
               </div>
             </div>
-            <div className="passport-page-dots" aria-label="Progreso de páginas">{departmentPages.map((page,index)=><button key={page.code} type="button" className={index===passportSpread?'active':''} aria-label={`Ir a página ${index+1}: ${page.name}`} onClick={()=>{if(!passportFlip)setPassportSpread(index)}} />)}</div>
+            <div className="passport-page-dots" aria-label="Progreso de páginas">{departmentPages.map((page,index)=><button key={page.code} type="button" className={index===passportSpread?'active':''} aria-label={`Ir a página ${index+1}: ${page.name}`} onClick={()=>setPassportSpread(index)} />)}</div>
             <p className="passport-page-tip"><BookOpen size={14}/> Cada departamento guarda sus destinos y sellos de visita.</p>
           </div> : <div className="passport-cover-stage">
-            <button type="button" className={`passport-cover passport-cover-official passport-cover-trigger ${passportOpening?'passport-cover-opening':''}`} onClick={()=>{if(!passportOpening){setPassportOpening(true)}}} onAnimationEnd={event=>{if(event.target===event.currentTarget && passportOpening){setPassportOpen(true);setPassportOpening(false)}}} aria-label="Abrir mi pasaporte">
+            <button type="button" className="passport-cover passport-cover-official passport-cover-trigger" onClick={()=>setPassportOpen(true)} aria-label="Abrir mi pasaporte">
               <img src="/portada-pasaporte-motero.png" alt="Pasaporte de aventura, República del Camino, edición motociclista" />
               <span className="passport-open-hint"><BookOpen size={14}/> Toca para abrir tu pasaporte</span>
             </button>
