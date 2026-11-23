@@ -3236,3 +3236,65 @@ html,body,#root{background:var(--pm-paper)!important}
   line-height:1.05!important;
   text-align:center!important;
 }
+
+
+/* Ajuste fino de composición: sellos secundarios fuera de títulos y del sello central */
+.app-shell .content .passport-page-face .department-tourist-stamps{
+  position:absolute!important;inset:0!important;display:block!important;
+  width:100%!important;height:100%!important;margin:0!important;padding:0!important;
+  overflow:hidden!important;z-index:5!important;pointer-events:none!important;
+}
+.app-shell .content .passport-page-face .tourist-mini-stamp{
+  width:clamp(34px,10.5vw,40px)!important;
+  height:25px!important;min-width:0!important;
+  border-radius:5px 7px 4px 6px!important;
+  background:#f6eddccf!important;
+  box-shadow:0 1px 2px #705b3b1c!important;
+  opacity:.82!important;
+  transform:translate(-50%,-50%) rotate(var(--stamp-rotation,0deg))!important;
+}
+.app-shell .content .passport-page-face .tourist-mini-stamp:nth-child(8n+1){--stamp-x:13%;--stamp-y:35%;--stamp-rotation:-8deg}
+.app-shell .content .passport-page-face .tourist-mini-stamp:nth-child(8n+2){--stamp-x:87%;--stamp-y:34%;--stamp-rotation:6deg}
+.app-shell .content .passport-page-face .tourist-mini-stamp:nth-child(8n+3){--stamp-x:12%;--stamp-y:50%;--stamp-rotation:5deg}
+.app-shell .content .passport-page-face .tourist-mini-stamp:nth-child(8n+4){--stamp-x:88%;--stamp-y:51%;--stamp-rotation:-7deg}
+.app-shell .content .passport-page-face .tourist-mini-stamp:nth-child(8n+5){--stamp-x:14%;--stamp-y:63%;--stamp-rotation:7deg}
+.app-shell .content .passport-page-face .tourist-mini-stamp:nth-child(8n+6){--stamp-x:86%;--stamp-y:62%;--stamp-rotation:-4deg}
+.app-shell .content .passport-page-face .tourist-mini-stamp:nth-child(8n+7){--stamp-x:18%;--stamp-y:57%;--stamp-rotation:-11deg}
+.app-shell .content .passport-page-face .tourist-mini-stamp:nth-child(8n){--stamp-x:82%;--stamp-y:57%;--stamp-rotation:9deg}
+.app-shell .content .passport-page-face .tourist-mini-stamp small{
+  font-size:4.6px!important;letter-spacing:-.12px!important;
+  max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important;
+}
+/* El área abierta se ajusta al contenido: sin altura sobrante entre hoja, puntos y estadísticas */
+.app-shell .content .passport-interactive-area,
+.app-shell .content .passport-interactive-area.passport-is-open{
+  display:flex!important;flex-direction:column!important;justify-content:flex-start!important;
+  align-items:stretch!important;gap:0!important;
+  height:auto!important;min-height:0!important;max-height:none!important;
+  margin:8px 0 10px!important;padding:0!important;
+  flex:0 0 auto!important;
+}
+.app-shell .content .passport-book-viewport{
+  display:grid!important;place-items:center!important;
+  width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;
+  aspect-ratio:auto!important;flex:0 0 auto!important;
+  margin:0 auto 4px!important;padding:0!important;
+  align-content:start!important;justify-content:center!important;
+}
+.app-shell .content .passport-page-turn{
+  display:block!important;position:relative!important;
+  width:min(86vw,360px)!important;height:auto!important;
+  aspect-ratio:.78!important;min-height:0!important;max-height:none!important;
+  flex:0 0 auto!important;margin:0 auto!important;
+}
+.app-shell .content .passport-page-dots{
+  position:relative!important;display:flex!important;
+  width:min(100%,360px)!important;height:auto!important;min-height:0!important;
+  margin:2px auto 5px!important;padding:0!important;
+  flex:0 0 auto!important;align-self:center!important;
+}
+.app-shell .content .passport-page-tip{
+  margin:0 auto 2px!important;padding:0!important;
+  min-height:0!important;flex:0 0 auto!important;
+}
+.app-shell .content .passport-is-open+.stats-grid{margin-top:8px!important}
