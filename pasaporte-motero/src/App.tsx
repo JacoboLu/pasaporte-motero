@@ -541,17 +541,29 @@ export default function App() {
   const passportSpreadCount = departmentPages.length
 
   const renderPassportPage = (page: (typeof departmentPages)[number], index: number, face: 'front'|'back') => {
-    const stampState = page.earned || page.stamp ? 'earned' : page.pendingPlaces.length ? 'pending' : 'unearned'
+    // Restaurado del diseño estable del pasaporte: el sello se compone con su arte tipográfico y tinta departamental.
+    // Solo las visitas validadas activan el sello; pendientes y rechazadas nunca lo conceden.
+    const stampState = page.visitedPlaces.length ? 'earned' : page.pendingPlaces.length ? 'pending' : 'unearned'
     const stampInk = departmentStampThemes[page.name]?.ink || '#858585'
-    const artPosition = index === 7 ? '0% 50%' : index % 2 === 0 ? '0% 50%' : '100% 50%'
     return <div className={`passport-page-face ${face} department-${stampState}`} key={`${face}-${page.name}`}>
       <span className="passport-page-number">PÁGINA {String(index+1).padStart(2,'0')} / 25</span>
       <span className="passport-page-ornament">✦ REPÚBLICA DEL PERÚ ✦</span>
       <h3 className="passport-page-title">{page.name}</h3>
       <span className="passport-page-caption">DEPARTAMENTO · PASAPORTE MOTERO</span>
-      <div className={`passport-page-art ${stampState}`} style={{backgroundPosition:artPosition}} role="img" aria-label={`Sello ilustrado del pasaporte para ${page.name}`}>
-        {stampState==='earned' && <span className="passport-earned-overprint"><Stamp size={12}/> SELLO OBTENIDO</span>}
-        {stampState==='pending' && <span className="passport-earned-overprint pending">EN VALIDACIÓN</span>}
+      <span className={`passport-ink-stamp ink-${page.code.toLowerCase()} shape-${departmentStampThemes[page.name]?.shape || 'round'} ${stampState}`}>
+        <span className="ink-stamp-top">PASAPORTE MOTERO · PERÚ</span>
+        <span className="ink-stamp-symbol">{departmentStampThemes[page.name]?.symbol || '✦'}</span>
+        <b>{page.code}</b>
+        <strong>{page.name.toUpperCase()}</strong>
+        <small>{departmentStampThemes[page.name]?.route || 'RUTA PERUANA'}</small>
+        <em>{stampState==='earned' && page.earnedAt ? new Date(page.earnedAt).toLocaleDateString('es-PE') : stampState==='pending' ? 'EN VALIDACIÓN' : 'POR VISITAR'}</em>
+      </span>
+      <div className="department-tourist-stamps" aria-label="Sellos de lugares turísticos obtenidos">
+        {page.visitedPlaces.map((place,stampIndex)=>{
+          const seed=String(place.id).split('').reduce((sum,char)=>sum+char.charCodeAt(0),stampIndex*37+index*19)
+          const rotation=(seed%25)-12
+          return <span key={place.id} className="tourist-mini-stamp earned" style={{transform:`rotate(${rotation}deg)`,zIndex:stampIndex+1}} title={`${place.title} · Visita validada`}><Stamp size={10}/><small>{place.title}</small></span>
+        })}
       </div>
       <div className={`passport-page-inkline ${stampState}`} style={{'--stamp-ink':stampInk} as React.CSSProperties}>
         <strong>{page.code}</strong><span>{departmentStampThemes[page.name]?.route || 'RUTA PERUANA'}</span>
