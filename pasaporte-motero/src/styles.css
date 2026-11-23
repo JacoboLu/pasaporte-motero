@@ -3038,3 +3038,73 @@ html,body,#root{background:var(--pm-paper)!important}
   background-size:100% 100%,100% auto!important;
 }
 .app-shell.theme-dark .content::before{background:transparent!important}
+
+
+/* IDENTIDAD VISUAL: usar el fondo original de pergamino como lienzo común de todas las pestañas */
+.app-shell{
+  background:#EBD9BA!important;
+}
+.app-shell .content{
+  position:relative!important;
+  isolation:isolate!important;
+  background-color:#EBD9BA!important;
+  background-image:url('/passport-parchment-background.jpg')!important;
+  background-repeat:repeat-y!important;
+  background-position:center top!important;
+  background-size:100% auto!important;
+  background-attachment:local!important;
+}
+.app-shell .content::before{
+  content:none!important;
+  display:none!important;
+  background:none!important;
+}
+.app-shell .content>*{position:relative;z-index:1}
+.app-shell.theme-dark .content{
+  background-color:#172638!important;
+  background-image:linear-gradient(#172638b0,#172638b0),url('/passport-parchment-background.jpg')!important;
+  background-repeat:repeat-y!important;
+  background-position:center top!important;
+  background-size:100% auto!important;
+}
+/* Restaurar el sprite original de sellos del pasaporte; la posición viene del JSX */
+.app-shell .content .passport-page-art{
+  background-image:url('/peru-passport-stamps.webp')!important;
+  background-repeat:no-repeat!important;
+  background-size:200% 100%!important;
+  background-position:0% 50%;
+  border:4px double #B58B51!important;
+  outline:1px dashed #9e774c!important;
+  outline-offset:3px!important;
+  filter:none!important;
+}
+.app-shell .content .passport-page-art::after{content:none!important;display:none!important}
+.app-shell .content .passport-page-art.earned{
+  box-shadow:0 5px 13px #5b41231c,0 0 0 2px #c7a55f44!important;
+}
+.app-shell .content .passport-earned-overprint{
+  position:absolute;right:5px;bottom:7px;z-index:2;
+  display:inline-flex;align-items:center;gap:3px;
+  padding:4px 6px;border:1px solid #C7A55F;border-radius:999px;
+  background:#1A2F5C;color:#F7E5BE;font-size:7px;font-weight:800;
+  letter-spacing:.35px;box-shadow:0 2px 5px #34261755;
+}
+.app-shell .content .passport-earned-overprint.pending{
+  background:#f6ead6;color:#8d653c;border-color:#b58b51;
+}
+/* Sin animaciones ni transformaciones al abrir o consultar páginas.
+   Se mantienen controles directos, botones y gesto de deslizamiento. */
+.app-shell .content .passport-cover-trigger,
+.app-shell .content .passport-cover-trigger.passport-cover-opening{
+  animation:none!important;transition:none!important;
+  transform:none!important;transform-style:flat!important;
+  will-change:auto!important;backface-visibility:visible!important;
+}
+.app-shell .content .passport-page-turn,
+.app-shell .content .passport-page-turn.turn-next,
+.app-shell .content .passport-page-turn.turn-previous{
+  animation:none!important;transition:none!important;
+  transform:none!important;transform-style:preserve-3d!important;
+  filter:none!important;will-change:auto!important;
+}
+.app-shell .content .passport-interactive-area{animation:none!important;transition:none!important}
