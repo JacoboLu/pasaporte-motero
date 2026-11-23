@@ -2271,3 +2271,152 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
   .topbar .brand-mark.passport-brand-mark{width:38px!important;height:38px!important;flex-basis:38px!important}
   .passport-cover.passport-cover-official img{width:min(76%,245px)!important}
 }
+
+
+/* Identidad editorial de aventura: fondo de pergamino y sellos sutiles en todas las pestañas */
+:root{
+  --pm-paper:#F2E8D5;
+  --pm-paper-light:#F8F0E1;
+  --pm-paper-line:#D9C7A6;
+  --pm-ink:#1A2F5C;
+  --pm-ink-soft:#34495E;
+  --pm-antique-gold:#C7A55F;
+  --pm-rust:#A85E2D;
+}
+html,body,#root{background:var(--pm-paper)!important}
+.app-shell{
+  background:var(--pm-paper)!important;
+  color:#26384A!important;
+}
+.app-shell .topbar{
+  background:linear-gradient(110deg,#122747 0%,#1A2F5C 65%,#243D62 100%)!important;
+  border-bottom:2px solid var(--pm-antique-gold)!important;
+  color:#F8EBD0!important;
+}
+.app-shell .topbar .brand-heading strong,
+.app-shell .topbar .brand-heading small,
+.app-shell .topbar .brand,
+.app-shell .topbar .icon-button{color:#F2D8A4!important}
+.app-shell .content{
+  position:relative!important;
+  isolation:isolate!important;
+  background:transparent!important;
+  color:#29394A!important;
+}
+.app-shell .content::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:0;
+  pointer-events:none;
+  opacity:.52;
+  background-color:var(--pm-paper);
+  background-image:
+    radial-gradient(ellipse at 12% 9%,#fff8e8 0,transparent 33%),
+    radial-gradient(ellipse at 91% 24%,#dfcda9 0,transparent 26%),
+    radial-gradient(ellipse at 8% 75%,#e3d2b4 0,transparent 24%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260'%3E%3Cg fill='none' stroke='%238e7959' stroke-width='2' opacity='.16'%3E%3Ccircle cx='48' cy='58' r='31'/%3E%3Cpath d='M22 67 43 38l11 15 10-12 12 26M35 70h28'/%3E%3Ccircle cx='212' cy='192' r='29'/%3E%3Cpath d='M212 158v68m-34-34h68m-58-24 48 48m0-48-48 48M179 65q22-23 44 0t0 26q-22 23-44 0'/%3E%3C/g%3E%3Ctext x='48' y='106' text-anchor='middle' fill='%238e7959' opacity='.18' font-size='10' letter-spacing='2'%3EPERU%3C/text%3E%3C/svg%3E");
+  background-size:auto,auto,auto,260px 260px;
+  background-position:center,center,center,0 0;
+}
+.app-shell .content>section{position:relative}
+.app-shell .content h1,
+.app-shell .content h2,
+.app-shell .content h3{color:#1A2F5C}
+.app-shell .content .eyebrow,
+.app-shell .content .section-heading .eyebrow{color:#A85E2D}
+.app-shell .content .muted{color:#65717A!important}
+.app-shell .content .heading-icon,
+.app-shell .content .searchbox,
+.app-shell .content .explore-map-shortcut,
+.app-shell .content .explore-category-chip,
+.app-shell .content .nearby-destination-card,
+.app-shell .content .catalog-toggle,
+.app-shell .content .explore-catalog-panel,
+.app-shell .content .destination-detail .detail-info,
+.app-shell .content .status-card,
+.app-shell .content .empty-card,
+.app-shell .content .post-card,
+.app-shell .content .trip-card,
+.app-shell .content .profile-card,
+.app-shell .content .public-profile-card,
+.app-shell .content .settings-card,
+.app-shell .content .profile-menu button,
+.app-shell .content .history-row,
+.app-shell .content .composer-shortcut,
+.app-shell .content .stat,
+.app-shell .content .qr-card{
+  background:rgba(250,244,231,.94)!important;
+  border:1px solid #D5C19B!important;
+  box-shadow:0 3px 10px #624a2810!important;
+  color:#29394A!important;
+}
+.app-shell .content .nearby-destination-card,
+.app-shell .content .profile-menu button,
+.app-shell .content .history-row{border-radius:12px!important}
+.app-shell .content .stat{
+  background:linear-gradient(145deg,#1A2F5C,#263F63)!important;
+  border:1px solid #C7A55F!important;
+  color:#F2E8D5!important;
+  box-shadow:0 3px 0 #A77D3C!important;
+}
+.app-shell .content .stat strong{color:#F7E8C8!important}
+.app-shell .content .stat span{color:#E5C98F!important}
+.app-shell .content .primary,
+.app-shell .bottom-nav .nav-plus{
+  background:#1A2F5C!important;color:#F2E8D5!important;
+  border:1px solid #C7A55F!important;
+}
+.app-shell .content .secondary,
+.app-shell .content .chip,
+.app-shell .content .filter-button{
+  background:#F8F0E1!important;color:#34495E!important;border-color:#D5C19B!important
+}
+.app-shell .content .chip.active,
+.app-shell .content .explore-category-chip.active{
+  background:#E8D7B8!important;color:#8F4E26!important;border-color:#B9823D!important
+}
+.app-shell .content .text-action,
+.app-shell .content .back-link{color:#A85E2D!important}
+.app-shell .content .progress{background:#DCCDB4!important;border:1px solid #C7B28E!important}
+.app-shell .content .progress span{background:linear-gradient(90deg,#A85E2D,#C7A55F)!important}
+.app-shell .content .section-heading{border-color:#D8C6A4}
+.app-shell .bottom-nav{
+  background:#172D50!important;border-top:1px solid #C7A55F!important;
+  box-shadow:0 -5px 18px #182a4318!important;
+}
+.app-shell .bottom-nav button{color:#D8C7A5!important}
+.app-shell .bottom-nav button.active{color:#F0C77C!important}
+.app-shell .bottom-nav button.active::before{background:#C7A55F!important}
+.app-shell .bottom-nav .nav-plus{color:#F2D8A4!important;border-radius:50%!important}
+.app-shell .content .passport-book-heading strong{color:#8F4E26!important}
+.app-shell .content .passport-book-page{color:#34495E}
+.app-shell .content .passport-close-book{
+  display:inline-flex;align-items:center;gap:7px;
+  border:1px solid #C7A55F;border-radius:999px;
+  background:#1A2F5C;color:#F2E8D5;padding:8px 13px;
+  font-size:12px;font-weight:700;margin-bottom:10px;
+}
+.app-shell .content .passport-cover-trigger{
+  cursor:pointer;position:relative;display:flex;flex-direction:column;
+  align-items:center;gap:8px;width:100%;
+}
+.app-shell .content .passport-open-hint{
+  display:flex;align-items:center;gap:6px;
+  color:#8F4E26;font-size:11px;font-weight:700;
+  letter-spacing:.35px;padding:5px 12px;
+  border:1px solid #C7A55F;border-radius:999px;
+  background:#F8F0E1;
+}
+.app-shell .content .passport-interactive-area{margin:8px 0 15px}
+.app-shell .content .passport-book-viewport{
+  border:1px solid #B58B51!important;
+  border-radius:13px!important;
+  box-shadow:0 9px 22px #47351f24!important;
+  background:#EAD9B8!important;
+}
+@media(max-width:480px){
+  .app-shell .content::before{background-size:auto,auto,auto,220px 220px}
+  .app-shell .content .stat{min-height:74px}
+  .app-shell .content .passport-open-hint{font-size:10px}
+}
