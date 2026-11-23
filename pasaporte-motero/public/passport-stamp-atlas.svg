@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900">
+<defs>
+ <g id="seal" fill="none" stroke="#806b50" stroke-width="3">
+  <circle cx="150" cy="150" r="124"/><circle cx="150" cy="150" r="114" stroke-width="1.5" stroke-dasharray="4 7"/>
+  <path d="M54 222q20-13 40 0t40 0 40 0 40 0 40 0 40 0" stroke-width="2"/>
+  <path d="M54 235q20-13 40 0t40 0 40 0 40 0 40 0 40 0" stroke-width="1.5"/>
+ </g>
+ <style>.label{font-family:Georgia,serif;font-size:17px;letter-spacing:3px;fill:#806b50;font-weight:bold;text-anchor:middle}.art{fill:none;stroke:#806b50;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}</style>
+</defs>
+<!-- Machu Picchu -->
+<g transform="translate(0 0)"><use href="#seal"/>
+ <g class="art"><path d="M65 177 104 104l27 33 24-58 31 55 24-30 44 73Z" fill="#c4ad88"/><path d="m104 104 20 23 13-5 18 20 24-63 20 40 12-9 21 24 18-12 20 34M75 178h150v23H75zM90 180v18m22-18v18m22-18v18m22-18v18m22-18v18m22-18v18m22-18v18"/></g>
+ <text class="label" x="150" y="258">MACHU PICCHU</text></g>
+<!-- Llama -->
+<g transform="translate(300 0)"><use href="#seal"/>
+ <g class="art"><path d="M108 204q-19-16-14-43l-6-77q-1-13 10-14 11-1 13 13l7 65q10 10 25 7l12-66q3-12 13-9 10 3 6 16l-13 68q24 13 28 41l-5 43h-19l-8-35h-35l-8 35H104z" fill="#c4ad88"/><path d="M103 147q17-12 29 0t28 0 28 0m-78 18q17-12 29 0t28 0 28 0M115 94l-7-28m18 31-3-25m48 24 6-25m10 24 9-27"/></g>
+ <text class="label" x="150" y="258">ANDES</text></g>
+<!-- Hummingbird -->
+<g transform="translate(0 300)"><use href="#seal"/>
+ <g class="art"><path d="M142 144q-20-40-72-58 20 43 63 70-40 2-77 37 53 7 91-20 18 34 42 48-5-43-21-66 42-10 92-5-44-27-91-24l38-72q-45 9-65 90Z" fill="#c4ad88"/><path d="m142 144-6-91m10 95 66-35m-73 39-46 54m51-50-4 73"/></g>
+ <text class="label" x="150" y="558">NAZCA</text></g>
+<!-- Condor -->
+<g transform="translate(300 300)"><use href="#seal"/>
+ <g class="art"><path d="M30 135q67-34 118 18 19-18 38-17 18 0 37 17 51-52 118-18-51 2-83 42-42 40-72 18-31 22-72-18-32-40-84-42Z" fill="#c4ad88"/><path d="m55 129 71 40m-48-56 60 65m139-49-69 40m47-56-60 65m-65-18q-14 52 8 84 22-32 8-84"/></g>
+ <text class="label" x="150" y="558">CÓNDOR ANDINO</text></g>
+<!-- Compass -->
+<g transform="translate(0 600)"><use href="#seal"/>
+ <g class="art"><circle cx="150" cy="145" r="76"/><path d="m150 61 17 72-17 13-17-13Zm0 168-17-72 17-13 17 13ZM66 145l72-17 12 17-12 17Zm168 0-72 17-12-17 12-17Z" fill="#c4ad88"/><path d="M150 58v174M63 145h174M88 83l124 124m0-124L88 207"/></g>
+ <text class="label" x="150" y="858">RUMBO AL PERÚ</text></g>
+<!-- Titicaca boat -->
+<g transform="translate(300 600)"><use href="#seal"/>
+ <g class="art"><path d="M65 177q85 36 170 0l-25 32H90Z" fill="#c4ad88"/><path d="M137 174V83q43 12 67 54m-67-54q-42 16-57 56m-8 57q22-35 48-19 24-30 48 0 29-19 52 19M75 224q25 13 50 0t50 0 50 0 50 0"/></g>
+ <text class="label" x="150" y="858">TITICACA</text></g>
+</svg>
