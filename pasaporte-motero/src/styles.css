@@ -2219,3 +2219,12 @@ h1,h2,h3,.stat strong,.profile-menu button strong{color:var(--main-text)}
 .stamp-tile.earned strong{color:var(--pm-navy)!important}
 .progress span{background:var(--pm-terracotta)!important}
 button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline-color:var(--pm-gold)!important}
+
+
+/* Recursos gráficos oficiales: se muestran sin filtros ni recoloreado */
+.passport-brand-mark{overflow:hidden!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+.passport-brand-mark img{display:block;width:100%;height:100%;object-fit:contain;object-position:center}
+.passport-cover-official{display:flex;justify-content:center;align-items:center;margin:18px 0;padding:0!important;min-height:0!important;height:auto!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important}
+.passport-cover-official img{display:block;width:min(100%,360px);height:auto;max-height:480px;object-fit:contain;object-position:center;border-radius:0;filter:none}
+.theme-dark .passport-cover-official,.theme-light .passport-cover-official{background:transparent!important}
+@media(max-width:380px){.passport-cover-official img{width:min(100%,320px);max-height:430px}}
