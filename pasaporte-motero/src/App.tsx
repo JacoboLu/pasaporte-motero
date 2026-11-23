@@ -295,6 +295,8 @@ export default function App() {
   const [showAllDestinations, setShowAllDestinations] = useState(false)
   const [passportSpread, setPassportSpread] = useState(0)
   const [passportOpen, setPassportOpen] = useState(false)
+  const [passportOpening, setPassportOpening] = useState(false)
+  const [passportFlip, setPassportFlip] = useState<'next'|'previous'|''>('')
   const passportTouchStartX = useRef<number | null>(null)
   const [authOpen, setAuthOpen] = useState(false)
   const [authMode, setAuthMode] = useState<'login'|'register'>('login')
@@ -538,7 +540,34 @@ export default function App() {
   })
   const unlockedAchievementCount = achievementItems.filter(item => item.unlocked).length
   const progress = Math.round(visitedRegionCount / 25 * 100)
-  const passportSpreadCount = Math.ceil(departmentPages.length / 2)
+  const passportSpreadCount = departmentPages.length
+
+  const renderPassportPage = (page: (typeof departmentPages)[number], index: number, face: 'front'|'back') => {
+    const stampState = page.visitedPlaces.length ? 'earned' : page.pendingPlaces.length ? 'pending' : 'unearned'
+    const stampInk = departmentStampThemes[page.name]?.ink || '#858585'
+    const artPosition = index === 7 ? '0% 50%' : index % 2 === 0 ? '0% 50%' : '100% 50%'
+    return <div className={`passport-page-face ${face} department-${stampState}`} key={`${face}-${page.name}`}>
+      <span className="passport-page-number">PÁGINA {String(index+1).padStart(2,'0')} / 25</span>
+      <span className="passport-page-ornament">✦ REPÚBLICA DEL PERÚ ✦</span>
+      <h3 className="passport-page-title">{page.name}</h3>
+      <span className="passport-page-caption">DEPARTAMENTO · PASAPORTE MOTERO</span>
+      <div className="passport-page-art" style={{backgroundPosition:artPosition}} role="img" aria-label={index===7?'Sello ilustrado de Machu Picchu':'Sello ilustrado de una llama andina'} />
+      <div className={`passport-page-inkline ${stampState}`} style={{'--stamp-ink':stampInk} as React.CSSProperties}>
+        <strong>{page.code}</strong><span>{departmentStampThemes[page.name]?.route || 'RUTA PERUANA'}</span>
+        <small>{stampState==='earned' && page.earnedAt ? new Date(page.earnedAt).toLocaleDateString('es-PE') : stampState==='pending' ? 'VISITA EN VALIDACIÓN' : 'SELLO POR CONSEGUIR'}</small>
+      </div>
+      <div className="passport-page-bottomline">
+        <span><strong>{page.visitedPlaces.length}</strong> / {page.places.length} lugares visitados</span>
+        <span>{stampState==='earned'?'SELLO OBTENIDO':stampState==='pending'?'EN VALIDACIÓN':'TU PRÓXIMA AVENTURA'}</span>
+      </div>
+      <div className="passport-page-place-list">
+        {page.places.slice(0,3).map(place=><span key={place.id} className={visitedIds.has(place.id)?'visited':''}>{visitedIds.has(place.id)?'✦':'○'} {place.title}</span>)}
+        {page.places.length===0 && <span>Próximamente incorporaremos destinos de este departamento</span>}
+      </div>
+      <span className="passport-page-footer">PASAPORTE MOTERO · PERÚ · {page.code}</span>
+      <span className="passport-page-cancel">✦ · · · · · · · · · · · · ✦</span>
+    </div>
+  }
   const normalizedQuery = normalizeSearchText(query)
   const filteredDestinations = mapDestinations.filter(d => {
     const categoryMatch = category === 'Todos' || d.category === category
@@ -1797,19 +1826,31 @@ export default function App() {
         {tab === 'passport' && <section>
           <div className="page-heading tab-page-heading"><div><span className="eyebrow">DOCUMENTA CADA AVENTURA</span><h1>Mi pasaporte</h1><p className="muted">Cada destino visitado deja una historia y un sello.</p></div><div className="heading-icon"><ShieldCheck size={23}/></div></div>
 
+
           {passportOpen ? <div className="passport-interactive-area passport-is-open">
-            <button type="button" className="passport-close-book" onClick={()=>setPassportOpen(false)}><ArrowLeft size={15}/> Cerrar pasaporte</button>
-            <div className="passport-book-heading"><div><strong>SELLOS DE LOS 25 DEPARTAMENTOS</strong><span>Desliza las páginas para recorrer el Perú.</span></div><span className="book-page-count">{visitedRegionCount}/25</span></div>
-            <div className="passport-book-controls"><button type="button" className="book-turn-button" disabled={passportSpread===0} onClick={()=>setPassportSpread(page=>Math.max(0,page-1))} aria-label="Página anterior"><ArrowLeft size={17}/></button><span>PÁGINAS {passportSpread*2+1}–{Math.min(passportSpread*2+2,departmentPages.length)} <small>· {passportSpread+1}/{passportSpreadCount}</small></span><button type="button" className="book-turn-button" disabled={passportSpread>=passportSpreadCount-1} onClick={()=>setPassportSpread(page=>Math.min(passportSpreadCount-1,page+1))} aria-label="Página siguiente"><ChevronRight size={17}/></button></div>
-            <div className="passport-book-viewport" key={passportSpread} aria-label="Libro de pasaporte. Desliza o utiliza las flechas para pasar páginas" onTouchStart={event=>{passportTouchStartX.current=event.changedTouches[0]?.clientX ?? null}} onTouchEnd={event=>{const startX=passportTouchStartX.current;const endX=event.changedTouches[0]?.clientX;passportTouchStartX.current=null;if(startX===null||endX===undefined)return;const delta=endX-startX;if(Math.abs(delta)>45)setPassportSpread(page=>Math.max(0,Math.min(passportSpreadCount-1,page+(delta<0?1:-1))))}}>
-              <div className="passport-book-spread">{departmentPages.slice(passportSpread*2,passportSpread*2+2).map((page,pageIndex)=>{const index=passportSpread*2+pageIndex;const stampState=page.visitedPlaces.length?'earned':page.pendingPlaces.length?'pending':'unearned';const stampInk=departmentStampThemes[page.name]?.ink || '#858585';return <button type="button" className={`passport-book-page ${pageIndex===0?'left-page':'right-page'} department-${stampState} ${stampState==='earned'?'has-stamp':''}`} key={page.name} onClick={()=>{setSelected(null);setSelectedDepartment(page.name)}} aria-label={`Abrir ${page.name}: ${page.visitedPlaces.length} validados, ${page.pendingPlaces.length} en validación, de ${page.places.length} lugares`}>
-                <span className="passport-page-number">PÁGINA {String(index+1).padStart(2,'0')} / 25</span><span className="passport-page-ornament">✦ REPÚBLICA DEL PERÚ ✦</span><span className="passport-page-title">{page.name}</span><span className="passport-page-caption">DEPARTAMENTO</span>
-                <span className={`passport-ink-stamp ink-${page.code.toLowerCase()} shape-${departmentStampThemes[page.name]?.shape || 'round'} ${stampState}`} style={{color:stampState==='unearned'?'#858585':stampInk,transform:`scale(1.052) rotate(${(index%5-2)*2}deg)`,transformOrigin:'center center'}}><span className="ink-stamp-top">PASAPORTE MOTERO · PERÚ</span><span className="ink-stamp-symbol">{departmentStampThemes[page.name]?.symbol || '✦'}</span><b>{page.code}</b><strong>{page.name.toUpperCase()}</strong><small>{departmentStampThemes[page.name]?.route || 'RUTA PERUANA'}</small><em>{stampState==='earned' && page.earnedAt ? new Date(page.earnedAt).toLocaleDateString('es-PE') : stampState==='pending'?'EN VALIDACIÓN':'POR VISITAR'}</em></span>
-                <div className="department-tourist-stamps" aria-label="Sellos de lugares turísticos obtenidos">{page.places.filter(place=>visitedIds.has(place.id)).map((place,stampIndex)=>{const seed=String(place.id).split('').reduce((sum,char)=>sum+char.charCodeAt(0),stampIndex*37+index*19);const left=7+(seed%71);const top=27+((Math.floor(seed/7)+stampIndex*13)%48);const rotation=(seed%25)-12;const nudge=((Math.floor(seed/11)%7)-3)*1.5;return <span key={place.id} className="tourist-mini-stamp earned" style={{left:`${left}%`,top:`${top}%`,transform:`translate(-50%,-50%) rotate(${rotation}deg) translateY(${nudge}px)`,zIndex:stampIndex+1}} title={`${place.title} · Visita validada`}><Stamp size={10}/><small>{place.title}</small></span>})}</div>
-                <span className="passport-place-counter"><strong>{page.visitedPlaces.length}</strong><span> de {page.places.length} lugares visitados</span></span><span className="passport-page-status">{stampState==='earned'?`SELLO OBTENIDO · ${page.earnedAt?new Date(page.earnedAt).toLocaleDateString('es-PE'):'VISITADO'}`:stampState==='pending'?'VISITAS EN VALIDACIÓN':page.places.length?'TU PRÓXIMO DESTINO TE ESPERA':'DESTINOS EN INCORPORACIÓN'}</span><span className="passport-page-footer">PASAPORTE MOTERO · PERÚ</span><span className="passport-page-open">Ver lugares <ChevronRight size={13}/></span>
-              </button>})}{passportSpread*2+1>=departmentPages.length&&<div className="passport-book-page right-page passport-book-blank" aria-hidden="true"><span className="passport-page-ornament">✦ PASAPORTE MOTERO ✦</span><BookOpen size={34}/><strong>Tu próxima aventura</strong><small>Esta página espera tu próximo sello.</small><span className="passport-page-footer">PERÚ · TRAVEL · EXPLORE · REPEAT</span></div>}</div>
+            <div className="passport-open-toolbar">
+              <button type="button" className="passport-close-book" onClick={()=>{setPassportOpen(false);setPassportFlip('');setPassportSpread(0)}}><ArrowLeft size={15}/> Cerrar pasaporte</button>
+              <span className="passport-book-page-indicator">PÁGINA {passportSpread+1} DE {departmentPages.length}</span>
             </div>
-          </div> : <button type="button" className="passport-cover passport-cover-official passport-cover-trigger" onClick={()=>{setPassportOpen(true);setPassportSpread(0)}} aria-label="Abrir mi pasaporte"><img src="/portada-pasaporte-motero.png" alt="Pasaporte de aventura, República del Camino, edición motociclista" /><span className="passport-open-hint"><BookOpen size={14}/> Toca para abrir tu pasaporte</span></button>}
+            <div className="passport-book-controls">
+              <button type="button" className="book-turn-button" disabled={passportSpread===0 || !!passportFlip} onClick={()=>setPassportFlip('previous')} aria-label="Página anterior"><ArrowLeft size={17}/></button>
+              <span>DESLIZA O PASA LA HOJA <small>· {passportSpread+1}/{passportSpreadCount}</small></span>
+              <button type="button" className="book-turn-button" disabled={passportSpread>=passportSpreadCount-1 || !!passportFlip} onClick={()=>setPassportFlip('next')} aria-label="Página siguiente"><ChevronRight size={17}/></button>
+            </div>
+            <div className="passport-book-viewport" onTouchStart={event=>{passportTouchStartX.current=event.changedTouches[0]?.clientX ?? null}} onTouchEnd={event=>{const startX=passportTouchStartX.current;const endX=event.changedTouches[0]?.clientX;passportTouchStartX.current=null;if(startX===null||endX===undefined||passportFlip)return;const delta=endX-startX;if(Math.abs(delta)>45){if(delta<0 && passportSpread<passportSpreadCount-1)setPassportFlip('next');else if(delta>0 && passportSpread>0)setPassportFlip('previous')}}}>
+              <div className={`passport-page-turn ${passportFlip ? `turn-${passportFlip}` : ''}`} onAnimationEnd={event=>{if(event.target!==event.currentTarget || !passportFlip)return;setPassportSpread(current=>Math.max(0,Math.min(passportSpreadCount-1,current+(passportFlip==='next'?1:-1))));setPassportFlip('')}}>
+                {renderPassportPage(departmentPages[passportSpread],passportSpread,'front')}
+                {renderPassportPage(departmentPages[passportFlip==='previous'?Math.max(0,passportSpread-1):Math.min(departmentPages.length-1,passportSpread+1)],passportFlip==='previous'?Math.max(0,passportSpread-1):Math.min(departmentPages.length-1,passportSpread+1),'back')}
+              </div>
+            </div>
+            <div className="passport-page-dots" aria-label="Progreso de páginas">{departmentPages.map((page,index)=><button key={page.code} type="button" className={index===passportSpread?'active':''} aria-label={`Ir a página ${index+1}: ${page.name}`} onClick={()=>{if(!passportFlip)setPassportSpread(index)}} />)}</div>
+            <p className="passport-page-tip"><BookOpen size={14}/> Cada departamento guarda sus destinos y sellos de visita.</p>
+          </div> : <div className="passport-cover-stage">
+            <button type="button" className={`passport-cover passport-cover-official passport-cover-trigger ${passportOpening?'passport-cover-opening':''}`} onClick={()=>{if(!passportOpening){setPassportOpening(true)}}} onAnimationEnd={event=>{if(event.target===event.currentTarget && passportOpening){setPassportOpen(true);setPassportOpening(false)}}} aria-label="Abrir mi pasaporte">
+              <img src="/portada-pasaporte-motero.png" alt="Pasaporte de aventura, República del Camino, edición motociclista" />
+              <span className="passport-open-hint"><BookOpen size={14}/> Toca para abrir tu pasaporte</span>
+            </button>
+          </div>}
           <div className="stats-grid"><div className="stat"><strong>{Math.max(0, Number(visitedCount) || 0)}</strong><span>Lugares visitados</span></div><div className="stat"><strong>{Math.max(0, Number(departmentStamps?.length) || 0)}</strong><span>Sellos obtenidos</span></div><div className="stat"><strong>{Math.max(0, authUserId ? Number(trips?.length) || 0 : 0)}</strong><span>Viajes</span></div></div>
           <div className="section-heading"><h2>Exploración del Perú</h2><span className="muted tiny">{progress}% · {visitedRegionCount}/25 departamentos</span></div><div className="progress"><span style={{width: `${progress}%`}}/></div>
            <div className="section-heading"><h2>Historial de validaciones</h2><span className="muted tiny">{visits.length} registros</span></div>
