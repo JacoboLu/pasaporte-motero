@@ -2627,3 +2627,183 @@ html,body,#root{background:var(--pm-paper)!important}
   .app-shell .content .passport-cover-trigger,
   .app-shell .content .passport-page-dots button{transition:none}
 }
+
+
+/* REDISEÑO GLOBAL v2 — papelería ilustrada peruana de alta fidelidad */
+.app-shell{background:#F1E7D4!important;color:#26384A!important}
+.app-shell .content{
+  position:relative!important;isolation:isolate!important;
+  background:#F3E9D8!important;
+}
+.app-shell .content::before{
+  content:""!important;position:absolute!important;inset:0!important;z-index:-1!important;
+  pointer-events:none!important;opacity:.25!important;
+  background-color:#F3E9D8!important;
+  background-image:
+    radial-gradient(ellipse at 50% 0%,#fff9ed 0,transparent 54%),
+    url('/peru-passport-postmarks.svg')!important;
+  background-repeat:no-repeat,repeat!important;
+  background-size:100% 420px,540px 645px!important;
+  background-position:top center,center 20px!important;
+}
+.app-shell .content::after{
+  content:none!important;display:none!important;
+}
+.app-shell .topbar{
+  background:
+    linear-gradient(90deg,#102644f5,#1A2F5CF5),
+    url('/peru-passport-postmarks.svg')!important;
+  background-size:auto,420px 500px!important;
+  background-position:center,center 40%!important;
+  border-bottom:2px solid #C7A55F!important;
+  box-shadow:0 3px 12px #1a2f5c22!important;
+}
+.app-shell .topbar .brand-heading strong{color:#F0D49D!important}
+.app-shell .topbar .brand-heading small{color:#E6DDC8!important}
+.app-shell .topbar .icon-button{
+  color:#E7BD73!important;border:1px solid #C7A55F66!important;
+  background:#10264466!important;border-radius:12px!important;
+}
+.app-shell .content h1,.app-shell .content h2,.app-shell .content h3{
+  color:#1A2F5C!important;letter-spacing:.1px;
+}
+.app-shell .content .eyebrow{
+  color:#A65D2B!important;letter-spacing:1.15px!important;font-weight:800!important;
+}
+.app-shell .content .muted,.app-shell .content small{color:#68717A}
+.app-shell .content .searchbox,
+.app-shell .content .explore-map-shortcut,
+.app-shell .content .explore-category-chip,
+.app-shell .content .catalog-toggle,
+.app-shell .content .explore-catalog-panel,
+.app-shell .content .destination-card,
+.app-shell .content .nearby-destination-card,
+.app-shell .content .post-card,
+.app-shell .content .trip-card,
+.app-shell .content .profile-card,
+.app-shell .content .public-profile-card,
+.app-shell .content .profile-menu,
+.app-shell .content .profile-menu button,
+.app-shell .content .settings-card,
+.app-shell .content .history-row,
+.app-shell .content .composer-shortcut,
+.app-shell .content .empty-card,
+.app-shell .content .status-card,
+.app-shell .content .qr-card{
+  background:linear-gradient(145deg,#FFF9ED 0%,#F5EAD6 100%)!important;
+  border:1px solid #D5B982!important;
+  box-shadow:0 5px 15px #59442612, inset 0 1px #fff9!important;
+  color:#2C3E50!important;
+}
+.app-shell .content .searchbox{
+  border-radius:15px!important;min-height:48px!important;
+  box-shadow:0 4px 12px #59442610!important;
+}
+.app-shell .content .searchbox input{color:#1A2F5C!important}
+.app-shell .content .explore-map-shortcut{
+  border-radius:14px!important;color:#A65D2B!important;font-weight:800!important;
+}
+.app-shell .content .explore-category-chip{
+  border-radius:999px!important;padding:9px 13px!important;
+  color:#34495E!important;font-weight:700!important;
+}
+.app-shell .content .explore-category-chip.active{
+  background:linear-gradient(145deg,#1A2F5C,#263F63)!important;
+  border-color:#C7A55F!important;color:#F4D9A4!important;
+  box-shadow:0 3px 8px #1A2F5C22!important;
+}
+.app-shell .content .explore-section-heading h2{font-family:Georgia,serif!important;font-size:21px!important}
+.app-shell .content .nearby-destination-list{gap:12px!important;padding:3px 2px 13px!important}
+.app-shell .content .nearby-destination-card{
+  border-radius:17px!important;overflow:hidden!important;
+  box-shadow:0 7px 18px #49351e1c!important;
+  transition:transform .22s ease,box-shadow .22s ease!important;
+}
+.app-shell .content .nearby-destination-card:active{transform:scale(.985)}
+.app-shell .content .nearby-destination-card img{
+  height:132px!important;object-fit:cover!important;
+  filter:saturate(.88) contrast(1.03)!important;
+}
+.app-shell .content .nearby-destination-copy{padding:11px 12px 12px!important}
+.app-shell .content .nearby-destination-copy strong{
+  color:#1A2F5C!important;font-family:Georgia,serif!important;font-size:14px!important;
+}
+.app-shell .content .nearby-destination-copy small,
+.app-shell .content .nearby-destination-meta{color:#65717A!important}
+.app-shell .content .catalog-toggle{
+  border-radius:15px!important;padding:14px!important;
+  color:#1A2F5C!important;font-weight:800!important;
+}
+.app-shell .content .destination-card{
+  border-radius:16px!important;overflow:hidden!important;
+  border-color:#C7A55F!important;box-shadow:0 6px 16px #49351e1a!important;
+}
+.app-shell .content .destination-card img{filter:saturate(.9) contrast(1.04)}
+.app-shell .content .text-action,
+.app-shell .content .gps-inline-action{color:#A65D2B!important;font-weight:800!important}
+.app-shell .content .primary,
+.app-shell .content .nav-plus{
+  background:linear-gradient(145deg,#1A2F5C,#263F63)!important;
+  color:#F4D9A4!important;border:1px solid #C7A55F!important;
+}
+.app-shell .content .secondary,
+.app-shell .content .chip,
+.app-shell .content .filter-button{
+  background:#F8F0E1!important;color:#34495E!important;border:1px solid #D5B982!important;
+}
+.app-shell .content .stat{
+  background:linear-gradient(145deg,#142B4D,#263F63)!important;
+  border:1px solid #C7A55F!important;border-radius:15px!important;
+  box-shadow:0 4px 0 #9D7438,0 8px 16px #1A2F5C1c!important;
+  color:#F6E6C6!important;
+}
+.app-shell .content .stat strong{color:#F6E6C6!important}
+.app-shell .content .stat span{color:#E5C98F!important}
+.app-shell .content .progress{background:#DDCFB7!important;border:1px solid #C9B48F!important}
+.app-shell .content .progress span{background:linear-gradient(90deg,#B56C35,#D0A35C)!important}
+.app-shell .bottom-nav{
+  background:linear-gradient(180deg,#20395F,#142947)!important;
+  border-top:1px solid #C7A55F!important;box-shadow:0 -5px 18px #1A2F5C20!important;
+}
+.app-shell .bottom-nav button{color:#DCCBA9!important}
+.app-shell .bottom-nav button.active{color:#F2C777!important}
+.app-shell .bottom-nav button.active::before{background:#C7A55F!important}
+.app-shell .bottom-nav .nav-plus{
+  background:linear-gradient(145deg,#C17C42,#A95D2B)!important;
+  color:#FFF4DE!important;border:3px solid #F3E9D8!important;
+}
+.app-shell .content .community-post-header strong,
+.app-shell .content .profile-card h2,
+.app-shell .content .profile-menu button strong{color:#1A2F5C!important}
+.app-shell .content .profile-menu button{border-bottom:1px solid #D9C7A6!important}
+.app-shell .content input,.app-shell .content textarea,.app-shell .content select{
+  background:#FFF9ED!important;color:#26384A!important;border-color:#D5B982!important;
+}
+.app-shell.theme-dark{background:#172638!important;color:#E6DDC8!important}
+.app-shell.theme-dark .content{background:#172638!important;color:#E6DDC8!important}
+.app-shell.theme-dark .content::before{
+  opacity:.12!important;background-color:#172638!important;
+  background-image:linear-gradient(#172638bb,#172638bb),url('/peru-passport-postmarks.svg')!important;
+  background-size:100% 100%,540px 645px!important;
+}
+.app-shell.theme-dark .content h1,.app-shell.theme-dark .content h2,.app-shell.theme-dark .content h3{color:#F0D49D!important}
+.app-shell.theme-dark .content .nearby-destination-card,
+.app-shell.theme-dark .content .post-card,
+.app-shell.theme-dark .content .trip-card,
+.app-shell.theme-dark .content .profile-card,
+.app-shell.theme-dark .content .settings-card,
+.app-shell.theme-dark .content .catalog-toggle{
+  background:linear-gradient(145deg,#243A54,#1B2D43)!important;
+  border-color:#826B45!important;color:#E6DDC8!important;
+}
+.app-shell.theme-dark .content .nearby-destination-copy strong{color:#F0D49D!important}
+.app-shell.theme-dark .content input,.app-shell.theme-dark .content textarea,.app-shell.theme-dark .content select{
+  background:#20364F!important;color:#E6DDC8!important;border-color:#6C604A!important;
+}
+@media(max-width:480px){
+  .app-shell .content::before{background-size:100% 340px,440px 560px!important;background-position:top center,center 10px!important}
+  .app-shell .content .nearby-destination-card img{height:126px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .app-shell .content .nearby-destination-card{transition:none!important}
+}
