@@ -1,44 +1,60 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="720" height="860" viewBox="0 0 720 860">
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
 <defs>
- <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" seed="8"/><feDisplacementMap in="SourceGraphic" scale=".65"/></filter>
- <g id="postmark" fill="none" stroke="#78664b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-  <circle r="106"/><circle r="96" stroke-dasharray="3 5"/><path d="M-73 69h146M-67 76q67 17 134 0"/>
-  <path d="M-124 86q18-12 36 0t36 0t36 0t36 0t36 0t36 0t36 0" stroke-width="2.8"/>
-  <path d="M-124 101q18-12 36 0t36 0t36 0t36 0t36 0t36 0t36 0" stroke-width="2.8"/>
-  <path d="M-124 116q18-12 36 0t36 0t36 0t36 0t36 0t36 0t36 0" stroke-width="2.8"/>
+ <g id="cancel" fill="none" stroke="#806b50" stroke-linecap="round">
+  <path stroke-width="3" d="M-148 104q22-16 44 0t44 0 44 0 44 0 44 0 44 0 44 0 44 0"/>
+  <path stroke-width="2.6" d="M-148 119q22-16 44 0t44 0 44 0 44 0 44 0 44 0 44 0 44 0"/>
+  <path stroke-width="2.2" d="M-148 134q22-16 44 0t44 0 44 0 44 0 44 0 44 0 44 0 44 0"/>
  </g>
- <g id="mountain" fill="none" stroke="#78664b" stroke-width="4" stroke-linejoin="round">
-  <path d="M-76 25-23-52 3-18 30-65 82 25M-50 25-9-29 9-5 29-39 60 25"/>
-  <path d="m-23-52 12 19 13-4 9 19 19-47 11 21 10-3 15 22"/>
-  <path d="M-80 30h160M-64 39h128"/>
+ <g id="frame" fill="none" stroke="#806b50">
+  <circle r="100" stroke-width="3.2"/><circle r="92" stroke-width="1.4" stroke-dasharray="3 5"/>
+  <circle r="84" stroke-width=".9" stroke-dasharray="1 4"/>
+  <path d="M-62 65h124" stroke-width="1.5"/>
  </g>
- <g id="llama" fill="none" stroke="#78664b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M-49 38q-13-13-8-34l-7-31q-2-12 8-14 10-2 12 11l4 28q5 7 18 8l8-32q3-10 11-8 9 2 6 13l-6 38q13 12 15 31l-4 30h-13l-5-26h-29l-6 26h-13l3-40Z"/>
-  <path d="M-51 2q20 12 43 3M-37-30l-5-20m28 19 6-17M-40 15h27M-18 39l-2 25m-23-25-3 25"/>
-  <circle cx="-45" cy="-8" r="2.5" fill="#78664b"/><circle cx="1" cy="-8" r="2.5" fill="#78664b"/>
-  <path d="M-31-3q9 7 18 0M-31 13q10 6 19 0"/>
+ <g id="machu" stroke="#806b50" stroke-linejoin="round">
+  <path d="M-76 36-42-16-19 8 4-48 27-11 43-30 78 36Z" fill="#b29b78" stroke-width="2.5"/>
+  <path d="m-42-16 12 18 11-5 10 12 13-33 10 20 11-6 12 17 6-24 16 20 11-8 18 25" fill="none" stroke="#806b50" stroke-width="2"/>
+  <path d="M-72 35q12-18 25-11l10-13 12 10 13-16 15 12 10-9 14 12 15-8 14 11 14-6 17 18" fill="none" stroke-width="2"/>
+  <path d="M-70 38h140v18H-70z" fill="#a18a68" stroke-width="2"/>
+  <path d="M-62 39v15m13-15v15m14-15v15m14-15v15m14-15v15m14-15v15m14-15v15m14-15v15m14-15v15" stroke-width="1.3"/>
+  <path d="M-59 27 60 27M-49 18 50 18M-34 8 38 8" fill="none" stroke-width="1.4"/>
+  <path d="M-75 58h150M-67 63h134" fill="none" stroke-width="1.5"/>
  </g>
- <g id="nazca" fill="none" stroke="#78664b" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M-80 6q28-40 57-5 13 16 25 2 13-14 32-4 17 10 42-5"/>
-  <path d="M-8 2 1-50l9 52M-7-13l-28-20m45 18 25-25M-6 6l-28 35m47-32 28 35"/>
-  <path d="M-2-52q-13-15-22-4m23 4q13-15 22-4"/>
+ <g id="llama" stroke="#806b50" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M-47 24q-15-7-12-25l-5-38q-1-10 7-12 8-1 10 10l5 34q8 7 19 6l9-34q3-9 10-7 8 2 5 12L-7 5q17 10 20 28l-3 34H-3l-6-28h-29l-7 28h-13l2-43Z" fill="#b39b77" stroke-width="3"/>
+  <path d="M-53 12q10-9 18 0t17-1 17 2 17-2M-54 24q10-8 18 0t17 0 17 0 17 0M-43 41h46M-39 47h39" fill="none" stroke-width="1.7"/>
+  <path d="M-49-8l-4-24m12 28-2-21m31 22 4-21m9 19 6-22" fill="none" stroke-width="1.5"/>
+  <path d="M-43 29l-4 36m32-36 2 36" fill="none" stroke-width="2.4"/>
+  <circle cx="-45" cy="-17" r="2.5" fill="#806b50"/><circle cx="0" cy="-16" r="2.5" fill="#806b50"/>
+  <path d="M-34 3q9 6 18 0" fill="none" stroke-width="2"/>
  </g>
- <g id="condor" fill="none" stroke="#78664b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M-88-8q42-8 73 16 15-13 30-13t30 13q31-24 73-16-28 2-48 25-22 22-55 10-33 12-55-10Q-60-6-88-8Z"/>
-  <path d="M-15 8q-6 28 15 47 21-19 15-47M-10 42l-9 22m24-22 9 22"/>
-  <path d="M-78-3-49 7m127-10L49 7"/>
+ <g id="hummingbird" fill="none" stroke="#806b50" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M-8 0q-12-18-34-26 12 21 31 34-17 1-35 16 24 4 44-8 8 17 22 26-3-20-10-31 18-5 47-3-21-13-44-12l19-36Q6-26-8 0Z" stroke-width="3"/>
+  <path d="M-8 0q-6-22 3-41 10 16 4 36M-3-3l49-19M-6 4l-29 37M-3 3l-2 46" stroke-width="2"/>
+  <circle cx="-1" cy="-4" r="2.5" fill="#806b50"/>
  </g>
- <g id="compass" fill="none" stroke="#78664b" stroke-width="2.6">
-  <circle r="75"/><circle r="66" stroke-dasharray="2 5"/>
-  <path d="M0-60 12-8 0 0-12-8ZM0 60-12 8 0 0 12 8ZM-60 0-8-12 0 0-8 12ZM60 0 8 12 0 0 8-12Z"/>
-  <path d="M0-82v164M-82 0h164M-58-58 58 58M58-58-58 58"/>
+ <g id="condor" fill="none" stroke="#806b50" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M-92-5q38-17 80 16 12-10 24-10t24 10q42-33 80-16-28 0-49 25-24 24-55 11-31 13-55-11Q-64-5-92-5Z" fill="#b39b77" stroke-width="3"/>
+  <path d="M-74-1-40 13m-18-23 40 29m70-20L18 13m40-23L18 19M-5 10q-7 26 5 45 12-19 5-45M0 54l-11 13m17-13 11 13" stroke-width="2"/>
+  <path d="M-60 5-35 21m95-16L35 21" stroke-width="1.5"/>
+ </g>
+ <g id="compass" fill="none" stroke="#806b50" stroke-linejoin="round">
+  <circle r="75" stroke-width="2"/><circle r="65" stroke-width="1" stroke-dasharray="2 5"/>
+  <path d="M0-62 12-9 0 0-12-9ZM0 62-12 9 0 0 12 9ZM-62 0-9-12 0 0-9 12ZM62 0 9 12 0 0 9-12Z" fill="#a99270" stroke-width="1.8"/>
+  <path d="M0-83v166M-83 0h166M-58-58 58 58M58-58-58 58" stroke-width="1"/>
+ </g>
+ <g id="boat" fill="none" stroke="#806b50" stroke-linejoin="round">
+  <path d="M-68 29q65 25 136 0l-18 23h-99Z" fill="#b39b77" stroke-width="3"/>
+  <path d="M-47 28q12-21 29-13 14-17 29 0 18-10 33 13M-14 13V-36m0 0q26 8 39 32M-14-12q-20 2-29 22" stroke-width="2.3"/>
+  <path d="M-60 59q15 8 30 0t30 0 30 0 30 0" stroke-width="1.5"/>
+  <path d="M-82 71q20-9 40 0t40 0 40 0 40 0" stroke-width="1.5"/>
  </g>
 </defs>
-<g opacity=".72" filter="url(#rough)">
- <g transform="translate(176 178)"><use href="#postmark"/><use href="#mountain" transform="translate(0 -6) scale(.82)"/><text x="0" y="55" text-anchor="middle" fill="#78664b" stroke="none" font-family="Georgia,serif" font-size="24" font-weight="bold" letter-spacing="3">MACHU PICCHU</text><text x="0" y="78" text-anchor="middle" fill="#78664b" stroke="none" font-family="Georgia,serif" font-size="10" letter-spacing="4">CUSCO · PERÚ</text></g>
- <g transform="translate(540 205)"><use href="#postmark"/><use href="#llama" transform="translate(0 -4) scale(.78)"/><text x="0" y="72" text-anchor="middle" fill="#78664b" stroke="none" font-family="Georgia,serif" font-size="18" font-weight="bold" letter-spacing="3">ANDES</text></g>
- <g transform="translate(178 566)"><use href="#postmark"/><use href="#nazca" transform="translate(0 -15) scale(.78)"/><text x="0" y="65" text-anchor="middle" fill="#78664b" stroke="none" font-family="Georgia,serif" font-size="19" font-weight="bold" letter-spacing="3">NAZCA</text><text x="0" y="85" text-anchor="middle" fill="#78664b" stroke="none" font-family="Georgia,serif" font-size="10" letter-spacing="3">ICA · PERÚ</text></g>
- <g transform="translate(545 580)"><use href="#postmark"/><use href="#condor" transform="translate(0 -7) scale(.8)"/><text x="0" y="70" text-anchor="middle" fill="#78664b" stroke="none" font-family="Georgia,serif" font-size="19" font-weight="bold" letter-spacing="3">CÓNDOR</text></g>
- <g transform="translate(360 802) scale(.56)"><use href="#compass"/></g>
-</g>
-</svg>
+<rect width="900" height="1200" fill="none"/>
+<g opacity=".68">
+ <g transform="translate(176 170) rotate(-8) scale(1.02)"><use href="#frame"/><use href="#machu" transform="translate(0 -13) scale(.86)"/><text y="77" text-anchor="middle" font-family="Georgia,serif" font-size="15" font-weight="bold" letter-spacing="3" fill="#806b50">MACHU PICCHU</text><text y="91" text-anchor="middle" font-family="Georgia,serif" font-size="7" letter-spacing="2.5" fill="#806b50">CUSCO · PERÚ</text><use href="#cancel" transform="translate(120 28) rotate(7) scale(.86)"/></g>
+ <g transform="translate(716 248) rotate(7) scale(.75)"><use href="#frame"/><use href="#llama" transform="translate(0 -10) scale(.88)"/><text y="77" text-anchor="middle" font-family="Georgia,serif" font-size="15" font-weight="bold" letter-spacing="4" fill="#806b50">ANDES</text><use href="#cancel" transform="translate(-125 35) rotate(-8) scale(.7)"/></g>
+ <g transform="translate(160 622) rotate(11) scale(.82)"><use href="#frame"/><use href="#hummingbird" transform="translate(0 -12) scale(.9)"/><text y="77" text-anchor="middle" font-family="Georgia,serif" font-size="16" font-weight="bold" letter-spacing="3" fill="#806b50">NAZCA</text><use href="#cancel" transform="translate(100 40) rotate(-12) scale(.8)"/></g>
+ <g transform="translate(690 680) rotate(-9) scale(.93)"><use href="#frame"/><use href="#condor" transform="translate(0 -12) scale(.78)"/><text y="78" text-anchor="middle" font-family="Georgia,serif" font-size="15" font-weight="bold" letter-spacing="3" fill="#806b50">CÓNDOR ANDINO</text><use href="#cancel" transform="translate(-120 38) rotate(8) scale(.7)"/></g>
+ <g transform="translate(395 425) rotate(14) scale(.57)"><use href="#compass"/></g>
+ <g transform="translate(370 1000) rotate(-5) scale(.78)"><use href="#frame"/><use href="#boat" transform="translate(0 -4) scale(.92)"/><text y="78" text-anchor="middle" font-family="Georgia,serif" font-size="15" font-weight="bold" letter-spacing="3" fill="#806b50">TITICACA</text><use href="#cancel" transform="translate(120 40) rotate(5) scale(.65)"/></g>
+</g></svg>
