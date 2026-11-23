@@ -3347,3 +3347,193 @@ html,body,#root{background:var(--pm-paper)!important}
     padding:clamp(11px,3.3vw,14px) clamp(10px,3vw,13px) 10px!important;
   }
 }
+
+
+/* SISTEMA DE CONTRASTE ACCESIBLE — modo claro y oscuro */
+.app-shell{
+  --ui-text:#24364A;
+  --ui-muted:#566779;
+  --ui-card:#FFF8EA;
+  --ui-card-border:#C7A55F;
+  --ui-field:#FFFFFF;
+  --ui-field-text:#20364F;
+  --ui-soft:#EDE3D1;
+}
+.app-shell.theme-dark{
+  --ui-text:#F2E6D0;
+  --ui-muted:#B8C5D1;
+  --ui-card:#F7EEDC;
+  --ui-card-border:#B98C48;
+  --ui-field:#20364F;
+  --ui-field-text:#FFF5E3;
+  --ui-soft:#263B53;
+}
+.app-shell .content{color:var(--ui-text)!important}
+.app-shell .content h1,
+.app-shell .content h2,
+.app-shell .content h3,
+.app-shell .content h4{color:var(--ui-text)!important}
+.app-shell .content p,
+.app-shell .content .muted,
+.app-shell .content small,
+.app-shell .content .helper-text{color:var(--ui-muted)}
+.app-shell .content input,
+.app-shell .content textarea,
+.app-shell .content select,
+.app-shell .content .searchbox input,
+.app-shell .content .community-search-input input{
+  color:var(--ui-field-text)!important;
+  caret-color:var(--pm-terracotta)!important;
+}
+.app-shell .content input::placeholder,
+.app-shell .content textarea::placeholder,
+.app-shell .content .community-search-input input::placeholder{
+  color:var(--ui-muted)!important;opacity:1!important;
+}
+.app-shell .content input::selection,
+.app-shell .content textarea::selection{background:#C7A55F66;color:var(--ui-field-text)}
+/* Las superficies de papel siempre usan tinta azul oscura legible */
+.app-shell .content .empty-card,
+.app-shell .content .settings-card,
+.app-shell .content .profile-menu,
+.app-shell .content .history-row,
+.app-shell .content .composer-shortcut,
+.app-shell .content .achievement-card,
+.app-shell .content .achievement-summary,
+.app-shell .content .qr-card,
+.app-shell .content .file-pick,
+.app-shell .content .form-card{
+  color:#24364A!important;
+}
+.app-shell .content .empty-card h3,
+.app-shell .content .settings-card strong,
+.app-shell .content .profile-menu button strong,
+.app-shell .content .history-row strong,
+.app-shell .content .composer-shortcut,
+.app-shell .content .achievement-card h3,
+.app-shell .content .achievement-card p,
+.app-shell .content .achievement-card small,
+.app-shell .content .achievement-summary strong,
+.app-shell .content .achievement-summary small{
+  color:#24364A!important;
+}
+.app-shell .content .empty-card p,
+.app-shell .content .settings-card small,
+.app-shell .content .profile-menu button small,
+.app-shell .content .history-row small,
+.app-shell .content .achievement-card p,
+.app-shell .content .achievement-card small{
+  color:#526273!important;
+}
+/* Logros: eliminar texto crema sobre tarjetas blancas y grises */
+.app-shell .content .achievement-card{
+  background:#FFF8EA!important;border:1px solid #C7A55F!important;
+}
+.app-shell .content .achievement-card.is-locked{
+  background:#E4E8EA!important;border-color:#B8C1C8!important;
+}
+.app-shell .content .achievement-card.is-locked h3,
+.app-shell .content .achievement-card.is-locked p,
+.app-shell .content .achievement-card.is-locked small{color:#34495E!important}
+.app-shell .content .achievement-summary{
+  background:#FFF8EA!important;border:1px solid #D7C7A8!important;
+}
+.app-shell .content .achievement-icon{color:#C17C42!important}
+/* Comunidad: nombre, usuario y acciones legibles sobre la tarjeta azul */
+.app-shell .content .community-post-header,
+.app-shell .content .community-author-meta,
+.app-shell .content .community-author-open{
+  color:#F5EAD5!important;
+}
+.app-shell .content .community-author-meta strong,
+.app-shell .content .community-author-open strong{color:#F5EAD5!important}
+.app-shell .content .community-author-meta span,
+.app-shell .content .community-author-open span{color:#E1C995!important}
+.app-shell .content .community-author-meta small,
+.app-shell .content .community-author-open small{color:#B9C7D5!important}
+.app-shell .content .community-more{color:#E6DDC8!important}
+.app-shell .content .community-post-content,
+.app-shell .content .community-post-content h3,
+.app-shell .content .community-post-content p{color:#24364A!important}
+.app-shell .content .community-post-content .community-post-location,
+.app-shell .content .community-post-content small{color:#566779!important}
+/* Perfil y tarjetas de identidad */
+.app-shell .content .profile-card,
+.app-shell .content .public-profile-card{
+  color:#F2E6D0!important;
+}
+.app-shell .content .profile-card h1,
+.app-shell .content .profile-card h2,
+.app-shell .content .profile-card h3,
+.app-shell .content .profile-card strong,
+.app-shell .content .public-profile-card strong{color:#F2E6D0!important}
+.app-shell .content .profile-card p,
+.app-shell .content .profile-card small,
+.app-shell .content .public-profile-card p,
+.app-shell .content .public-profile-card small{color:#C0CBD5!important}
+/* Tarjetas de viajes y vacíos: tinta oscura sobre papel crema */
+.app-shell .content .trip-card,
+.app-shell .content .empty-card{
+  background:#F7EEDC!important;border-color:#C7A55F!important;color:#24364A!important;
+}
+.app-shell .content .trip-card h3,
+.app-shell .content .trip-card strong,
+.app-shell .content .empty-card h3{color:#24364A!important}
+.app-shell .content .trip-card p,
+.app-shell .content .trip-card small,
+.app-shell .content .empty-card p{color:#526273!important}
+/* Formularios, selectores y botones secundarios en ambos temas */
+.app-shell .content .secondary,
+.app-shell .content button.secondary{
+  background:var(--ui-card)!important;color:#24364A!important;border-color:var(--ui-card-border)!important;
+}
+.app-shell .content .primary,
+.app-shell .content button.primary{color:#FFF2D8!important}
+.app-shell .content .settings-card,
+.app-shell .content .profile-menu button{
+  background:#F7EEDC!important;border-color:#C7A55F!important;
+}
+.app-shell .content .settings-card *,
+.app-shell .content .profile-menu button *{color:#24364A}
+.app-shell .content .settings-card small,
+.app-shell .content .profile-menu button small{color:#526273!important}
+/* Exploración: chips, resultados y metadatos no deben perderse en azul oscuro */
+.app-shell.theme-dark .content .nearby-destination-copy small,
+.app-shell.theme-dark .content .nearby-destination-meta,
+.app-shell.theme-dark .content .destination-copy small,
+.app-shell.theme-dark .content .destination-meta,
+.app-shell.theme-dark .content .section-heading .muted{color:#D1DCE5!important}
+.app-shell.theme-dark .content .nearby-destination-card,
+.app-shell.theme-dark .content .destination-card,
+.app-shell.theme-dark .content .catalog-toggle{
+  color:#F4E7D0!important;
+}
+.app-shell.theme-dark .content .nearby-destination-copy strong,
+.app-shell.theme-dark .content .destination-copy strong{color:#F5EAD5!important}
+.app-shell.theme-dark .content .chip,
+.app-shell.theme-dark .content .filter-chip,
+.app-shell.theme-dark .content .explore-shortcuts button{
+  color:#24364A!important;
+}
+.app-shell.theme-dark .content .chip.active,
+.app-shell.theme-dark .content .filter-chip.active,
+.app-shell.theme-dark .content .explore-shortcuts button.active{
+  background:#1A2F5C!important;color:#F5EAD5!important;
+}
+/* El encabezado conserva el contraste oro/crema sobre azul */
+.app-shell .topbar .brand,
+.app-shell .topbar .brand strong,
+.app-shell .topbar .brand-heading strong{color:#F3D79F!important}
+.app-shell .topbar .brand small,
+.app-shell .topbar .brand-heading small{color:#E6DDC8!important}
+/* Modo claro: tinta azul marino en textos principales y controles */
+.app-shell.theme-light .content h1,
+.app-shell.theme-light .content h2,
+.app-shell.theme-light .content h3{color:#1A2F5C!important}
+.app-shell.theme-light .content .muted,
+.app-shell.theme-light .content .helper-text{color:#536477!important}
+@media(prefers-contrast:more){
+  .app-shell .content p,.app-shell .content small,.app-shell .content .muted{color:#34495E!important}
+  .app-shell.theme-dark .content p,.app-shell.theme-dark .content small,
+  .app-shell.theme-dark .content .muted{color:#E6DDC8!important}
+}
