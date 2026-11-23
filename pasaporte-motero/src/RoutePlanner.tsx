@@ -27,6 +27,7 @@ function distanceKm(a: RouteDestination, b: RouteDestination) {
 
 export default function RoutePlanner({ destinations, onClose, onPrepareTrip }: Props) {
   const [stops, setStops] = useState<number[]>([])
+  const [search, setSearch] = useState('')
   const selected = useMemo(() => stops.map(id => destinations.find(d => d.id === id)).filter((d): d is RouteDestination => Boolean(d)), [stops, destinations])
   const segments = selected.slice(1).map((d, i) => distanceKm(selected[i], d))
   const estimate = segments.every(v => v !== null) ? segments.reduce<number>((sum, v) => sum + (v || 0), 0) : null
@@ -38,10 +39,11 @@ export default function RoutePlanner({ destinations, onClose, onPrepareTrip }: P
     ;[next[index], next[target]] = [next[target], next[index]]
     return next
   })
-  const mapsUrl = selected.length >= 2
+  const mapsReady = selected.length >= 2 && selected.every(d => d.lat !== null && d.lng !== null)
+  const mapsUrl = mapsReady
     ? `https://www.google.com/maps/dir/${selected.map(d => encodeURIComponent(`${d.lat},${d.lng}`)).join('/')}/`
     : ''
-  const available = destinations.filter(d => !stops.includes(d.id)).sort((a, b) => a.title.localeCompare(b.title, 'es'))
+  const available = destinations.filter(d => !stops.includes(d.id) && `${d.title} ${d.city} ${d.region}`.toLocaleLowerCase('es').includes(search.toLocaleLowerCase('es'))).sort((a, b) => a.title.localeCompare(b.title, 'es'))
 
   return <section className="route-planner-screen">
     <button className="back-link" onClick={onClose}><ArrowLeft size={17}/> Volver a Explorar</button>
@@ -62,14 +64,15 @@ export default function RoutePlanner({ destinations, onClose, onPrepareTrip }: P
       </ol>}
       {selected.length >= 2 && <div className="route-estimate"><span>Distancia aproximada entre coordenadas</span><strong>{estimate === null ? 'No disponible' : `≈ ${estimate.toFixed(1)} km`}</strong><small>La distancia real por carretera y el tiempo de viaje se calculan en Google Maps.</small></div>}
       <div className="route-planner-actions">
-        <button className="secondary" disabled={selected.length < 2} onClick={() => window.open(mapsUrl, '_blank', 'noopener,noreferrer')}><Navigation size={16}/> Abrir navegación</button>
+        <button className="secondary" disabled={!mapsReady} onClick={() => window.open(mapsUrl, '_blank', 'noopener,noreferrer')}><Navigation size={16}/> Abrir navegación</button>
         <button className="primary" disabled={selected.length < 2} onClick={() => onPrepareTrip(stops)}><Plus size={16}/> Guardar como viaje</button>
       </div>
     </div>
     <div className="settings-card">
       <div className="section-heading"><h2>Añadir destinos</h2><span className="muted tiny">{available.length} disponibles</span></div>
+      <input aria-label="Buscar destino para la ruta" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar destino, ciudad o departamento" />
       <div className="route-destination-options">{available.slice(0, 100).map(destination => <button type="button" key={destination.id} onClick={() => addStop(destination.id)}><span><MapPin size={16}/></span><span><strong>{destination.title}</strong><small>{destination.city}, {destination.region}</small></span><Plus size={17}/></button>)}</div>
-      {available.length > 100 && <p className="muted tiny">Mostrando los primeros 100 destinos. Puedes buscar el resto desde Explorar.</p>}
+      {available.length > 100 && <p className="muted tiny">Mostrando los primeros 100 resultados. Escribe para filtrar el catálogo.</p>}
     </div>
   </section>
 }
