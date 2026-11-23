@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="860" viewBox="0 0 720 860">
+<defs>
+ <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" seed="8"/><feDisplacementMap in="SourceGraphic" scale=".65"/></filter>
+ <g id="postmark" fill="none" stroke="#78664b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+  <circle r="106"/><circle r="96" stroke-dasharray="3 5"/><path d="M-73 69h146M-67 76q67 17 134 0"/>
+  <path d="M-124 86q18-12 36 0t36 0t36 0t36 0t36 0t36 0t36 0" stroke-width="2.8"/>
+  <path d="M-124 101q18-12 36 0t36 0t36 0t36 0t36 0t36 0t36 0" stroke-width="2.8"/>
+  <path d="M-124 116q18-12 36 0t36 0t36 0t36 0t36 0t36 0t36 0" stroke-width="2.8"/>
+ </g>
+ <g id="mountain" fill="none" stroke="#78664b" stroke-width="4" stroke-linejoin="round">
+  <path d="M-76 25-23-52 3-18 30-65 82 25M-50 25-9-29 9-5 29-39 60 25"/>
+  <path d="m-23-52 12 19 13-4 9 19 19-47 11 21 10-3 15 22"/>
+  <path d="M-80 30h160M-64 39h128"/>
+ </g>
+ <g id="llama" fill="none" stroke="#78664b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M-49 38q-13-13-8-34l-7-31q-2-12 8-14 10-2 12 11l4 28q5 7 18 8l8-32q3-10 11-8 9 2 6 13l-6 38q13 12 15 31l-4 30h-13l-5-26h-29l-6 26h-13l3-40Z"/>
+  <path d="M-51 2q20 12 43 3M-37-30l-5-20m28 19 6-17M-40 15h27M-18 39l-2 25m-23-25-3 25"/>
+  <circle cx="-45" cy="-8" r="2.5" fill="#78664b"/><circle cx="1" cy="-8" r="2.5" fill="#78664b"/>
+  <path d="M-31-3q9 7 18 0M-31 13q10 6 19 0"/>
+ </g>
+ <g id="nazca" fill="none" stroke="#78664b" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M-80 6q28-40 57-5 13 16 25 2 13-14 32-4 17 10 42-5"/>
+  <path d="M-8 2 1-50l9 52M-7-13l-28-20m45 18 25-25M-6 6l-28 35m47-32 28 35"/>
+  <path d="M-2-52q-13-15-22-4m23 4q13-15 22-4"/>
+ </g>
+ <g id="condor" fill="none" stroke="#78664b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M-88-8q42-8 73 16 15-13 30-13t30 13q31-24 73-16-28 2-48 25-22 22-55 10-33 12-55-10Q-60-6-88-8Z"/>
+  <path d="M-15 8q-6 28 15 47 21-19 15-47M-10 42l-9 22m24-22 9 22"/>
+  <path d="M-78-3-49 7m127-10L49 7"/>
+ </g>
+ <g id="compass" fill="none" stroke="#78664b" stroke-width="2.6">
+  <circle r="75"/><circle r="66" stroke-dasharray="2 5"/>
+  <path d="M0-60 12-8 0 0-12-8ZM0 60-12 8 0 0 12 8ZM-60 0-8-12 0 0-8 12ZM60 0 8 12 0 0 8-12Z"/>
+  <path d="M0-82v164M-82 0h164M-58-58 58 58M58-58-58 58"/>
+ </g>
+</defs>
+<g opacity=".72" filter="url(#rough)">
+ <g transform="translate(176 178)"><use href="#postmark"/><use href="#mountain" transform="translate(0 -6) scale(.82)"/><text x="0" y="55" text-anchor="middle" fill="#78664b" stroke="none" font-family="Georgia,serif" font-size="24" font-weight="bold" letter-spacing="3">MACHU PICCHU</text><text x="0" y="78" text-anchor="middle" fill="#78664b" stroke="none" font-family="Georgia,serif" font-size="10" letter-spacing="4">CUSCO · PERÚ</text></g>
+ <g transform="translate(540 205)"><use href="#postmark"/><use href="#llama" transform="translate(0 -4) scale(.78)"/><text x="0" y="72" text-anchor="middle" fill="#78664b" stroke="none" font-family="Georgia,serif" font-size="18" font-weight="bold" letter-spacing="3">ANDES</text></g>
+ <g transform="translate(178 566)"><use href="#postmark"/><use href="#nazca" transform="translate(0 -15) scale(.78)"/><text x="0" y="65" text-anchor="middle" fill="#78664b" stroke="none" font-family="Georgia,serif" font-size="19" font-weight="bold" letter-spacing="3">NAZCA</text><text x="0" y="85" text-anchor="middle" fill="#78664b" stroke="none" font-family="Georgia,serif" font-size="10" letter-spacing="3">ICA · PERÚ</text></g>
+ <g transform="translate(545 580)"><use href="#postmark"/><use href="#condor" transform="translate(0 -7) scale(.8)"/><text x="0" y="70" text-anchor="middle" fill="#78664b" stroke="none" font-family="Georgia,serif" font-size="19" font-weight="bold" letter-spacing="3">CÓNDOR</text></g>
+ <g transform="translate(360 802) scale(.56)"><use href="#compass"/></g>
+</g>
+</svg>
