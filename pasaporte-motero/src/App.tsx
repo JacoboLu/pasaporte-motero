@@ -184,6 +184,9 @@ export default function App() {
   const [searchFocused, setSearchFocused] = useState(false)
   const [category, setCategory] = useState('Todos')
   const [regionFilter, setRegionFilter] = useState('Todos')
+  const [provinceFilter, setProvinceFilter] = useState('Todos')
+  const [cityFilter, setCityFilter] = useState('Todos')
+  const [destinationsLoading, setDestinationsLoading] = useState(true)
   const [selected, setSelected] = useState<Destination | null>(null)
   const [showActions, setShowActions] = useState(false)
   const [action, setAction] = useState<'visit'|'trip'|'post'|'memory'|''>('')
@@ -357,28 +360,46 @@ export default function App() {
     }
   }, [qrScanning])
   useEffect(() => { try { localStorage.setItem('pm_destination_view', destinationView) } catch { /* La preferencia seguirá activa durante esta sesión */ } }, [destinationView])
-  useEffect(() => { setDestinationPage(1) }, [query, category, regionFilter])
+  useEffect(() => { setDestinationPage(1) }, [query, category, regionFilter, provinceFilter, cityFilter])
   // Al abrir la app, intenta recuperar la ubicación para ordenar automáticamente los destinos cercanos.
   useEffect(() => { requestExploreLocation(false) }, [])
   useEffect(() => {
-    if (!supabase) return
+    if (!supabase) { setDestinationsLoading(false); return }
     let active = true
-    void supabase.from('destination_catalog')
-      .select('id,name,department,province,city,category,description,latitude,longitude,geofence_radius_m,image_url,source_note')
-      .eq('is_active', true)
-      .then(({ data, error }) => {
+    const loadAllDestinations = async () => {
+      setDestinationsLoading(true)
+      const pageSize = 500
+      const allRows: any[] = []
+      try {
+        for (let from = 0; ; from += pageSize) {
+          const { data, error } = await supabase!.from('destination_catalog')
+            .select('id,name,department,province,city,category,description,latitude,longitude,geofence_radius_m,image_url,source_note')
+            .eq('is_active', true)
+            .order('id', { ascending: true })
+            .range(from, from + pageSize - 1)
+          if (error) throw error
+          const page = data || []
+          allRows.push(...page)
+          if (page.length < pageSize) break
+        }
         if (!active) return
-        if (error) { console.warn('No se pudo cargar el catálogo de destinos para el mapa:', error.message); return }
-        const rows = (data || []).map((row: any): Destination => {
+        const rows = allRows.map((row: any): Destination => {
           const category = row.category || 'Destino'
           const latitude = row.latitude === null || row.latitude === undefined || row.latitude === '' ? null : Number(row.latitude)
           const longitude = row.longitude === null || row.longitude === undefined || row.longitude === '' ? null : Number(row.longitude)
           const note = String(row.source_note || '')
-          const credit = note.match(/Fotografía:\s*([^;]+);\s*Wikimedia Commons;\s*(CC BY-SA [^;]+);\s*(https:[^;]+)/i)
+          const credit = note.match(/Fotografía:\\s*([^;]+);\\s*Wikimedia Commons;\\s*(CC BY-SA [^;]+);\\s*(https:[^;]+)/i)
           return { id:Number(row.id), title:row.name, region:row.department || 'Perú', province:row.province || row.department || '', city:row.city || row.province || '', category, distance:'—', image:typeof row.image_url === 'string' ? row.image_url : '', imageCredit:credit ? `${credit[1].trim()} · ${credit[2].trim()}` : '', imageCreditUrl:credit ? credit[3].trim() : '', description:row.description || '', lat:Number.isFinite(latitude) ? latitude : null, lng:Number.isFinite(longitude) ? longitude : null, radius:Number(row.geofence_radius_m) || 250 }
         })
-        if (rows.length) setMapDestinations(rows)
-      })
+        setMapDestinations(rows)
+      } catch (error: any) {
+        console.warn('No se pudo cargar el catálogo completo de destinos:', error?.message || error)
+        if (active) notify('No se pudo cargar el catálogo completo: ' + (error?.message || 'Error de conexión'))
+      } finally {
+        if (active) setDestinationsLoading(false)
+      }
+    }
+    void loadAllDestinations()
     return () => { active = false }
   }, [])
   useEffect(() => {
@@ -521,9 +542,11 @@ export default function App() {
   const filteredDestinations = mapDestinations.filter(d => {
     const categoryMatch = category === 'Todos' || d.category === category
     const regionMatch = regionFilter === 'Todos' || normalizeSearchText(d.region) === normalizeSearchText(regionFilter)
+    const provinceMatch = provinceFilter === 'Todos' || normalizeSearchText(d.province) === normalizeSearchText(provinceFilter)
+    const cityMatch = cityFilter === 'Todos' || normalizeSearchText(d.city) === normalizeSearchText(cityFilter)
     const searchable = normalizeSearchText(`${d.title} ${d.region} ${d.province} ${d.city} ${d.category}`)
     const queryMatch = !normalizedQuery || normalizedQuery.split(' ').every(term => searchable.includes(term))
-    return categoryMatch && regionMatch && queryMatch
+    return categoryMatch && regionMatch && provinceMatch && cityMatch && queryMatch
   })
   const searchSuggestions = useMemo(() => {
     if (normalizedQuery.length < 2) return []
@@ -547,7 +570,9 @@ export default function App() {
     .map(destination => ({ ...destination, distanceFromUser: exploreLocation && destination.lat !== null && destination.lng !== null ? distanceKmBetween(exploreLocation.lat, exploreLocation.lng, destination.lat, destination.lng) : null }))
     .sort((a, b) => exploreLocation ? (a.distanceFromUser ?? Infinity) - (b.distanceFromUser ?? Infinity) : a.id - b.id)
     .slice(0, 4), [mapDestinations, visitedIds, visits, exploreLocation])
-  const catalogOpen = showAllDestinations || !!query.trim() || regionFilter !== 'Todos' || category !== 'Todos'
+  const provinceOptions = [...new Set(mapDestinations.filter(d => regionFilter === 'Todos' || normalizeSearchText(d.region) === normalizeSearchText(regionFilter)).map(d => d.province).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'))
+  const cityOptions = [...new Set(mapDestinations.filter(d => (regionFilter === 'Todos' || normalizeSearchText(d.region) === normalizeSearchText(regionFilter)) && (provinceFilter === 'Todos' || normalizeSearchText(d.province) === normalizeSearchText(provinceFilter))).map(d => d.city).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'))
+  const catalogOpen = showAllDestinations || !!query.trim() || regionFilter !== 'Todos' || provinceFilter !== 'Todos' || cityFilter !== 'Todos' || category !== 'Todos'
   const filteredMapDestinations = filteredDestinations
   const visiblePosts = posts.filter(p => p.visibility !== 'private').filter(p => feedMode === 'all' || (!!p.authorId && followed.includes(p.authorId)))
 
@@ -1759,7 +1784,7 @@ export default function App() {
           {!mapMode && <div className="nearby-destination-list">{nearbyDestinations.map(dest => <button className="nearby-destination-card" key={dest.id} onClick={() => setSelected(dest)}>{dest.image ? <img src={dest.image} alt="" loading="lazy"/> : <span className="destination-photo-placeholder"><Compass size={19}/></span>}<span className="nearby-destination-copy"><strong>{dest.title}</strong><small><MapPin size={12}/> {dest.city}, {dest.region}</small><span className="nearby-destination-meta"><i>{dest.category}</i>{dest.distanceFromUser !== null ? <b>{formatDistanceKm(dest.distanceFromUser)}</b> : <em>Activa GPS para ver distancia</em>}</span></span><ChevronRight size={17}/></button>)}</div>}
           <button className="catalog-toggle" onClick={() => { setShowAllDestinations(value => !value); setMapMode(false); setDestinationPage(1); setSearchFocused(false) }}><span><Compass size={16}/>{catalogOpen ? 'Ocultar todos los destinos' : 'Ver todos los destinos'}</span><span>{mapDestinations.length.toLocaleString('es-PE')} lugares <ChevronDown size={15} className={catalogOpen ? 'rotated' : ''}/></span></button>
           {mapMode && <div className="map-placeholder map-frame"><iframe title="Mapa de destinos registrados en Pasaporte Motero" srcDoc={`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>html,body,#map{height:100%;margin:0;font-family:Arial} .leaflet-popup-content{font-size:13px}</style></head><body><div id="map"></div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>const map=L.map('map').setView([-9.19,-75.02],5);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);const points=${JSON.stringify(filteredMapDestinations.map(d=>({name:d.title,city:d.city,region:d.region,lat:d.lat,lng:d.lng})))};const valid=points.filter(p=>p.lat!==null&&p.lng!==null&&Number.isFinite(p.lat)&&Number.isFinite(p.lng));valid.forEach(p=>{const marker=L.marker([p.lat,p.lng]).addTo(map);marker.bindPopup('<strong>'+String(p.name).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))+'</strong><br>'+p.city+', '+p.region)});if(valid.length){const bounds=L.latLngBounds(valid.map(p=>[p.lat,p.lng]));if(bounds.isValid())map.fitBounds(bounds.pad(.12));}setTimeout(()=>map.invalidateSize(),180)</script></body></html>`} loading="lazy"/><span>{filteredMapDestinations.length} destinos registrados en el catálogo · Selecciona un marcador para ver su nombre.</span><button className="text-action" onClick={() => setMapMode(false)}>Volver a la lista</button></div>}
-          {catalogOpen && <div className="explore-catalog-panel"><div className="catalog-panel-heading"><div><span className="eyebrow">CATÁLOGO NACIONAL</span><h2>Todos los destinos</h2></div><span>{filteredDestinations.length.toLocaleString('es-PE')} resultados</span></div><div className="catalog-filter-row"><label>Departamento<select value={regionFilter} onChange={e => {setRegionFilter(e.target.value);setDestinationPage(1)}}><option value="Todos">Todo el Perú</option>{allRegions.map(region => <option key={region} value={region}>{region}</option>)}</select></label><label>Categoría<select value={category} onChange={e => {setCategory(e.target.value);setDestinationPage(1)}}>{categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}</select></label></div>
+          {catalogOpen && <div className="explore-catalog-panel"><div className="catalog-panel-heading"><div><span className="eyebrow">CATÁLOGO NACIONAL</span><h2>Todos los destinos</h2></div><span>{filteredDestinations.length.toLocaleString('es-PE')} resultados</span></div><div className="catalog-filter-row"><label>Departamento<select value={regionFilter} onChange={e => {setRegionFilter(e.target.value);setProvinceFilter('Todos');setCityFilter('Todos');setDestinationPage(1)}}><option value="Todos">Todo el Perú</option>{allRegions.map(region => <option key={region} value={region}>{region}</option>)}</select></label><label>Provincia<select value={provinceFilter} onChange={e => {setProvinceFilter(e.target.value);setCityFilter('Todos');setDestinationPage(1)}}><option value="Todos">Todas las provincias</option>{provinceOptions.map(province => <option key={province} value={province}>{province}</option>)}</select></label><label>Ciudad / distrito<select value={cityFilter} onChange={e => {setCityFilter(e.target.value);setDestinationPage(1)}}><option value="Todos">Todas las ciudades</option>{cityOptions.map(city => <option key={city} value={city}>{city}</option>)}</select></label><label>Categoría<select value={category} onChange={e => {setCategory(e.target.value);setDestinationPage(1)}}>{categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}</select></label></div>
             <div className="chips">{categories.map(cat => <button key={cat} className={category === cat ? 'chip active' : 'chip'} onClick={() => {setCategory(cat);setDestinationPage(1)}}>{cat}</button>)}</div>
             <div className="destination-results-meta"><span>Mostrando {Math.min(visibleDestinations.length,filteredDestinations.length)} de {filteredDestinations.length}</span></div>
             {!mapMode && <div className="destination-view-switch" aria-label="Forma de visualizar destinos"><button className={destinationView==='list'?'active':''} onClick={() => setDestinationView('list')} aria-label="Vista lista"><BookOpen size={16}/> Lista</button><button className={destinationView==='grid'?'active':''} onClick={() => setDestinationView('grid')} aria-label="Vista cuadrícula"><Images size={16}/> Cuadrícula</button><button className={destinationView==='compact'?'active':''} onClick={() => setDestinationView('compact')} aria-label="Vista compacta"><ListIcon size={16}/> Compacta</button></div>}
