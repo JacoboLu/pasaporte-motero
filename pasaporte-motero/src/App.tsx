@@ -545,7 +545,7 @@ export default function App() {
   const renderPassportPage = (page: (typeof departmentPages)[number], index: number, face: 'front'|'back') => {
     const stampState = page.visitedPlaces.length ? 'earned' : page.pendingPlaces.length ? 'pending' : 'unearned'
     const stampInk = departmentStampThemes[page.name]?.ink || '#858585'
-    const artPosition = index === 7 ? '0% 50%' : index % 2 === 0 ? '0% 50%' : '100% 50%'
+    const stampPositions = ['0% 0%','100% 0%','0% 50%','100% 50%','0% 100%','100% 100%']; const artPosition = stampPositions[index % stampPositions.length]
     return <div className={`passport-page-face ${face} department-${stampState}`} key={`${face}-${page.name}`}>
       <span className="passport-page-number">PÁGINA {String(index+1).padStart(2,'0')} / 25</span>
       <span className="passport-page-ornament">✦ REPÚBLICA DEL PERÚ ✦</span>
