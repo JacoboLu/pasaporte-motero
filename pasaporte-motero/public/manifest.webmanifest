@@ -1,11 +1,11 @@
 {
-  "name": "Pasaporte Motero",
-  "short_name": "Pasaporte",
-  "description": "Tu pasaporte de aventuras por el Perú",
+  "name": "Pasaporte de Aventura",
+  "short_name": "Pasaporte Motero",
+  "description": "Tu pasaporte de aventuras y rutas en motocicleta por el Perú",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#101214",
-  "theme_color": "#101214",
+  "background_color": "#1A2F5C",
+  "theme_color": "#1A2F5C",
   "icons": [
     {
       "src": "/icon.svg",
