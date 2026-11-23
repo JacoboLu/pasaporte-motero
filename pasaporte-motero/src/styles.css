@@ -2228,3 +2228,46 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .passport-cover-official img{display:block;width:min(100%,360px);height:auto;max-height:480px;object-fit:contain;object-position:center;border-radius:0;filter:none}
 .theme-dark .passport-cover-official,.theme-light .passport-cover-official{background:transparent!important}
 @media(max-width:380px){.passport-cover-official img{width:min(100%,320px);max-height:430px}}
+
+
+/* Ajuste final de proporciones para los recursos oficiales */
+.topbar .brand-mark.passport-brand-mark,
+.auth-brand .brand-mark.passport-brand-mark{
+  width:42px!important;height:42px!important;flex:0 0 42px!important;
+  display:grid!important;place-items:center!important;
+  padding:0!important;overflow:hidden!important;
+  border:0!important;border-radius:50%!important;
+  background:transparent!important;box-shadow:none!important;
+}
+.topbar .brand-mark.passport-brand-mark img,
+.auth-brand .brand-mark.passport-brand-mark img{
+  display:block!important;width:100%!important;height:100%!important;
+  max-width:none!important;max-height:none!important;
+  object-fit:contain!important;object-position:center!important;
+}
+.passport-cover.passport-cover-official{
+  position:relative!important;isolation:auto!important;display:flex!important;
+  justify-content:center!important;align-items:center!important;
+  width:100%!important;min-width:0!important;min-height:0!important;
+  height:auto!important;margin:14px auto 16px!important;padding:0!important;
+  overflow:visible!important;border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;color:inherit!important;
+}
+.passport-cover.passport-cover-official::before,
+.passport-cover.passport-cover-official::after{
+  content:none!important;display:none!important;border:0!important;background:none!important;
+}
+.passport-cover.passport-cover-official img{
+  display:block!important;width:min(76%,300px)!important;height:auto!important;
+  max-width:100%!important;max-height:none!important;aspect-ratio:auto!important;
+  margin:0 auto!important;padding:0!important;object-fit:contain!important;
+  object-position:center!important;border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;filter:none!important;
+}
+@media(max-width:480px){
+  .passport-cover.passport-cover-official img{width:min(74%,270px)!important}
+}
+@media(max-width:360px){
+  .topbar .brand-mark.passport-brand-mark{width:38px!important;height:38px!important;flex-basis:38px!important}
+  .passport-cover.passport-cover-official img{width:min(76%,245px)!important}
+}
