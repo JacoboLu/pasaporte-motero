@@ -2142,3 +2142,80 @@ h2,h3{color:var(--main-text)}
 .achievement-share-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:8px 12px;font-size:12px}
 .achievement-card.is-unlocked{border-color:rgba(214,166,106,.35)}
 @media(max-width:520px){.achievement-share-actions{display:grid;grid-template-columns:1fr 1fr}.achievement-share-actions button{padding:8px 6px;font-size:11px}}
+
+
+/* Identidad visual oficial Pasaporte Motero — paleta del pasaporte suministrada */
+:root{
+  --pm-navy:#1A2F5C;
+  --pm-gold:#C7A55F;
+  --pm-slate:#34495E;
+  --pm-cream:#E6DDC8;
+  --pm-terracotta:#C17C42;
+  --pm-olive:#4F6B57;
+  --pm-gray:#95A5A6;
+  --pm-charcoal:#2C3E50;
+  --accent-color:var(--pm-terracotta);
+  --accent:var(--pm-terracotta);
+  --page-bg:#F3F0E8;
+  --shell-bg:#F3F0E8;
+  --topbar-bg:#1A2F5C;
+  --main-text:#2C3E50;
+  --muted-text:#64717B;
+  --card-bg:#FFFEFA;
+  --field-bg:#FFFEFA;
+  --field-border:#C9C4B8;
+  --line-color:#D9D1C1;
+}
+html[data-theme="light"],html[data-theme="light"] body,html[data-theme="light"] #root,
+.theme-light,.theme-light .app-shell{
+  --page-bg:#F3F0E8;
+  --shell-bg:#F3F0E8;
+  --topbar-bg:#1A2F5C;
+  --main-text:#2C3E50;
+  --muted-text:#64717B;
+  --card-bg:#FFFEFA;
+  --field-bg:#FFFEFA;
+  --field-border:#C9C4B8;
+  --line-color:#D9D1C1;
+}
+html[data-theme="dark"],html[data-theme="dark"] body,html[data-theme="dark"] #root,
+.theme-dark,.theme-dark .app-shell{
+  --page-bg:#182536;
+  --shell-bg:#182536;
+  --topbar-bg:#1A2F5C;
+  --main-text:#E6DDC8;
+  --muted-text:#B3B9B7;
+  --card-bg:#223247;
+  --field-bg:#223247;
+  --field-border:#526273;
+  --line-color:#405268;
+}
+.app-shell{background:var(--shell-bg)!important;color:var(--main-text)}
+.topbar{background:var(--pm-navy)!important;border-bottom:1px solid #C7A55F66!important}
+.topbar .brand,.topbar .brand strong,.topbar .icon-button{color:var(--pm-cream)!important}
+.topbar .brand small{color:#D8C69F!important}
+.brand-mark,.heading-icon,.trip-icon,.history-icon{background:#C17C4220!important;color:var(--pm-terracotta)!important;border-color:#C7A55F66!important}
+.content{background:var(--page-bg)!important}
+h1,h2,h3,.stat strong,.profile-menu button strong{color:var(--main-text)}
+.eyebrow,.text-action,.destination-distance{color:var(--pm-terracotta)}
+.primary,.bottom-nav .nav-plus{background:var(--pm-navy)!important;color:var(--pm-cream)!important;border:1px solid var(--pm-gold)!important}
+.secondary{background:var(--card-bg)!important;color:var(--main-text)!important;border:1px solid var(--line-color)!important}
+.chip{background:var(--card-bg);color:var(--main-text);border-color:var(--line-color)}
+.chip.active,.feed-switch button.active,.method-tabs button.active{background:#C17C4220!important;color:var(--pm-terracotta)!important;border-color:var(--pm-terracotta)!important}
+.stat,.post-card,.profile-card,.profile-menu,.trip-card,.history-row,.composer-shortcut,.settings-card,.qr-card{
+  background:var(--card-bg)!important;border-color:var(--line-color)!important;color:var(--main-text)
+}
+.searchbox,.filter-button,.filter-panel,.composer-modal,.action-sheet,.bottom-nav{
+  background:var(--card-bg)!important;border-color:var(--line-color)!important;color:var(--main-text)
+}
+.searchbox input,.composer-modal label input,.composer-modal label textarea,.composer-modal label select,
+.settings-card label input,.settings-card label textarea,.filter-panel select{
+  background:var(--field-bg)!important;border-color:var(--field-border)!important;color:var(--main-text)!important
+}
+.bottom-nav button{color:var(--muted-text)}
+.bottom-nav button.active{color:var(--pm-terracotta)!important}
+.bottom-nav .nav-plus{border-color:var(--page-bg)!important}
+.stamp-tile.earned{background:#C17C4218!important;border-color:var(--pm-gold)!important;color:var(--pm-terracotta)!important}
+.stamp-tile.earned strong{color:var(--pm-navy)!important}
+.progress span{background:var(--pm-terracotta)!important}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline-color:var(--pm-gold)!important}
