@@ -3180,3 +3180,59 @@ html,body,#root{background:var(--pm-paper)!important}
     min-width:clamp(132px,42vw,160px)!important;min-height:clamp(132px,42vw,160px)!important;
   }
 }
+
+
+/* Sellos secundarios: dispersos como estampaciones manuales por toda la hoja */
+.app-shell .content .passport-page-face{
+  position:relative!important;
+  isolation:isolate!important;
+}
+.app-shell .content .passport-page-face .department-tourist-stamps{
+  position:absolute!important;
+  inset:0!important;
+  z-index:6!important;
+  display:block!important;
+  width:auto!important;
+  height:auto!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  pointer-events:none!important;
+}
+.app-shell .content .passport-page-face .tourist-mini-stamp{
+  position:absolute!important;
+  left:var(--stamp-x,50%)!important;
+  top:var(--stamp-y,50%)!important;
+  width:42px!important;
+  height:27px!important;
+  min-width:42px!important;
+  flex:none!important;
+  margin:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:2px!important;
+  background:#f5ecd9d9!important;
+  box-shadow:0 1px 2px #705b3b22!important;
+  transform:translate(-50%,-50%) rotate(var(--stamp-rotation,0deg))!important;
+  opacity:.88!important;
+}
+.app-shell .content .passport-page-face .tourist-mini-stamp:nth-child(8n+1){--stamp-x:17%;--stamp-y:28%;--stamp-rotation:-9deg}
+.app-shell .content .passport-page-face .tourist-mini-stamp:nth-child(8n+2){--stamp-x:83%;--stamp-y:25%;--stamp-rotation:7deg}
+.app-shell .content .passport-page-face .tourist-mini-stamp:nth-child(8n+3){--stamp-x:13%;--stamp-y:48%;--stamp-rotation:5deg}
+.app-shell .content .passport-page-face .tourist-mini-stamp:nth-child(8n+4){--stamp-x:87%;--stamp-y:48%;--stamp-rotation:-8deg}
+.app-shell .content .passport-page-face .tourist-mini-stamp:nth-child(8n+5){--stamp-x:20%;--stamp-y:72%;--stamp-rotation:8deg}
+.app-shell .content .passport-page-face .tourist-mini-stamp:nth-child(8n+6){--stamp-x:80%;--stamp-y:70%;--stamp-rotation:-5deg}
+.app-shell .content .passport-page-face .tourist-mini-stamp:nth-child(8n+7){--stamp-x:47%;--stamp-y:17%;--stamp-rotation:-6deg}
+.app-shell .content .passport-page-face .tourist-mini-stamp:nth-child(8n){--stamp-x:56%;--stamp-y:85%;--stamp-rotation:9deg}
+.app-shell .content .passport-page-face .tourist-mini-stamp small{
+  display:block!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  font-size:5px!important;
+  line-height:1.05!important;
+  text-align:center!important;
+}
