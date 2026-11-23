@@ -2142,3 +2142,85 @@ h2,h3{color:var(--main-text)}
 .achievement-share-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:8px 12px;font-size:12px}
 .achievement-card.is-unlocked{border-color:rgba(214,166,106,.35)}
 @media(max-width:520px){.achievement-share-actions{display:grid;grid-template-columns:1fr 1fr}.achievement-share-actions button{padding:8px 6px;font-size:11px}}
+
+
+/* V4 · planificador de rutas */
+.route-planner-launch{margin-top:12px;min-height:42px}
+.route-planner-screen{display:grid;gap:16px;padding-bottom:24px}
+.route-planner-summary{display:grid;gap:14px}
+.route-stop-list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.route-stop-list li{display:grid;grid-template-columns:30px minmax(0,1fr) auto;align-items:center;gap:10px;position:relative;padding:10px 0;border-bottom:1px solid var(--border,rgba(128,128,128,.2))}
+.route-stop-number{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2,rgba(128,128,128,.14));font-weight:700;font-size:12px}
+.route-stop-copy{display:grid;gap:3px;min-width:0}
+.route-stop-copy strong{font-size:14px;overflow-wrap:anywhere}
+.route-stop-copy small,.route-segment-distance{font-size:11px;color:var(--muted,#929292)}
+.route-stop-controls{display:flex;gap:2px}
+.route-stop-controls .icon-button{width:30px;height:30px;min-width:30px}
+.route-segment-distance{grid-column:2/4;padding-bottom:2px}
+.route-estimate{display:grid;gap:5px;padding:12px;border-radius:12px;background:var(--surface-2,rgba(128,128,128,.1))}
+.route-estimate span,.route-estimate small{font-size:11px;color:var(--muted,#929292)}
+.route-estimate strong{font-size:20px}
+.route-planner-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.route-planner-actions button{justify-content:center;min-width:0;padding-inline:8px}
+.route-destination-options{display:grid;gap:4px;max-height:420px;overflow:auto}
+.route-destination-options button{display:grid;grid-template-columns:28px minmax(0,1fr) 20px;align-items:center;gap:9px;text-align:left;padding:10px 4px;background:transparent;border:0;border-bottom:1px solid var(--border,rgba(128,128,128,.16));color:inherit}
+.route-destination-options button>span:nth-child(2){display:grid;gap:3px;min-width:0}
+.route-destination-options strong{font-size:13px;overflow-wrap:anywhere}
+.route-destination-options small{font-size:11px;color:var(--muted,#929292)}
+.route-destination-options button>span:first-child{display:grid;place-items:center;color:var(--accent,#d28b48)}
+@media(max-width:380px){.route-planner-actions{grid-template-columns:1fr}.route-stop-controls .icon-button{width:26px;height:28px;min-width:26px}}
+
+.document-status.due-soon{background:rgba(217,145,42,.16);color:#d9912a;border:1px solid rgba(217,145,42,.35)}
+
+
+/* Identidad visual Pasaporte de Aventura · Azul marino, oro y tonos de expedición */
+:root{--pm-navy:#1A2F5C;--pm-slate:#34495E;--pm-cream:#E6DDC8;--pm-terracotta:#C17C42;--pm-olive:#4F6B57;--pm-gray:#95A5A6;--pm-charcoal:#2C3E50;--pm-gold:#C7A55F}
+html,body,#root{background:#142544}
+.app-shell{background:var(--pm-navy);color:var(--pm-cream);border-color:#C7A55F33}
+.app-shell.theme-dark{--page-bg:#1A2F5C;--shell-bg:#1A2F5C;--topbar-bg:#142544;--main-text:#E6DDC8;--muted-text:#B8C0C4;--card-bg:#243B61;--field-bg:#172B4B;--field-border:#536783;--line-color:#526783;color:#E6DDC8;color-scheme:dark}
+.theme-dark .topbar,.theme-dark .bottom-nav{background:#142544!important;border-color:#C7A55F55!important}
+.theme-dark .content{background:#1A2F5C}
+.theme-dark h1,.theme-dark h2,.theme-dark h3,.theme-dark .brand strong,.theme-dark .stat strong{color:#F4EFE3}
+.theme-dark .muted,.theme-dark .brand small{color:#C3C9C8}
+.theme-dark .eyebrow{color:#D8B978}
+.theme-dark .settings-card,.theme-dark .profile-card,.theme-dark .profile-menu,.theme-dark .post-card,.theme-dark .trip-card,.theme-dark .qr-card,.theme-dark .history-row,.theme-dark .empty-card,.theme-dark .stat,.theme-dark .composer-modal,.theme-dark .filter-panel,.theme-dark .map-placeholder{background:#243B61!important;color:#E6DDC8!important;border-color:#C7A55F45!important}
+.theme-dark .searchbox,.theme-dark .filter-button,.theme-dark .field,.theme-dark input:not([type=file]),.theme-dark textarea,.theme-dark select{border-color:#64768C}
+.theme-dark .primary{background:#C17C42!important;color:#fff!important}
+.theme-dark .secondary{background:#34495E!important;color:#E6DDC8!important;border:1px solid #C7A55F66!important}
+.theme-dark .heading-icon{background:#34495E;border-color:#C7A55F66;color:#C7A55F}
+.theme-dark .progress span{background:linear-gradient(90deg,#C17C42,#C7A55F)}
+.theme-dark .stamp-tile.earned{border-color:#C7A55F;background:#34495E;color:#E6DDC8}
+.theme-dark .stamp-tile.earned strong{color:#F4E8CB}
+.theme-dark .passport-book-page{background:#E6DDC8;color:#2C3E50;border-color:#C7A55F}
+.theme-dark .passport-book-page strong,.theme-dark .passport-book-page h3{color:#1A2F5C}
+.theme-light .app-shell{background:#E6DDC8!important;color:#2C3E50!important}
+.theme-light .content{background:#E6DDC8!important}
+.theme-light .topbar,.theme-light .bottom-nav{background:#1A2F5C!important;color:#E6DDC8!important;border-color:#C7A55F!important}
+.theme-light .brand,.theme-light .brand strong,.theme-light .topbar .icon-button{color:#E6DDC8!important}
+.theme-light h1,.theme-light h2,.theme-light h3{color:#1A2F5C}
+.theme-light .eyebrow{color:#9A602F}
+.theme-light .primary{background:#C17C42!important;color:#fff!important}
+.theme-light .secondary{background:#34495E!important;color:#E6DDC8!important}
+.theme-light .heading-icon{background:#F4EFE3!important;color:#C17C42!important;border-color:#C7A55F!important}
+.theme-light .progress span{background:linear-gradient(90deg,#C17C42,#C7A55F)}
+.brand-mark.passport-brand-mark{width:42px;height:42px;border-radius:50%;overflow:hidden;background:#1A2F5C;border:1px solid #C7A55F;box-shadow:0 2px 8px #0003}
+.brand-mark.passport-brand-mark img{display:block;width:100%;height:100%;object-fit:cover}
+.passport-cover-premium{min-height:390px!important;padding:24px 18px 22px 42px!important;border:2px solid #C7A55F!important;border-radius:13px!important;color:#E6DDC8!important;background:radial-gradient(ellipse at 50% 35%,#34495E 0,#1A2F5C 55%,#142544 100%),repeating-linear-gradient(135deg,#1A2F5C 0,#1A2F5C 3px,#20375F 4px,#1A2F5C 6px)!important;box-shadow:0 18px 35px #0005,inset 0 0 0 2px #C7A55F22,inset 0 0 30px #0B1930!important}
+.passport-cover-premium:before{inset:9px;border:1px solid #C7A55F99;border-radius:7px;box-shadow:inset 0 0 0 3px #E6DDC811}
+.passport-cover-premium:after{background:radial-gradient(ellipse at 50% 45%,transparent 35%,#08152b55 100%)}
+.passport-cover-premium .passport-binding{background:repeating-linear-gradient(45deg,#C7A55F 0 2px,#1A2F5C 2px 5px,#E6DDC8 5px 6px,#142544 6px 10px);border-right:2px solid #C7A55F}
+.passport-binding span{border-color:#E6DDC8}
+.passport-cover-premium .passport-cover-inner{border-color:#C7A55F55}
+.passport-cover-premium .passport-watermark{color:#E6DDC8;opacity:.07}
+.passport-cover-top{color:#E6DDC8;text-shadow:0 2px 5px #0B1930}
+.passport-cover-top span{color:#C7A55F}
+.passport-cover-emblem{width:102px;height:102px;background:#1A2F5C;border:2px solid #C7A55F;box-shadow:0 0 0 5px #C7A55F22,0 0 0 10px #C7A55F12}
+.passport-cover-emblem img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.passport-cover-premium .cover-title{font-size:clamp(26px,6.5vw,36px)!important;letter-spacing:2px!important;color:#E6DDC8;text-shadow:0 2px 0 #142544,0 4px 12px #0B1930}
+.passport-cover-premium .cover-subtitle{max-width:240px;font-size:8px;line-height:1.6;letter-spacing:1.5px;color:#C7A55F}
+.passport-cover-flag{display:none}
+.passport-cover-bottom{border-color:#C7A55F88;color:#E6DDC8}
+.passport-cover-bottom b{border-color:#C7A55F;color:#C7A55F}
+.passport-cover-premium .passport-serial{color:#C7A55F99}
+.document-status.due-soon{background:rgba(193,124,66,.2);color:#E5B47C;border:1px solid #C17C42}
+@media(max-width:380px){.passport-cover-premium{min-height:360px!important}.passport-cover-emblem{width:88px;height:88px}}
