@@ -3108,3 +3108,75 @@ html,body,#root{background:var(--pm-paper)!important}
   filter:none!important;will-change:auto!important;
 }
 .app-shell .content .passport-interactive-area{animation:none!important;transition:none!important}
+
+
+/* Restauración visual: sello tipográfico original y fondo común en todas las pestañas */
+.app-shell .content{
+  background-color:#EBD9BA!important;
+  background-image:url('/passport-parchment-background.jpg')!important;
+  background-position:center top!important;
+  background-repeat:repeat-y!important;
+  background-size:100% auto!important;
+  background-attachment:local!important;
+}
+.app-shell .content::before,.app-shell .content::after{
+  content:none!important;display:none!important;background:none!important;
+}
+.app-shell.theme-dark .content{
+  background-color:#172638!important;
+  background-image:linear-gradient(#172638b5,#172638b5),url('/passport-parchment-background.jpg')!important;
+  background-position:center top!important;background-repeat:repeat-y!important;background-size:100% auto!important;
+}
+.app-shell .content .passport-page-face{
+  background:linear-gradient(105deg,#e7d5b6 0%,#f8f0df 11%,#f4e9d3 100%)!important;
+  overflow:hidden!important;
+}
+.app-shell .content .passport-page-face .passport-ink-stamp{
+  width:clamp(142px,43vw,176px)!important;
+  height:clamp(142px,43vw,176px)!important;
+  min-width:clamp(142px,43vw,176px)!important;
+  min-height:clamp(142px,43vw,176px)!important;
+  margin:12px auto 8px!important;
+  flex:0 0 auto!important;
+  transform:rotate(-2deg)!important;
+  opacity:.34!important;
+  filter:grayscale(.35) contrast(.95)!important;
+}
+.app-shell .content .passport-page-face .passport-ink-stamp.earned{
+  opacity:.96!important;filter:contrast(1.16) saturate(.9)!important;
+  animation:none!important;transition:none!important;
+}
+.app-shell .content .passport-page-face .passport-ink-stamp.pending{
+  opacity:.68!important;filter:grayscale(.2)!important;
+}
+.app-shell .content .passport-page-face .passport-ink-stamp.unearned{
+  opacity:.3!important;filter:grayscale(.8)!important;
+}
+.app-shell .content .passport-page-face .department-tourist-stamps{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  flex-wrap:wrap!important;gap:4px!important;width:100%!important;
+  min-height:0!important;margin:3px auto 5px!important;padding:0 4px!important;
+  overflow:visible!important;position:relative!important;
+}
+.app-shell .content .passport-page-face .tourist-mini-stamp{
+  position:relative!important;left:auto!important;top:auto!important;
+  display:flex!important;flex:0 0 43px!important;width:43px!important;height:27px!important;
+  opacity:1!important;filter:contrast(1.1)!important;
+  color:#47745f!important;border:1.5px double currentColor!important;
+}
+.app-shell .content .passport-page-face .passport-page-inkline{margin-top:3px!important}
+.app-shell .content .passport-page-face .passport-page-place-list{margin-top:5px!important}
+.app-shell .content .passport-page-art,
+.app-shell .content .passport-earned-overprint{display:none!important}
+.app-shell .content .passport-ink-stamp.earned,
+.app-shell .content .department-detail-stamp.earned,
+.app-shell .content .passport-page-face .passport-ink-stamp{
+  animation:none!important;transition:none!important;
+}
+@media(max-width:480px){
+  .app-shell .content{background-size:100% auto!important}
+  .app-shell .content .passport-page-face .passport-ink-stamp{
+    width:clamp(132px,42vw,160px)!important;height:clamp(132px,42vw,160px)!important;
+    min-width:clamp(132px,42vw,160px)!important;min-height:clamp(132px,42vw,160px)!important;
+  }
+}
