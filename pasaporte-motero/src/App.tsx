@@ -12,6 +12,7 @@ import { allRegions, regions } from './data'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
 import { clearPrivateCache, migrateLegacyPrivateCache, readPrivateCache, writePrivateCache } from './lib/secure-storage'
 import { addQueuedPhotoVisit, getQueuedPhotoVisits, removeQueuedPhotoVisit, type QueuedPhotoVisit } from './lib/offline-photo-visits'
+import RoutePlanner from './RoutePlanner'
 
 type Tab = 'explore' | 'passport' | 'community' | 'profile'
 type VisitStatus = 'validated' | 'pending' | 'rejected'
@@ -287,6 +288,7 @@ export default function App() {
   const [adminVisits, setAdminVisits] = useState<any[]>([])
   const [adminBusy, setAdminBusy] = useState(false)
   const [mapMode, setMapMode] = useState(false)
+  const [routePlannerOpen, setRoutePlannerOpen] = useState(false)
   const [mapDestinations, setMapDestinations] = useState<Destination[]>(destinations)
   const [destinationView, setDestinationView] = useState<'list'|'grid'|'compact'>(() => { try { const saved = localStorage.getItem('pm_destination_view'); return saved === 'list' || saved === 'grid' || saved === 'compact' ? saved : 'list' } catch { return 'list' } })
   const [destinationPage, setDestinationPage] = useState(1)
@@ -1768,8 +1770,9 @@ export default function App() {
         <div className="section-heading"><h2>Tu estado</h2></div><div className="status-card">{visitedIds.has(selected.id) ? <><BadgeCheck/><div><strong>Destino visitado</strong><small>Ya tienes este sello en tu pasaporte.</small></div></> : <><Lock/><div><strong>Pendiente de visitar</strong><small>Completa una visita para obtener el sello.</small></div></>}</div>
       </section> : <>
         {tab === 'explore' && <section className="explore-screen">
+          {routePlannerOpen ? <RoutePlanner destinations={mapDestinations} onClose={() => setRoutePlannerOpen(false)} onPrepareTrip={(ids) => { setTripDestinations(ids); setTripName('Ruta personalizada'); setTripDescription('Ruta planificada desde el catálogo de Pasaporte Motero.'); setRoutePlannerOpen(false); openAction('trip') }} /> : <>
           <div className="explore-heading tab-page-heading">
-            <div><span className="eyebrow">PASAPORTE MOTERO · PERÚ</span><h1>Explora el Perú</h1><p className="muted">Encuentra tu próxima ruta y descubre nuevos destinos.</p></div>
+            <div><span className="eyebrow">PASAPORTE MOTERO · PERÚ</span><h1>Explora el Perú</h1><p className="muted">Encuentra tu próxima ruta y descubre nuevos destinos.</p><button className="secondary route-planner-launch" onClick={() => setRoutePlannerOpen(true)}><Route size={16}/> Planificar una ruta</button></div>
             <div className="heading-icon"><Compass size={22}/></div>
           </div>
           <div className="explore-search-line">
@@ -1792,6 +1795,7 @@ export default function App() {
             {filteredDestinations.length > visibleDestinations.length && !mapMode && <button className="destination-load-more" onClick={() => setDestinationPage(page => page + 1)}>Mostrar 8 destinos más <span>{filteredDestinations.length-visibleDestinations.length} restantes</span></button>}
             {filteredDestinations.length === 0 && <div className="empty-card"><Search size={30}/><h3>No encontramos destinos</h3><p>Prueba con otro nombre o cambia los filtros.</p></div>}
           </div>}
+          </>}
         </section>}
         {tab === 'passport' && <section>
           <div className="page-heading tab-page-heading"><div><span className="eyebrow">DOCUMENTA CADA AVENTURA</span><h1>Mi pasaporte</h1><p className="muted">Cada destino visitado deja una historia y un sello.</p></div><div className="heading-icon"><ShieldCheck size={23}/></div></div>
