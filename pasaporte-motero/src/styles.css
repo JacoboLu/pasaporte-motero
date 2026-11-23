@@ -2991,3 +2991,50 @@ html,body,#root{background:var(--pm-paper)!important}
   .app-shell .content .passport-page-turn.turn-previous,
   .app-shell .content .passport-interactive-area{animation-duration:.01ms!important;transition:none!important}
 }
+
+
+/* CORRECCIÓN: fondo de pergamino de referencia visible en todas las pestañas.
+   La imagen original se sirve como JPEG válido; se evita cubrirla con un degradado opaco. */
+.app-shell .content{
+  background-color:#EBD9BA!important;
+  background-image:
+    linear-gradient(180deg,#f7ecd62b 0%,#f4e6cc20 48%,#f7ecd62b 100%),
+    url('/passport-parchment-background.jpg')!important;
+  background-repeat:repeat-y!important;
+  background-position:center top,center top!important;
+  background-size:100% 100%,100% auto!important;
+  background-attachment:local!important;
+}
+.app-shell .content::before{
+  content:""!important;position:absolute!important;inset:0!important;z-index:0!important;
+  pointer-events:none!important;opacity:1!important;
+  background:linear-gradient(180deg,#f8efd21a,#f6e8cf12 50%,#f8efd21a)!important;
+}
+.app-shell .content>*{position:relative;z-index:1}
+/* Mantener intactos los sellos originales ya trabajados: sprite oficial de dos ilustraciones */
+.app-shell .content .passport-page-art{
+  width:clamp(145px,47vw,190px)!important;
+  height:clamp(145px,47vw,190px)!important;
+  flex:0 0 auto!important;margin:clamp(8px,2.4vw,14px) 0 4px!important;
+  border-radius:50%!important;
+  background-image:url('/peru-passport-stamps.webp')!important;
+  background-repeat:no-repeat!important;background-size:200% 100%!important;
+  background-position:0% 50%!important;
+  border:4px double #B58B51!important;
+  outline:1px dashed #9e774c!important;outline-offset:3px!important;
+  box-shadow:0 5px 13px #5b41231c!important;overflow:hidden!important;
+  filter:none!important;
+}
+.app-shell .content .passport-page-face{
+  background:
+    radial-gradient(circle at 10% 15%,#fff9e8aa 0,transparent 27%),
+    radial-gradient(circle at 90% 82%,#d8c39e55 0,transparent 34%),
+    repeating-linear-gradient(0deg,#8c6d3b08 0 1px,transparent 1px 4px),
+    linear-gradient(105deg,#e7d5b6 0%,#f8f0df 11%,#f4e9d3 100%)!important;
+}
+.app-shell.theme-dark .content{
+  background-color:#172638!important;
+  background-image:linear-gradient(#172638b8,#172638c9),url('/passport-parchment-background.jpg')!important;
+  background-size:100% 100%,100% auto!important;
+}
+.app-shell.theme-dark .content::before{background:transparent!important}
