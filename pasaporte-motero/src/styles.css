@@ -2142,3 +2142,30 @@ h2,h3{color:var(--main-text)}
 .achievement-share-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:8px 12px;font-size:12px}
 .achievement-card.is-unlocked{border-color:rgba(214,166,106,.35)}
 @media(max-width:520px){.achievement-share-actions{display:grid;grid-template-columns:1fr 1fr}.achievement-share-actions button{padding:8px 6px;font-size:11px}}
+
+
+/* V4 · planificador de rutas */
+.route-planner-launch{margin-top:12px;min-height:42px}
+.route-planner-screen{display:grid;gap:16px;padding-bottom:24px}
+.route-planner-summary{display:grid;gap:14px}
+.route-stop-list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.route-stop-list li{display:grid;grid-template-columns:30px minmax(0,1fr) auto;align-items:center;gap:10px;position:relative;padding:10px 0;border-bottom:1px solid var(--border,rgba(128,128,128,.2))}
+.route-stop-number{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2,rgba(128,128,128,.14));font-weight:700;font-size:12px}
+.route-stop-copy{display:grid;gap:3px;min-width:0}
+.route-stop-copy strong{font-size:14px;overflow-wrap:anywhere}
+.route-stop-copy small,.route-segment-distance{font-size:11px;color:var(--muted,#929292)}
+.route-stop-controls{display:flex;gap:2px}
+.route-stop-controls .icon-button{width:30px;height:30px;min-width:30px}
+.route-segment-distance{grid-column:2/4;padding-bottom:2px}
+.route-estimate{display:grid;gap:5px;padding:12px;border-radius:12px;background:var(--surface-2,rgba(128,128,128,.1))}
+.route-estimate span,.route-estimate small{font-size:11px;color:var(--muted,#929292)}
+.route-estimate strong{font-size:20px}
+.route-planner-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.route-planner-actions button{justify-content:center;min-width:0;padding-inline:8px}
+.route-destination-options{display:grid;gap:4px;max-height:420px;overflow:auto}
+.route-destination-options button{display:grid;grid-template-columns:28px minmax(0,1fr) 20px;align-items:center;gap:9px;text-align:left;padding:10px 4px;background:transparent;border:0;border-bottom:1px solid var(--border,rgba(128,128,128,.16));color:inherit}
+.route-destination-options button>span:nth-child(2){display:grid;gap:3px;min-width:0}
+.route-destination-options strong{font-size:13px;overflow-wrap:anywhere}
+.route-destination-options small{font-size:11px;color:var(--muted,#929292)}
+.route-destination-options button>span:first-child{display:grid;place-items:center;color:var(--accent,#d28b48)}
+@media(max-width:380px){.route-planner-actions{grid-template-columns:1fr}.route-stop-controls .icon-button{width:26px;height:28px;min-width:26px}}
