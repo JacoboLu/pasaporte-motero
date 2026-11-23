@@ -3298,3 +3298,52 @@ html,body,#root{background:var(--pm-paper)!important}
   min-height:0!important;flex:0 0 auto!important;
 }
 .app-shell .content .passport-is-open+.stats-grid{margin-top:8px!important}
+
+
+/* Medidas reales de pasaporte: las páginas interiores igualan la imagen de portada.
+   La portada ocupa el 76% del botón de 86vw (máx. 360px); aplicamos exactamente ese ancho. */
+.app-shell .content .passport-page-turn{
+  width:min(65.36vw,273.6px)!important;
+  max-width:273.6px!important;
+  aspect-ratio:0.717!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+.app-shell .content .passport-book-viewport{
+  width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  aspect-ratio:auto!important;
+  padding:4px 0 8px!important;
+  margin:0 auto 2px!important;
+}
+.app-shell .content .passport-book-controls{
+  width:min(65.36vw,273.6px)!important;
+  max-width:273.6px!important;
+  margin:0 auto 8px!important;
+}
+.app-shell .content .passport-page-dots{
+  width:min(65.36vw,273.6px)!important;
+  max-width:273.6px!important;
+  margin:2px auto 5px!important;
+}
+.app-shell .content .passport-page-face{
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  box-sizing:border-box!important;
+}
+@media(max-width:380px){
+  .app-shell .content .passport-page-turn{
+    width:65.36vw!important;
+    max-width:273.6px!important;
+    aspect-ratio:.717!important;
+  }
+  .app-shell .content .passport-page-face{
+    padding:clamp(11px,3.3vw,14px) clamp(10px,3vw,13px) 10px!important;
+  }
+}
