@@ -42,7 +42,7 @@ assert.match(profileMigration, /revoke select on table public\.profiles from ano
 assert.match(profileMigration, /using \(id = \(select auth\.uid\(\)\)\)/i);
 assert.match(profileMigration, /security_barrier/i);
 assert.match(profileMigration, /security_invoker\s*=\s*false/i);
-assert.match(profileProjectionMigration, /drop view if exists public\\.public_profiles/i);
+assert.match(profileProjectionMigration, /drop view if exists public\.public_profiles/i);
 assert.match(profileProjectionMigration, /enable row level security/i);
 assert.match(profileProjectionMigration, /create policy "Public profiles are readable"/i);
 assert.match(profileProjectionMigration, /security definer/i);
