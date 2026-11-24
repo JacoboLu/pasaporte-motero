@@ -5199,3 +5199,49 @@ html,body,#root{background:var(--pm-paper)!important}
   background:#29445E!important;
   color:#F4D18A!important;
 }
+
+
+/* V6 · Kit de ruta y navegación */
+.rider-toolkit{display:flex;flex-direction:column;gap:14px}
+.toolkit-card{padding:15px;display:flex;flex-direction:column;gap:12px}
+.toolkit-heading{display:flex;align-items:center;gap:11px}
+.toolkit-heading>div{min-width:0;flex:1}
+.toolkit-heading h2{font-size:14px;margin:0}
+.toolkit-heading small{display:block;color:var(--muted,#999);font-size:10px;line-height:1.5;margin-top:3px}
+.toolkit-heading>strong{font-size:16px;color:var(--accent,#ff8738);font-variant-numeric:tabular-nums}
+.toolkit-icon{width:39px;height:39px;border-radius:12px;background:#ff87381c;color:#ff9857;display:grid;place-items:center;flex-shrink:0}
+.toolkit-check-group{display:flex;flex-direction:column;gap:3px}
+.toolkit-check-group h3{font-size:11px;color:var(--accent,#ff9857);margin:7px 0 4px}
+.toolkit-check{display:flex;align-items:center;gap:10px;padding:9px 3px;border-bottom:1px solid var(--line,#ffffff12);font-size:11px;color:var(--text,#ddd);cursor:pointer}
+.toolkit-check input{width:18px;height:18px;min-width:18px;accent-color:#f77b2d;margin:0}
+.toolkit-check input:checked+span{text-decoration:line-through;opacity:.65}
+.toolkit-actions{display:grid;grid-template-columns:1fr 1.35fr;gap:8px}
+.toolkit-note,.toolkit-storage-note{font-size:9px;line-height:1.55;color:var(--muted,#999);margin:0}
+.toolkit-storage-note{display:flex;align-items:flex-start;gap:7px;padding:3px 4px}
+.toolkit-storage-note svg{flex-shrink:0;color:#69b88a}
+.toolkit-expense-total{border:1px solid #ff873833;background:#ff873810;border-radius:12px;padding:12px}
+.toolkit-expense-total small{display:block;color:var(--muted,#999);font-size:9px}
+.toolkit-expense-total strong{display:block;color:var(--accent,#ff9857);font-size:23px;margin-top:3px;font-variant-numeric:tabular-nums}
+.toolkit-expense-list{display:flex;flex-direction:column;gap:0}
+.toolkit-expense-row{display:grid;grid-template-columns:minmax(0,1fr) auto 30px;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line,#ffffff12)}
+.toolkit-expense-row>div{min-width:0}
+.toolkit-expense-row strong,.toolkit-expense-row small{display:block;overflow-wrap:anywhere}
+.toolkit-expense-row strong{font-size:11px}
+.toolkit-expense-row small{font-size:9px;color:var(--muted,#999);margin-top:3px}
+.toolkit-expense-row>b{font-size:11px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.toolkit-expense-row>button{width:30px;height:30px;border:0;border-radius:8px;background:#ffffff0d;color:#b8a29a;display:grid;place-items:center}
+.toolkit-route-button{margin:8px 0 12px;width:100%}
+.passport-next-achievement{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px;border:1px solid #ff873833;border-radius:14px;background:linear-gradient(120deg,#ff873812,transparent)}
+.passport-next-achievement>div{min-width:0;display:flex;flex-direction:column;gap:4px}
+.passport-next-achievement strong{font-size:12px;color:var(--text,#fff)}
+.passport-next-achievement small{font-size:9px;color:var(--muted,#999);line-height:1.4}
+.passport-next-achievement .eyebrow{font-size:8px}
+.passport-next-achievement>button{flex-shrink:0}
+.profile-quick-tools .profile-quick-icon{background:#ff87381a;color:#ff9857}
+.theme-light .toolkit-check{color:#30343a;border-color:#00000012}
+.theme-light .toolkit-heading small,.theme-light .toolkit-note,.theme-light .toolkit-storage-note,.theme-light .toolkit-expense-total small,.theme-light .toolkit-expense-row small{color:#666}
+.theme-light .toolkit-expense-row{border-color:#00000012}
+.theme-light .toolkit-expense-row>button{background:#00000008;color:#755c50}
+.theme-light .passport-next-achievement{background:#fff8f1;border-color:#e6c8ad}
+.theme-light .passport-next-achievement strong{color:#2f2924}
+@media(min-width:480px){.toolkit-card{padding:17px}}
