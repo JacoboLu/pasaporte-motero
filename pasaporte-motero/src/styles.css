@@ -6157,3 +6157,39 @@ html[data-theme="dark"],html[data-theme="dark"] body,html[data-theme="dark"] #ro
   -webkit-text-fill-color:#d7e0e9!important;
   border-color:#71849a!important;
 }
+
+
+/* Mi QR de viajero: asegurar contraste del título, explicación y estado de carga */
+.app-shell.theme-dark .content .personal-qr-card{
+  background:#20364f!important;
+  border:1px solid #7189a2!important;
+  color:#f4f7fb!important;
+}
+.app-shell.theme-dark .content .personal-qr-card h3{
+  color:#f7f9fc!important;
+  opacity:1!important;
+  font-weight:800!important;
+}
+.app-shell.theme-dark .content .personal-qr-card>p{
+  color:#d4dfeb!important;
+  opacity:1!important;
+  font-size:11px!important;
+  line-height:1.65!important;
+}
+.app-shell.theme-dark .content .personal-qr-card .qr-loading,
+.app-shell.theme-dark .content .personal-qr-card .qr-loading p{
+  color:#d4dfeb!important;
+  opacity:1!important;
+}
+.app-shell.theme-dark .content .personal-qr-card .qr-loading svg{
+  color:#f0b45e!important;
+}
+.app-shell.theme-dark .content .personal-qr-card button.secondary{
+  min-height:44px!important;
+  background:#f5ead5!important;
+  border:1px solid #e5c995!important;
+  color:#18324d!important;
+  -webkit-text-fill-color:#18324d!important;
+  font-weight:800!important;
+  opacity:1!important;
+}
