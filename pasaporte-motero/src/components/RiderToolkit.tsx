@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { AlertTriangle, CheckCircle2, ClipboardCheck, MapPin, Phone, Plus, RefreshCw, Trash2, Wallet } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, ClipboardCheck, MapPin, Pencil, Phone, Plus, RefreshCw, Trash2, Wallet } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 type Expense = { id:string; date:string; category:string; amount:number; note:string }
@@ -90,6 +90,11 @@ export function RiderToolkit({onBack,userId}:{onBack:()=>void;userId:string|null
  },[userId])
 
  useEffect(()=>{
+  if(!loaded)return
+  try{localStorage.setItem(KEY,JSON.stringify({checked,contactName,contactPhone,packages}))}catch{/* La sincronización remota sigue siendo la fuente principal. */}
+ },[checked,contactName,contactPhone,packages,loaded])
+
+ useEffect(()=>{
   if(!loaded||!userId||!supabase)return
   const payload:Payload={checklist:checked,contact_name:contactName,contact_phone:contactPhone,expenses:[],expense_packages:packages}
   const serialized=JSON.stringify(payload)
@@ -157,7 +162,7 @@ export function RiderToolkit({onBack,userId}:{onBack:()=>void;userId:string|null
    <label>Detalle (opcional)<input value={note} onChange={e=>setNote(e.target.value)} placeholder="Ej. tanque lleno en Huancayo"/></label>
    <button type="button" className="primary full" disabled={!amount||Number(amount)<=0||!date||!activePackageId} onClick={addExpense}>{editingExpenseId?'Guardar cambios':'Añadir gasto'} <Plus size={16}/></button>
    {editingExpenseId&&<button type="button" className="secondary full" onClick={cancelExpenseEdit}>Cancelar edición</button>}
-   {expenses.length?<div className="toolkit-expense-list">{expenses.map(x=><div className="toolkit-expense-row" key={x.id}><div><strong>{x.category}</strong><small>{x.date}{x.note?' · '+x.note:''}</small></div><b>S/ {x.amount.toFixed(2)}</b><div className="toolkit-expense-row-actions"><button type="button" aria-label="Editar gasto" onClick={()=>editExpense(x)}><ClipboardCheck size={15}/></button><button type="button" aria-label="Eliminar gasto" onClick={()=>updateActiveExpenses(expenses.filter(y=>y.id!==x.id))}><Trash2 size={15}/></button></div></div>)}</div>:<p className="muted tiny">Este paquete aún no tiene gastos.</p>}
+   {expenses.length?<div className="toolkit-expense-list">{expenses.map(x=><div className="toolkit-expense-row" key={x.id}><div><strong>{x.category}</strong><small>{x.date}{x.note?' · '+x.note:''}</small></div><b>S/ {x.amount.toFixed(2)}</b><div className="toolkit-expense-row-actions"><button type="button" aria-label="Editar gasto" onClick={()=>editExpense(x)}><Pencil size={15}/></button><button type="button" aria-label="Eliminar gasto" onClick={()=>updateActiveExpenses(expenses.filter(y=>y.id!==x.id))}><Trash2 size={15}/></button></div></div>)}</div>:<p className="muted tiny">Este paquete aún no tiene gastos.</p>}
   </div>
   <p className={'toolkit-storage-note toolkit-sync-'+syncState}><span>{syncState==='saving'||syncState==='loading'?<RefreshCw size={14}/>:<CheckCircle2 size={14}/>}</span>{syncMessage}</p>
  </section>
