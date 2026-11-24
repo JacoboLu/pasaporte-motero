@@ -980,6 +980,7 @@ export default function App() {
       for (const item of queued) {
         let path = ''
         try {
+          if (item.blob.type === 'application/x-pasaporte-motero-encrypted') throw new Error('No se pudo descifrar una evidencia local. Se conserva en el dispositivo y no se enviará como fotografía dañada.')
           const extension = item.blob.type === 'image/png' ? 'png' : item.blob.type === 'image/webp' ? 'webp' : 'jpg'
           path = user.id + '/visits/' + item.id + '.' + extension
           const { error: uploadError } = await supabase.storage.from('travel-media').upload(path, item.blob, { contentType: item.blob.type || 'image/jpeg', upsert: true })
