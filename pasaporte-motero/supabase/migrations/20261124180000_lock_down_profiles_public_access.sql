@@ -13,8 +13,10 @@ USING (id = (SELECT auth.uid()));
 REVOKE SELECT ON TABLE public.profiles FROM anon;
 GRANT SELECT ON TABLE public.profiles TO authenticated;
 
+-- This curated view intentionally runs with its owner privileges so anonymous
+-- users can see only these approved columns while profiles itself stays owner-only.
 CREATE OR REPLACE VIEW public.public_profiles
-WITH (security_barrier = true)
+WITH (security_barrier = true, security_invoker = false)
 AS
 SELECT
   id,
