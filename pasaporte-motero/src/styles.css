@@ -4392,3 +4392,124 @@ html,body,#root{background:var(--pm-paper)!important}
   flex:0 0 auto!important;background:transparent!important;border:0!important;
   color:#E8D8B8!important;padding:5px!important;
 }
+
+
+/* Perfil: jerarquía visual y accesos de dos columnas */
+.app-shell .content .profile-card{
+  position:relative!important;
+  display:flex!important;flex-direction:column!important;align-items:center!important;
+  gap:5px!important;
+  margin:4px 0 20px!important;padding:22px 18px 17px!important;
+  min-height:0!important;border-radius:20px!important;
+  border:1px solid #C7A55F!important;
+  background:linear-gradient(145deg,#1A2F4A 0%,#203A58 58%,#172D49 100%)!important;
+  box-shadow:0 8px 22px #182a431c,inset 0 1px #ffffff16!important;
+  text-align:center!important;
+}
+.app-shell .content .profile-card .avatar.large{
+  width:82px!important;height:82px!important;flex:0 0 82px!important;
+  margin:0 auto 7px!important;border-radius:50%!important;
+  border:2px solid #D6B477!important;
+  box-shadow:0 0 0 4px #D6B47720,0 5px 14px #0004!important;
+  overflow:hidden!important;
+}
+.app-shell .content .profile-card .avatar.large img{
+  width:100%!important;height:100%!important;object-fit:cover!important;border-radius:50%!important;
+}
+.app-shell .content .profile-card h2{
+  margin:0!important;color:#FFF0D4!important;font-size:21px!important;
+  font-weight:800!important;line-height:1.2!important;
+}
+.app-shell .content .profile-card>.muted{
+  margin:0!important;color:#C0CBD5!important;font-size:11px!important;
+}
+.app-shell .content .profile-card>p.muted{
+  max-width:310px!important;line-height:1.45!important;
+}
+.app-shell .content .profile-card .profile-location{
+  display:inline-flex!important;align-items:center!important;gap:6px!important;
+  margin:2px 0 4px!important;color:#E8D8B8!important;font-size:11px!important;
+}
+.app-shell .content .profile-card .profile-location svg{color:#E2B96F!important}
+.app-shell .content .profile-card .profile-stats{
+  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  width:100%!important;gap:6px!important;
+  margin:12px 0 0!important;padding:13px 0 0!important;
+  border-top:1px solid #FFFFFF2B!important;
+  color:#D5DFE8!important;
+}
+.app-shell .content .profile-card .profile-stats span{
+  display:flex!important;flex-direction:column!important;gap:3px!important;
+  align-items:center!important;font-size:10px!important;color:#D5DFE8!important;
+}
+.app-shell .content .profile-card .profile-stats b{
+  color:#F4D79E!important;font-size:15px!important;font-weight:800!important;
+}
+.app-shell .content .profile-quick-heading{
+  display:flex!important;flex-direction:column!important;gap:3px!important;
+  margin:0 0 10px!important;padding:0 2px!important;
+}
+.app-shell .content .profile-quick-heading .eyebrow{
+  color:#9B622F!important;font-size:10px!important;letter-spacing:1.6px!important;
+}
+.app-shell .content .profile-quick-caption{
+  color:#687786!important;font-size:10px!important;line-height:1.4!important;
+}
+.app-shell .content .profile-quick-access{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;margin:0 0 22px!important;
+}
+.app-shell .content .profile-quick-access button{
+  position:relative!important;display:grid!important;
+  grid-template-columns:38px minmax(0,1fr) 16px!important;
+  grid-template-rows:auto auto!important;column-gap:10px!important;row-gap:3px!important;
+  align-content:center!important;align-items:center!important;
+  min-width:0!important;min-height:82px!important;height:auto!important;
+  padding:12px 10px!important;text-align:left!important;
+  border:1px solid #CBB27F!important;border-radius:15px!important;
+  background:linear-gradient(145deg,#FFFCF4,#F1E5CE)!important;
+  color:#1A2F5C!important;box-shadow:0 3px 9px #59442612!important;
+  transition:transform .16s ease,box-shadow .16s ease!important;
+}
+.app-shell .content .profile-quick-access button:active{transform:scale(.98)!important}
+.app-shell .content .profile-quick-access .profile-quick-icon{
+  grid-column:1!important;grid-row:1 / span 2!important;
+  width:38px!important;height:38px!important;border-radius:12px!important;
+  display:grid!important;place-items:center!important;
+  background:#1A2F5C!important;color:#F0C77C!important;
+}
+.app-shell .content .profile-quick-access button strong{
+  grid-column:2!important;grid-row:1!important;align-self:end!important;
+  min-width:0!important;white-space:normal!important;
+  color:#1A2F5C!important;font-size:12px!important;line-height:1.2!important;
+}
+.app-shell .content .profile-quick-access button small{
+  grid-column:2!important;grid-row:2!important;align-self:start!important;
+  min-width:0!important;white-space:normal!important;
+  color:#667586!important;font-size:9px!important;line-height:1.25!important;
+}
+.app-shell .content .profile-quick-access .profile-quick-arrow{
+  grid-column:3!important;grid-row:1 / span 2!important;
+  color:#A8793D!important;
+}
+.app-shell .content .profile-quick-access .profile-quick-saved{
+  grid-column:1 / -1!important;min-height:66px!important;
+}
+.app-shell.theme-dark .content .profile-quick-heading .eyebrow{color:#E0B66E!important}
+.app-shell.theme-dark .content .profile-quick-caption{color:#B9C7D5!important}
+.app-shell.theme-dark .content .profile-quick-access button{
+  background:linear-gradient(145deg,#203A58,#172D49)!important;
+  border-color:#8E754B!important;box-shadow:0 4px 12px #0003!important;
+}
+.app-shell.theme-dark .content .profile-quick-access button strong{color:#FFF0D4!important}
+.app-shell.theme-dark .content .profile-quick-access button small{color:#C0CBD5!important}
+.app-shell.theme-dark .content .profile-quick-access .profile-quick-icon{
+  background:#2D4968!important;color:#F0C77C!important;
+}
+.app-shell.theme-dark .content .profile-quick-access .profile-quick-arrow{color:#E0B66E!important}
+@media(max-width:360px){
+  .app-shell .content .profile-quick-access{gap:8px!important}
+  .app-shell .content .profile-quick-access button{min-height:76px!important;padding:10px 8px!important;column-gap:8px!important}
+  .app-shell .content .profile-quick-access .profile-quick-icon{width:34px!important;height:34px!important}
+  .app-shell .content .profile-quick-access button strong{font-size:11px!important}
+}
