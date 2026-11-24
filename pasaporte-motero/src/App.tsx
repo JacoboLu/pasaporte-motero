@@ -215,6 +215,8 @@ export default function App() {
   const [motorcyclePhotoPreview, setMotorcyclePhotoPreview] = useState('')
   const [motorcycleCropX, setMotorcycleCropX] = useState(50)
   const [motorcycleCropY, setMotorcycleCropY] = useState(50)
+  const [profileBikeCropEditing, setProfileBikeCropEditing] = useState(false)
+  const profileBikeCropStart = useRef<{x:number;y:number}|null>(null)
   const cropDrag = useRef<{x:number;y:number;cropX:number;cropY:number}|null>(null)
   const [avatarUrl, setAvatarUrl] = useState('')
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
@@ -2179,11 +2181,20 @@ export default function App() {
                 <div><strong>{posts.filter(p=>p.authorId===authUserId&&p.kind!=='trip').length}</strong><span>Publicaciones</span></div>
               </div>
             </section>
-            <button type="button" className="profile-bike-feature" onClick={()=>setSubview('motorcycle')}>
-              <span className="profile-bike-image">{(motorcyclePhotoPreview || (motorcyclePhoto.startsWith('http') ? motorcyclePhoto : '')) ? <img src={motorcyclePhotoPreview || motorcyclePhoto} alt="Mi motocicleta" style={{objectPosition:`${motorcycleCropX}% ${motorcycleCropY}%`}}/> : <Bike size={42}/>}</span>
-              <span className="profile-bike-copy"><small>MI COMPAÑERA DE RUTA</small><strong>{[motorcycleBrand,motorcycleModel].filter(Boolean).join(' ') || 'Registra tu motocicleta'}</strong><span>{motorcycleYear ? 'Año '+motorcycleYear : 'Ficha técnica, documentos y mantenimiento'}</span></span>
-              <ChevronRight size={21} className="profile-bike-chevron"/>
-            </button>
+            <div className="profile-bike-editor">
+              <div className="profile-bike-feature" role="button" tabIndex={0} onClick={()=>{if(!profileBikeCropEditing)setSubview('motorcycle')}} onKeyDown={e=>{if(!profileBikeCropEditing&&(e.key==='Enter'||e.key===' ')){e.preventDefault();setSubview('motorcycle')}}}>
+                <span className={'profile-bike-image '+(profileBikeCropEditing?'is-cropping':'')} onPointerDown={profileBikeCropEditing?startMotorcycleCrop:undefined} onPointerMove={profileBikeCropEditing?moveMotorcycleCrop:undefined} onPointerUp={profileBikeCropEditing?endMotorcycleCrop:undefined} onPointerCancel={profileBikeCropEditing?endMotorcycleCrop:undefined} role={profileBikeCropEditing?'group':undefined} aria-label={profileBikeCropEditing?'Arrastra la foto para acomodar el encuadre':undefined}>
+                  {(motorcyclePhotoPreview || (motorcyclePhoto.startsWith('http') ? motorcyclePhoto : '')) ? <img src={motorcyclePhotoPreview || motorcyclePhoto} alt="Mi motocicleta" style={{objectPosition: `${motorcycleCropX}% ${motorcycleCropY}%`}}/> : <Bike size={42}/>} 
+                  {profileBikeCropEditing && <span className="profile-bike-crop-hint">Arrastra para encuadrar</span>}
+                </span>
+                <span className="profile-bike-copy"><small>MI COMPAÑERA DE RUTA</small><strong>{[motorcycleBrand,motorcycleModel].filter(Boolean).join(' ') || 'Registra tu motocicleta'}</strong><span>{motorcycleYear ? 'Año '+motorcycleYear : 'Ficha técnica, documentos y mantenimiento'}</span></span>
+                {!profileBikeCropEditing && <ChevronRight size={21} className="profile-bike-chevron"/>}
+                {profileBikeCropEditing && <button type="button" className="profile-bike-crop-save" disabled={motorcycleBusy} onClick={e=>{e.stopPropagation();void saveMotorcycle()}}><Save size={14}/> {motorcycleBusy?'Guardando…':'Guardar encuadre'}</button>}
+              </div>
+              <div className="profile-bike-editor-actions">
+                {!profileBikeCropEditing ? <button type="button" onClick={()=>{profileBikeCropStart.current={x:motorcycleCropX,y:motorcycleCropY};setProfileBikeCropEditing(true)}} disabled={!(motorcyclePhotoPreview||motorcyclePhoto)}><Crop size={14}/> Ajustar fotografía</button> : <button type="button" onClick={()=>{if(profileBikeCropStart.current){setMotorcycleCropX(profileBikeCropStart.current.x);setMotorcycleCropY(profileBikeCropStart.current.y)}setProfileBikeCropEditing(false)}}>Cancelar ajuste</button>}
+              </div>
+            </div>
             <div className="profile-quick-heading"><span className="eyebrow">TU ESPACIO MOTERO</span><span className="profile-quick-caption">Tus rutas, logros y recuerdos en un solo lugar</span></div>
             <div className="profile-quick-access" aria-label="Accesos rápidos">{isOwnerAdmin && profileRole === 'admin' && <button type="button" className="profile-quick-admin" onClick={()=>setOwnerAdminOpen(v=>!v)}><span className="profile-quick-icon"><ShieldCheck size={20}/></span><strong>{ownerAdminOpen ? 'Ocultar administración' : 'Administración'}</strong><small>{ownerAdminOpen ? 'Cerrar herramientas de gestión' : 'Validaciones y gestión de Pasaporte Motero'}</small><ChevronRight className="profile-quick-arrow" size={16}/></button>}
                <button type="button" className="profile-quick-trips" onClick={()=>setSubview('trips')}><span className="profile-quick-icon"><Route size={20}/></span><strong>Mis viajes</strong><small>{trips.length} viajes registrados</small><ChevronRight className="profile-quick-arrow" size={16}/></button>
