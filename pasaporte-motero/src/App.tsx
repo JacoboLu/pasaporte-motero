@@ -1212,7 +1212,7 @@ export default function App() {
   }
 
   async function resolveContentReport(reportId:string, status:'resolved'|'dismissed') {
-    if (!supabase || profileRole !== 'admin') return
+    if (!supabase || !isOwnerAdmin || profileRole !== 'admin') return
     setAdminReportsBusy(true)
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -1230,7 +1230,7 @@ export default function App() {
   }
 
   async function searchManagerCandidates() {
-    if (!supabase || profileRole !== 'admin') return
+    if (!supabase || !isOwnerAdmin || profileRole !== 'admin') return
     const term = managerQuery.trim().replace(/[\\,%()_*]/g, ' ').replace(/\s+/g, ' ')
     if (term.length < 2) { notify('Escribe al menos 2 caracteres para buscar al encargado.'); return }
     setManagerBusy(true)
@@ -1246,7 +1246,7 @@ export default function App() {
   }
 
   async function loadDepartmentManagers() {
-    if (!supabase || profileRole !== 'admin') return
+    if (!supabase || !isOwnerAdmin || profileRole !== 'admin') return
     setManagerBusy(true)
     const { data, error } = await supabase.from('department_managers')
       .select('id,user_id,department_code,is_active,created_at')
@@ -1262,7 +1262,7 @@ export default function App() {
   }
 
   async function saveDepartmentManager(userId:string, action:'assign'|'deactivate', departmentCode = managerDepartment) {
-    if (!supabase || profileRole !== 'admin') return
+    if (!supabase || !isOwnerAdmin || profileRole !== 'admin') return
     setManagerBusy(true)
     const { data, error } = await supabase.functions.invoke('manage-department-manager', {
       body: { action, user_id: userId, department_code: departmentCode }
