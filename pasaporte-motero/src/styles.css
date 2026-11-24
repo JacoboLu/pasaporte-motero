@@ -3919,3 +3919,35 @@ html,body,#root{background:var(--pm-paper)!important}
 .app-shell.theme-dark .content .settings-card textarea::placeholder{
   color:#647487!important;
 }
+
+
+/* Fondo maestro del Pasaporte Motero: archivo original, sin filtros ni overlays.
+   El PNG se incorpora sin editar en /public/passport-parchment-background.png */
+.app-shell .content,
+.app-shell.theme-light .content,
+.app-shell.theme-dark .content{
+  background-color:#EBD9BA!important;
+  background-image:url('/passport-parchment-background.png')!important;
+  background-position:center top!important;
+  background-size:100% auto!important;
+  background-repeat:repeat-y!important;
+  background-attachment:local!important;
+  background-blend-mode:normal!important;
+  background-color:#EBD9BA!important;
+}
+.app-shell .content::before,
+.app-shell .content::after,
+.app-shell.theme-light .content::before,
+.app-shell.theme-light .content::after,
+.app-shell.theme-dark .content::before,
+.app-shell.theme-dark .content::after{
+  background-image:none!important;
+  background-color:transparent!important;
+  filter:none!important;
+}
+/* El tema oscuro no oscurece ni tiñe la ilustración del papel. */
+.app-shell.theme-dark .content{
+  background-image:url('/passport-parchment-background.png')!important;
+  background-color:#EBD9BA!important;
+  filter:none!important;
+}
