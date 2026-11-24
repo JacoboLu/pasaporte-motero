@@ -560,19 +560,19 @@ export default function App() {
       <span className="passport-page-ornament">✦ REPÚBLICA DEL PERÚ ✦</span>
       <h3 className="passport-page-title">{page.name}</h3>
       <span className="passport-page-caption">DEPARTAMENTO · PASAPORTE MOTERO</span>
-      <span className={`passport-ink-stamp ink-${page.code.toLowerCase()} shape-${departmentStampThemes[page.name]?.shape || 'round'} ${stampState}`}>
+      <button type="button" className={`passport-ink-stamp passport-ink-stamp-trigger ink-${page.code.toLowerCase()} shape-${departmentStampThemes[page.name]?.shape || 'round'} ${stampState}`} onClick={() => setSelectedDepartment(page.name)} aria-label={`Ver colección de sellos de ${page.name}`}>
         <span className="ink-stamp-top">PASAPORTE MOTERO · PERÚ</span>
         <span className="ink-stamp-symbol">{departmentStampThemes[page.name]?.symbol || '✦'}</span>
         <b>{page.code}</b>
         <strong>{page.name.toUpperCase()}</strong>
         <small>{departmentStampThemes[page.name]?.route || 'RUTA PERUANA'}</small>
         <em>{stampState==='earned' && page.earnedAt ? new Date(page.earnedAt).toLocaleDateString('es-PE') : stampState==='pending' ? 'EN VALIDACIÓN' : 'POR VISITAR'}</em>
-      </span>
+      </button>
       <div className="department-tourist-stamps" aria-label="Sellos de lugares turísticos obtenidos">
         {page.visitedPlaces.map((place,stampIndex)=>{
           const seed=String(place.id).split('').reduce((sum,char)=>sum+char.charCodeAt(0),stampIndex*37+index*19)
           const rotation=(seed%25)-12
-          return <span key={place.id} className="tourist-mini-stamp earned" style={{transform:`rotate(${rotation}deg)`,zIndex:stampIndex+1}} title={`${place.title} · Visita validada`}><Stamp size={10}/><small>{place.title}</small></span>
+          return <button type="button" key={place.id} className="tourist-mini-stamp earned tourist-mini-stamp-trigger" style={{transform:`rotate(${rotation}deg)`,zIndex:stampIndex+1}} title={`Ver sello de ${place.title}`} aria-label={`Ver detalle del sello de ${place.title}`} onClick={() => { setSelected(place); setSelectedDepartment(null) }}><Stamp size={10}/><small>{place.title}</small></button>
         })}
       </div>
       <div className={`passport-page-inkline ${stampState}`} style={{'--stamp-ink':stampInk} as React.CSSProperties}>
