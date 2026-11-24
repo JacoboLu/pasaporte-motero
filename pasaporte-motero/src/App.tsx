@@ -1903,7 +1903,34 @@ export default function App() {
             </div>
           </div> : <>
             <div className="profile-title-row"><div><span className="eyebrow">TU IDENTIDAD VIAJERA</span><h1>Mi perfil</h1></div><button type="button" className="profile-settings-button" aria-label="Abrir configuración" title="Configuración" onClick={()=>setSubview('preferences')}><Settings size={21}/></button></div>
-            <div className="profile-card"><div className="avatar large">{avatarUrl ? <img src={avatarUrl} alt="Foto de perfil"/> : initials(displayName)}</div><h2>{displayName}</h2><span className="muted">@{username}</span><p className="muted">{bio}</p><span className="profile-location"><MapPin size={13}/> {homeCity}</span><div className="profile-stats"><span><b>{followed.length}</b> siguiendo</span><span><b>0</b> seguidores</span><span><b>{posts.filter(p=>p.authorId===authUserId).length}</b> publicaciones</span></div></div>
+            <section className="profile-hero-card" aria-label="Identidad del motociclista">
+              <div className="profile-hero-main">
+                <div className="profile-avatar-wrap"><div className="avatar large">{avatarUrl ? <img src={avatarUrl} alt="Foto de perfil"/> : initials(displayName)}</div><span className="profile-avatar-status" aria-label="Perfil de viajero"/></div>
+                <div className="profile-identity">
+                  <span className="profile-identity-kicker">PASAPORTE MOTERO</span>
+                  <h2>{displayName || 'Viajero Motero'}</h2>
+                  <span className="profile-handle">@{username || 'viajero_motero'}</span>
+                  <p>{bio || 'Comparte tus rutas y experiencias sobre dos ruedas.'}</p>
+                  <span className="profile-location"><MapPin size={13}/> {homeCity || 'Perú'}</span>
+                </div>
+              </div>
+              <div className="profile-hero-actions">
+                <button type="button" className="profile-edit-button" onClick={()=>setSubview('settings')}><Pencil size={15}/> Editar perfil</button>
+                <button type="button" className="profile-share-button" aria-label="Compartir perfil" title="Compartir perfil" onClick={()=>{const shareText='Conoce mi perfil en Pasaporte Motero: '+displayName+' (@'+username+'). '+(bio||'');const shareUrl=window.location.origin;if(navigator.share){void navigator.share({title:'Mi perfil · Pasaporte Motero',text:shareText,url:shareUrl}).catch(()=>{})}else if(navigator.clipboard){void navigator.clipboard.writeText(shareText+' '+shareUrl).then(()=>notify('Enlace y datos del perfil copiados.')).catch(()=>notify('No se pudo copiar el perfil.'))}else notify('Comparte tu perfil desde el navegador.')}}><Share2 size={16}/></button>
+              </div>
+              <div className="profile-hero-stats">
+                <div><strong>{trips.length}</strong><span>Viajes</span></div>
+                <div><strong>{unlockedAchievementCount}<small>/{achievementItems.length}</small></strong><span>Logros</span></div>
+                <div><strong>{visitedIds.size}</strong><span>Destinos</span></div>
+                <div><strong>{departmentStamps.length}</strong><span>Sellos</span></div>
+                <div><strong>{posts.filter(p=>p.authorId===authUserId&&p.kind!=='trip').length}</strong><span>Publicaciones</span></div>
+              </div>
+            </section>
+            <button type="button" className="profile-bike-feature" onClick={()=>setSubview('motorcycle')}>
+              <span className="profile-bike-image">{(motorcyclePhotoPreview || (motorcyclePhoto.startsWith('http') ? motorcyclePhoto : '')) ? <img src={motorcyclePhotoPreview || motorcyclePhoto} alt="Mi motocicleta"/> : <Bike size={42}/>}</span>
+              <span className="profile-bike-copy"><small>MI COMPAÑERA DE RUTA</small><strong>{[motorcycleBrand,motorcycleModel].filter(Boolean).join(' ') || 'Registra tu motocicleta'}</strong><span>{motorcycleYear ? 'Año '+motorcycleYear : 'Ficha técnica, documentos y mantenimiento'}</span></span>
+              <ChevronRight size={21} className="profile-bike-chevron"/>
+            </button>
             <div className="profile-quick-heading"><span className="eyebrow">TU ESPACIO MOTERO</span><span className="profile-quick-caption">Tus rutas, logros y recuerdos en un solo lugar</span></div>
             <div className="profile-quick-access" aria-label="Accesos rápidos">
                <button type="button" className="profile-quick-trips" onClick={()=>setSubview('trips')}><span className="profile-quick-icon"><Route size={20}/></span><strong>Mis viajes</strong><small>{trips.length} viajes registrados</small><ChevronRight className="profile-quick-arrow" size={16}/></button>
