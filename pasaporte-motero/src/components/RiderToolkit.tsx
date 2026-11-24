@@ -71,12 +71,12 @@ export function RiderToolkit({onBack,userId}:{onBack:()=>void;userId:string|null
      checklist:[...new Set([...checkedValues(data.checklist),...checkedValues(local?.checked)])],
      contact_name:data.contact_name||(typeof local?.contactName==='string'?local.contactName:''),
      contact_phone:data.contact_phone||(typeof local?.contactPhone==='string'?local.contactPhone:''),
-     expenses:mergedExpenses.slice(0,100),expense_packages:savedPackages
+     expenses:[],expense_packages:savedPackages
     }
    }else{
     const localPackages=packageValues(local?.packages)
     const localExpenses=expenseValues(local?.expenses)
-    payload={checklist:checkedValues(local?.checked),contact_name:typeof local?.contactName==='string'?local.contactName:'',contact_phone:typeof local?.contactPhone==='string'?local.contactPhone:'',expenses:localExpenses,expense_packages:localPackages.length?localPackages:(localExpenses.length?[{id:crypto.randomUUID(),name:'Mis gastos',expenses:localExpenses,created_at:new Date().toISOString()}]:[])}
+    payload={checklist:checkedValues(local?.checked),contact_name:typeof local?.contactName==='string'?local.contactName:'',contact_phone:typeof local?.contactPhone==='string'?local.contactPhone:'',expenses:[],expense_packages:localPackages.length?localPackages:(localExpenses.length?[{id:crypto.randomUUID(),name:'Mis gastos',expenses:localExpenses,created_at:new Date().toISOString()}]:[])}
    }
    setChecked(payload.checklist);setContactName(payload.contact_name);setContactPhone(payload.contact_phone);setPackages(payload.expense_packages);setActivePackageId(payload.expense_packages[0]?.id||'')
    lastPayload.current=JSON.stringify(payload)
