@@ -1764,7 +1764,7 @@ export default function App() {
 
   return <div className={`app-shell theme-${theme}`}>
     <header className={`topbar ${tab !== 'explore' || subview || selected || selectedDepartment ? 'topbar-contextual' : ''}`}>
-      <img className="header-mountain-art" src="/header-andes-mountain.webp?v=20261124-2" alt="" aria-hidden="true" />
+      <img className="header-mountain-art" src="/header-mountain.svg?v=20261124-3" alt="" aria-hidden="true" />
       <button className="brand" onClick={() => { if (subview) { setSubview(''); setSelectedPublicProfile(null) } else if (selected || selectedDepartment) { setSelected(null); setSelectedDepartment(null) } else openTab('explore') }} aria-label="Volver a la sección principal"><span className="brand-mark passport-brand-mark" aria-hidden="true"><img src="/logo-pasaporte-motero.png" alt="" /></span><span className="brand-heading"><strong>{activeHeaderTitle}</strong><small>{activeHeaderSubtitle}</small></span></button>
       <div className="top-actions"><span className={`connection-dot ${offline ? 'off' : ''}`} title={offline ? 'Sin conexión' : 'Con conexión'}/><button className="icon-button theme-toggle" aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'} title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'} onClick={() => setTheme(v => v === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? <Sun size={18}/> : <Moon size={18}/>}</button><button className="icon-button notification-trigger" aria-label="Abrir notificaciones" title="Notificaciones" onClick={openNotifications}><Bell size={19}/>{unreadNotificationCount > 0 && <span className="notification-count">{unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}</span>}</button></div>
     </header>
