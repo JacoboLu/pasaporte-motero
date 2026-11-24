@@ -3611,3 +3611,266 @@ html,body,#root{background:var(--pm-paper)!important}
 .app-shell.theme-light .content .community-feed-tabs button.active{
   color:#A84E12!important;background:#FFF0E3!important;
 }
+
+
+/* AUDITORÍA DE CONTRASTE — MODO OSCURO EN TODA LA APLICACIÓN
+   Superficies oscuras usan tinta crema; superficies de papel mantienen tinta azul.
+   Evita textos azul oscuro heredados sobre paneles azul marino. */
+.app-shell.theme-dark{
+  --ui-text:#F2E6D0;
+  --ui-muted:#B8C5D1;
+  --ui-card:#223A55;
+  --ui-card-border:#8A744F;
+  --ui-field:#20364F;
+  --ui-field-text:#FFF5E3;
+  --ui-soft:#2B4058;
+  color:#F2E6D0!important;
+}
+.app-shell.theme-dark .content{
+  color:#F2E6D0!important;
+}
+.app-shell.theme-dark .content p,
+.app-shell.theme-dark .content small,
+.app-shell.theme-dark .content .muted,
+.app-shell.theme-dark .content .helper-text,
+.app-shell.theme-dark .content .form-hint,
+.app-shell.theme-dark .content .field-hint{
+  color:#B8C5D1!important;
+}
+/* Encabezados y textos principales sobre el fondo azul */
+.app-shell.theme-dark .content h1,
+.app-shell.theme-dark .content h2,
+.app-shell.theme-dark .content h3,
+.app-shell.theme-dark .content h4,
+.app-shell.theme-dark .content .section-heading strong{
+  color:#F2D8A4!important;
+}
+.app-shell.theme-dark .content .eyebrow,
+.app-shell.theme-dark .content .text-action,
+.app-shell.theme-dark .content .back-link{
+  color:#D99A58!important;
+}
+/* Tarjetas oscuras: lectura clara en cada nivel de texto */
+.app-shell.theme-dark .content .profile-card,
+.app-shell.theme-dark .content .public-profile-card,
+.app-shell.theme-dark .content .motorcycle-card,
+.app-shell.theme-dark .content .admin-demo,
+.app-shell.theme-dark .content .staff-scan-panel,
+.app-shell.theme-dark .content .status-card,
+.app-shell.theme-dark .content .qr-card,
+.app-shell.theme-dark .content .form-card,
+.app-shell.theme-dark .content .filter-panel,
+.app-shell.theme-dark .content .method-panel,
+.app-shell.theme-dark .content .explore-location-panel,
+.app-shell.theme-dark .content .explore-catalog-panel{
+  background:#20364F!important;
+  color:#F2E6D0!important;
+  border-color:#786746!important;
+}
+.app-shell.theme-dark .content .motorcycle-card *,
+.app-shell.theme-dark .content .admin-demo *,
+.app-shell.theme-dark .content .staff-scan-panel *,
+.app-shell.theme-dark .content .status-card *,
+.app-shell.theme-dark .content .qr-card *,
+.app-shell.theme-dark .content .form-card *,
+.app-shell.theme-dark .content .filter-panel *,
+.app-shell.theme-dark .content .method-panel *{
+  text-shadow:none!important;
+}
+.app-shell.theme-dark .content .motorcycle-card strong,
+.app-shell.theme-dark .content .motorcycle-card .collapsible-heading,
+.app-shell.theme-dark .content .motorcycle-card .collapsible-heading span,
+.app-shell.theme-dark .content .admin-demo strong,
+.app-shell.theme-dark .content .staff-scan-panel strong,
+.app-shell.theme-dark .content .status-card strong,
+.app-shell.theme-dark .content .qr-card strong{
+  color:#F2E6D0!important;
+}
+.app-shell.theme-dark .content .motorcycle-card p,
+.app-shell.theme-dark .content .admin-demo p,
+.app-shell.theme-dark .content .staff-scan-panel p,
+.app-shell.theme-dark .content .status-card p,
+.app-shell.theme-dark .content .qr-card p,
+.app-shell.theme-dark .content .motorcycle-card small,
+.app-shell.theme-dark .content .admin-demo small,
+.app-shell.theme-dark .content .staff-scan-panel small{
+  color:#B8C5D1!important;
+}
+/* Comunidad: cuerpo de publicación y metadatos sobre tarjeta azul */
+.app-shell.theme-dark .content .community-post,
+.app-shell.theme-dark .content .post-card{
+  background:#20364F!important;
+  border-color:#806D4D!important;
+  color:#F2E6D0!important;
+}
+.app-shell.theme-dark .content .community-post-header{
+  background:#263F5B!important;
+  color:#F2E6D0!important;
+}
+.app-shell.theme-dark .content .community-author-meta,
+.app-shell.theme-dark .content .community-author-open,
+.app-shell.theme-dark .content .community-author-meta strong,
+.app-shell.theme-dark .content .community-author-open strong,
+.app-shell.theme-dark .content .community-post-content h3,
+.app-shell.theme-dark .content .community-post-content p,
+.app-shell.theme-dark .content .community-post-content small{
+  color:#F2E6D0!important;
+}
+.app-shell.theme-dark .content .community-author-meta span,
+.app-shell.theme-dark .content .community-author-meta small,
+.app-shell.theme-dark .content .community-author-open span,
+.app-shell.theme-dark .content .community-author-open small,
+.app-shell.theme-dark .content .community-post-location{
+  color:#C2CED9!important;
+}
+.app-shell.theme-dark .content .community-more,
+.app-shell.theme-dark .content .community-post-actions button{
+  color:#E6DDC8!important;
+}
+/* Panel administrativo: controles, instrucciones y estado */
+.app-shell.theme-dark .content .admin-demo label,
+.app-shell.theme-dark .content .staff-scan-panel label{
+  color:#E6DDC8!important;
+}
+.app-shell.theme-dark .content .admin-demo .section-heading h3{color:#F2D8A4!important}
+.app-shell.theme-dark .content .staff-scan-panel{
+  background:#192C42!important;
+  border:1px solid #52677D!important;
+}
+.app-shell.theme-dark .content .staff-scan-panel .secondary{
+  background:#F7EEDC!important;
+  color:#1A2F5C!important;
+  border-color:#C7A55F!important;
+}
+.app-shell.theme-dark .content .staff-scan-panel .secondary svg{color:#1A2F5C!important}
+.app-shell.theme-dark .content .admin-visit{
+  background:#263F5B!important;color:#F2E6D0!important;border-color:#806D4D!important;
+}
+.app-shell.theme-dark .content .admin-visit strong{color:#F2E6D0!important}
+.app-shell.theme-dark .content .admin-visit small,
+.app-shell.theme-dark .content .admin-visit p{color:#C2CED9!important}
+/* Campos, selectores, fechas y áreas de texto */
+.app-shell.theme-dark .content input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.app-shell.theme-dark .content textarea,
+.app-shell.theme-dark .content select,
+.app-shell.theme-dark .content .searchbox input,
+.app-shell.theme-dark .content .community-search-input input{
+  background:#20364F!important;
+  color:#FFF5E3!important;
+  border-color:#65788B!important;
+  -webkit-text-fill-color:#FFF5E3!important;
+}
+.app-shell.theme-dark .content input::placeholder,
+.app-shell.theme-dark .content textarea::placeholder,
+.app-shell.theme-dark .content .community-search-input input::placeholder{
+  color:#B8C5D1!important;opacity:1!important;
+}
+.app-shell.theme-dark .content input:disabled,
+.app-shell.theme-dark .content textarea:disabled,
+.app-shell.theme-dark .content select:disabled{
+  color:#AAB8C6!important;-webkit-text-fill-color:#AAB8C6!important;opacity:1!important;
+}
+.app-shell.theme-dark .content select option{
+  background:#20364F!important;color:#FFF5E3!important;
+}
+/* Archivos y botones de selección: no usar tinta oscura sobre controles oscuros */
+.app-shell.theme-dark .content .file-pick,
+.app-shell.theme-dark .content .motorcycle-file,
+.app-shell.theme-dark .content .profile-photo-pick,
+.app-shell.theme-dark .content .trip-photo-pick{
+  background:#2B4058!important;
+  color:#F2D8A4!important;
+  border:1px dashed #A98550!important;
+}
+.app-shell.theme-dark .content .file-pick svg,
+.app-shell.theme-dark .content .motorcycle-file svg{color:#E6B96D!important}
+.app-shell.theme-dark .content .crop-hint{
+  background:#14243BEE!important;color:#FFF5E3!important;
+}
+/* Documentos SOAT: superficie papel con tinta oscura y estados diferenciados */
+.app-shell.theme-dark .content .document-history-row,
+.app-shell.theme-dark .content .history-row.document-history-row{
+  background:#F7EEDC!important;
+  color:#24364A!important;
+  border:1px solid #C7A55F!important;
+}
+.app-shell.theme-dark .content .document-history-row strong,
+.app-shell.theme-dark .content .document-history-row b,
+.app-shell.theme-dark .content .document-summary strong,
+.app-shell.theme-dark .content .document-expiry-date{
+  color:#1A2F5C!important;
+}
+.app-shell.theme-dark .content .document-expiry-label{
+  color:#526273!important;
+}
+.app-shell.theme-dark .content .document-status.valid{
+  background:#D9F0DF!important;color:#185B35!important;border:1px solid #8AC49B!important;
+}
+.app-shell.theme-dark .content .document-status.expired{
+  background:#FBE1DF!important;color:#922D2A!important;border:1px solid #E4A19D!important;
+}
+.app-shell.theme-dark .content .document-delete{
+  background:#FFF8EA!important;color:#24364A!important;border-color:#D6B982!important;
+}
+/* Historial, mantenimiento y paneles plegables */
+.app-shell.theme-dark .content .history-row:not(.document-history-row),
+.app-shell.theme-dark .content .maintenance-row,
+.app-shell.theme-dark .content .admin-visit{
+  background:#263F5B!important;color:#F2E6D0!important;border-color:#52677D!important;
+}
+.app-shell.theme-dark .content .history-row:not(.document-history-row) strong,
+.app-shell.theme-dark .content .maintenance-row strong{
+  color:#F2E6D0!important;
+}
+.app-shell.theme-dark .content .history-row:not(.document-history-row) small,
+.app-shell.theme-dark .content .maintenance-row small{
+  color:#C2CED9!important;
+}
+.app-shell.theme-dark .content .collapsible-heading{
+  color:#F2D8A4!important;border-color:#52677D!important;
+}
+.app-shell.theme-dark .content .collapsible-heading svg{color:#E6B96D!important}
+/* Modales, notificaciones, comentarios, alertas y estados vacíos */
+.app-shell.theme-dark .modal-backdrop{background:rgba(5,12,22,.78)!important}
+.app-shell.theme-dark .composer-modal,
+.app-shell.theme-dark .notifications-modal,
+.app-shell.theme-dark .action-sheet,
+.app-shell.theme-dark .search-modal{
+  background:#20364F!important;color:#F2E6D0!important;border-color:#806D4D!important;
+}
+.app-shell.theme-dark .composer-modal h2,
+.app-shell.theme-dark .notifications-modal h2,
+.app-shell.theme-dark .composer-modal label,
+.app-shell.theme-dark .notification-copy strong{
+  color:#F2E6D0!important;
+}
+.app-shell.theme-dark .composer-modal p,
+.app-shell.theme-dark .notification-copy small,
+.app-shell.theme-dark .comments-list p{
+  color:#C2CED9!important;
+}
+.app-shell.theme-dark .comments-list p{
+  background:#2B4058!important;border:1px solid #52677D!important;
+}
+.app-shell.theme-dark .content .empty-card{
+  background:#20364F!important;color:#F2E6D0!important;border-color:#806D4D!important;
+}
+.app-shell.theme-dark .content .empty-card h3,
+.app-shell.theme-dark .content .empty-card strong{color:#F2D8A4!important}
+.app-shell.theme-dark .content .empty-card p,
+.app-shell.theme-dark .content .empty-card small{color:#C2CED9!important}
+/* Elementos deshabilitados conservan legibilidad sin parecer activos */
+.app-shell.theme-dark .content button:disabled{
+  color:#AAB8C6!important;opacity:.72!important;
+}
+.app-shell.theme-dark .content button.primary:disabled{
+  background:#34495E!important;color:#D4DCE4!important;border-color:#65788B!important;
+}
+.app-shell.theme-dark .content button.secondary{
+  background:#F7EEDC!important;color:#1A2F5C!important;border-color:#C7A55F!important;
+}
+.app-shell.theme-dark .content button.secondary svg{color:#1A2F5C!important}
+.app-shell.theme-dark .content .toast{
+  background:#F7EEDC!important;color:#24364A!important;border:1px solid #C7A55F!important;
+}
+.app-shell.theme-dark .content .toast *{color:#24364A!important}
