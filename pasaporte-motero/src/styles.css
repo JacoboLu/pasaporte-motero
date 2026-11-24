@@ -5324,3 +5324,38 @@ html,body,#root{background:var(--pm-paper)!important}
  .toolkit-expense-row-actions{gap:3px}
  .toolkit-expense-row-actions button{width:29px;height:29px;min-width:29px;min-height:29px}
 }
+
+
+/* Kit de ruta · selector y acciones de rutas con jerarquía visual */
+.toolkit-package-manager{gap:10px;padding:12px;background:#f7f8fa;border:1px solid #e2e7ed;border-radius:13px}
+.settings-card .toolkit-package-manager>label{gap:6px;font-size:10px;font-weight:600;color:#334155}
+.settings-card .toolkit-package-manager>label select{height:46px;min-height:46px;padding:0 34px 0 12px;border:1px solid #c7d2df;border-radius:10px;font-size:13px;font-weight:600}
+.toolkit-package-tools{justify-content:flex-start;gap:16px;padding:0 2px}
+.toolkit-package-tools button{display:inline-flex;align-items:center;gap:5px;min-height:34px;padding:5px 2px;font-size:10px;font-weight:600}
+.toolkit-package-tools .danger{color:#b54747}
+.toolkit-package-create{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end;padding-top:9px;border-top:1px solid #e1e6ec}
+.settings-card .toolkit-package-create>label,.settings-card .toolkit-package-editor>label{display:flex;flex-direction:column;gap:5px;min-width:0;margin:0;font-size:10px;font-weight:600;color:#334155}
+.settings-card .toolkit-package-create input,.settings-card .toolkit-package-editor input{box-sizing:border-box;width:100%;min-width:0;height:43px;min-height:43px;margin:0;padding:0 11px;border:1px solid #c7d2df;border-radius:10px;background:#fff;color:#1e293b;font-size:12px}
+.toolkit-package-create>button{height:43px;min-height:43px;padding:8px 12px;white-space:nowrap;font-size:10px}
+.toolkit-package-editor,.toolkit-package-confirm{display:flex;flex-direction:column;gap:9px;padding:11px;border:1px solid #e3d2bb;border-radius:11px;background:#fffaf4}
+.toolkit-package-editor>div,.toolkit-package-confirm>div{display:flex;flex-wrap:wrap;gap:7px}
+.toolkit-package-editor button,.toolkit-package-confirm button{min-height:38px;padding:8px 12px;font-size:10px}
+.toolkit-package-confirm{border-color:#f0caca;background:#fff7f7}
+.toolkit-package-confirm strong{font-size:11px;color:#8f3030}
+.toolkit-package-confirm small{font-size:10px;line-height:1.45;color:#785c5c}
+.toolkit-package-confirm .danger-button{border:1px solid #b83f3f;border-radius:9px;background:#b83f3f;color:#fff;font-weight:700}
+.toolkit-expense-total{margin-top:0}
+.theme-dark .toolkit-package-manager{background:#20252d;border-color:#3b4654}
+.theme-dark .settings-card .toolkit-package-manager>label,.theme-dark .settings-card .toolkit-package-create>label,.theme-dark .settings-card .toolkit-package-editor>label{color:#dbe3ed}
+.theme-dark .settings-card .toolkit-package-manager>label select,.theme-dark .settings-card .toolkit-package-create input,.theme-dark .settings-card .toolkit-package-editor input{background:#171c23;border-color:#475467;color:#f1f5f9}
+.theme-dark .toolkit-package-create{border-color:#3b4654}
+.theme-dark .toolkit-package-editor{background:#302a23;border-color:#68533a}
+.theme-dark .toolkit-package-confirm{background:#302323;border-color:#704040}
+.theme-dark .toolkit-package-confirm strong,.theme-dark .toolkit-package-confirm small{color:#f1caca}
+@media(max-width:360px){
+ .toolkit-package-manager{padding:10px;gap:9px}
+ .toolkit-package-create{grid-template-columns:minmax(0,1fr) auto;gap:6px}
+ .toolkit-package-create>button{padding:7px 9px;font-size:9px}
+ .toolkit-package-tools{gap:12px}
+ .toolkit-package-tools button{font-size:9px}
+}
