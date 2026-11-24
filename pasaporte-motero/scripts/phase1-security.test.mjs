@@ -17,4 +17,16 @@ assert.match(gps, /accuracy_m/i);
 assert.match(gps, /distance \+ accuracy/i);
 assert.match(gps, /validation_status.*pending/i);
 assert.match(app, /accuracy_m:\s*accuracy/i);
-console.log('Phase 1 security regression checks passed.');
+
+const feedStart = app.indexOf('async function loadCommunityPosts()');
+const feedEnd = app.indexOf('async function loadMyActivity(', feedStart);
+const feed = app.slice(feedStart, feedEnd);
+assert.match(feed, /\.in\('visibility',\s*\['public','followers'\]\)/);
+assert.doesNotMatch(feed, /\.eq\('visibility','public'\)/);
+const activityStart = app.indexOf('async function loadMyActivity(');
+const activityEnd = app.indexOf('async function openOwnComments', activityStart);
+const activity = app.slice(activityStart, activityEnd);
+assert.match(activity, /\.in\('post_id',postIds\)/);
+assert.doesNotMatch(activity, /\.eq\('post_id',row\.id\)/);
+
+console.log('Phase 1 security and community regression checks passed.');
