@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, CheckCircle2, ClipboardCheck, MapPin, Phone, Plus, Share2, Trash2, Wallet, Wrench } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, ClipboardCheck, MapPin, Phone, Plus, Trash2, Wallet } from 'lucide-react'
 
 type Expense = { id: string; date: string; category: string; amount: number; note: string }
 type ChecklistItem = { id: string; label: string; group: string }
@@ -31,6 +31,7 @@ export function RiderToolkit({ onBack }: { onBack: () => void }) {
   const [note, setNote] = useState('')
   const [locationMessage, setLocationMessage] = useState('')
   const [saved, setSaved] = useState(false)
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     try {
@@ -42,14 +43,16 @@ export function RiderToolkit({ onBack }: { onBack: () => void }) {
       setContactPhone(typeof data.contactPhone === 'string' ? data.contactPhone : '')
       setExpenses(Array.isArray(data.expenses) ? data.expenses.filter((item: Expense) => item && typeof item.id === 'string' && Number.isFinite(Number(item.amount))) : [])
     } catch { /* Un almacenamiento local ilegible no debe bloquear la aplicación. */ }
+    finally { setLoaded(true) }
   }, [])
 
   useEffect(() => {
+    if (!loaded) return
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ checked, contactName, contactPhone, expenses }))
       setSaved(true)
     } catch { setSaved(false) }
-  }, [checked, contactName, contactPhone, expenses])
+  }, [checked, contactName, contactPhone, expenses, loaded])
 
   const progress = Math.round(checked.length / checklist.length * 100)
   const total = useMemo(() => expenses.reduce((sum, item) => sum + Number(item.amount || 0), 0), [expenses])
