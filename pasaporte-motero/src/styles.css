@@ -4316,3 +4316,22 @@ html,body,#root{background:var(--pm-paper)!important}
   .app-shell .topbar .brand-heading strong{font-size:16px!important}
   .app-shell .topbar .brand-heading small{font-size:8px!important}
 }
+
+
+/* Header mountain artwork: real DOM image, independent of pseudo-element resets */
+.app-shell .topbar{position:relative!important;isolation:isolate!important;overflow:hidden!important;background-color:#1A2F5C!important;background-image:linear-gradient(90deg,#1A2F5C 0%,rgba(26,47,92,.98) 35%,rgba(26,47,92,.82) 100%)!important;border-bottom:2px solid #C7A55F!important}
+.app-shell .topbar>.header-mountain-art{
+ position:absolute!important;display:block!important;visibility:visible!important;
+ z-index:0!important;pointer-events:none!important;
+ right:76px!important;top:0!important;width:min(62%,330px)!important;height:100%!important;
+ object-fit:contain!important;object-position:center center!important;
+ opacity:.82!important;filter:drop-shadow(0 1px 2px rgba(0,0,0,.28))!important;
+}
+.app-shell .topbar>.brand,.app-shell .topbar>.top-actions{position:relative!important;z-index:2!important}
+.theme-light .topbar,.theme-dark .topbar{background-color:#1A2F5C!important}
+@media(max-width:520px){
+ .app-shell .topbar>.header-mountain-art{right:70px!important;width:64%!important;opacity:.72!important}
+}
+@media(max-width:370px){
+ .app-shell .topbar>.header-mountain-art{right:65px!important;width:59%!important;opacity:.62!important}
+}
