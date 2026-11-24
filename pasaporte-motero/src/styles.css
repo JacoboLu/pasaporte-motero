@@ -5507,3 +5507,58 @@ html,body,#root{background:var(--pm-paper)!important}
  .settings-card .toolkit-expense-form>label select{height:44px;min-height:44px;padding-left:8px;font-size:12px}
  .settings-card .toolkit-expense-form>label select{padding-right:24px;background-position:right 5px center}
 }
+
+
+/* Centro de operaciones administrativo · acceso exclusivo del propietario */
+.owner-admin-dashboard{
+ display:flex;
+ flex-direction:column;
+ gap:15px;
+ margin:20px 0;
+ padding:16px;
+ border:1px solid var(--line,#ffffff20);
+ border-radius:18px;
+ background:var(--card,#171b21);
+ scroll-margin-top:18px;
+}
+.admin-dashboard-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.admin-dashboard-head>div{min-width:0}
+.admin-dashboard-head .eyebrow{font-size:9px;letter-spacing:1.3px;color:var(--accent,#e78a45)}
+.admin-dashboard-head h2{margin:4px 0 5px;font-size:20px;line-height:1.2}
+.admin-dashboard-head p{margin:0;font-size:11px;line-height:1.5;color:var(--muted,#9aa4b2)}
+.admin-refresh{flex-shrink:0;min-height:38px;padding:8px 11px;border:1px solid var(--line,#ffffff20);border-radius:10px;background:var(--surface,#222831);color:var(--text,#f2f4f7);font-size:10px;font-weight:700}
+.admin-dashboard-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.admin-stat{display:flex;flex-direction:column;gap:5px;min-width:0;padding:12px;border:1px solid var(--line,#ffffff18);border-radius:12px;background:var(--surface,#20252d)}
+.admin-stat small{font-size:10px;line-height:1.3;color:var(--muted,#9aa4b2)}
+.admin-stat strong{font-size:25px;line-height:1.1;font-variant-numeric:tabular-nums;color:var(--text,#f5f6f8)}
+.admin-dashboard-nav{display:flex;gap:7px;overflow-x:auto;padding:2px 0 7px;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+.admin-dashboard-nav button{flex:0 0 auto;min-height:36px;padding:8px 12px;border:1px solid var(--line,#ffffff20);border-radius:999px;background:var(--surface,#20252d);color:var(--text,#e9edf2);font-size:10px;font-weight:700;white-space:nowrap}
+.admin-dashboard-nav button:active{transform:scale(.98)}
+.owner-admin-dashboard .staff-scan-panel,.owner-admin-dashboard .admin-module{margin:0;padding:14px;border:1px solid var(--line,#ffffff20);border-radius:14px;background:var(--surface,#20252d);scroll-margin-top:16px}
+.owner-admin-dashboard .staff-scan-panel>strong{font-size:13px}
+.owner-admin-dashboard .staff-scan-panel .section-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.owner-admin-dashboard .admin-visit-list{display:flex;flex-direction:column;gap:10px;scroll-margin-top:16px}
+.owner-admin-dashboard .admin-visit{margin:0;padding:13px;border:1px solid var(--line,#ffffff20);border-radius:12px;background:var(--surface,#20252d)}
+.owner-admin-dashboard .admin-visit>div:last-child{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.owner-admin-dashboard .admin-visit button{min-height:40px}
+.owner-admin-dashboard .admin-visit img{display:block;width:100%;max-height:320px;object-fit:contain;border-radius:10px;background:#101318}
+.owner-admin-dashboard>p{margin:0;font-size:10px;color:var(--muted,#9aa4b2)}
+.owner-admin-dashboard label{display:flex;flex-direction:column;gap:6px;font-size:11px}
+.owner-admin-dashboard input,.owner-admin-dashboard select{box-sizing:border-box;width:100%;min-width:0;min-height:42px}
+.theme-light .owner-admin-dashboard{background:#fff;border-color:#dce2e9}
+.theme-light .admin-stat,.theme-light .owner-admin-dashboard .staff-scan-panel,.theme-light .owner-admin-dashboard .admin-module,.theme-light .owner-admin-dashboard .admin-visit{background:#f8fafc;border-color:#e0e6ed}
+.theme-light .admin-stat strong,.theme-light .admin-dashboard-head h2{color:#1d2939}
+.theme-light .admin-dashboard-head p,.theme-light .admin-stat small,.theme-light .owner-admin-dashboard>p{color:#667085}
+.theme-light .admin-refresh,.theme-light .admin-dashboard-nav button{background:#fff;border-color:#d0d8e3;color:#344054}
+@media(min-width:600px){
+ .admin-dashboard-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .owner-admin-dashboard{padding:20px;gap:17px}
+}
+@media(max-width:360px){
+ .owner-admin-dashboard{padding:12px;gap:12px}
+ .admin-dashboard-head h2{font-size:18px}
+ .admin-refresh{padding:7px 8px;font-size:9px}
+ .admin-stat{padding:10px}
+ .admin-stat strong{font-size:22px}
+ .admin-dashboard-nav button{padding:7px 10px}
+}
