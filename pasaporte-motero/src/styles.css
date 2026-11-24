@@ -4335,3 +4335,24 @@ html,body,#root{background:var(--pm-paper)!important}
 @media(max-width:370px){
  .app-shell .topbar>.header-mountain-art{right:65px!important;width:59%!important;opacity:.62!important}
 }
+
+
+/* Pasaporte: recortar las esquinas blancas del archivo de portada */
+.app-shell .content .passport-cover-trigger{
+  overflow:hidden!important;
+  border-radius:16px!important;
+  clip-path:inset(0 round 16px);
+}
+.app-shell .content .passport-cover-trigger img{
+  display:block!important;
+  border-radius:16px!important;
+  clip-path:inset(0 round 16px);
+  overflow:hidden!important;
+}
+@media(max-width:380px){
+  .app-shell .content .passport-cover-trigger,
+  .app-shell .content .passport-cover-trigger img{
+    border-radius:14px!important;
+    clip-path:inset(0 round 14px);
+  }
+}
