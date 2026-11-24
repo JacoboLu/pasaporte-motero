@@ -36,6 +36,7 @@ const profileMigration = readFileSync(new URL('../supabase/migrations/2026112418
 const offlineQueue = readFileSync(new URL('../src/lib/offline-photo-visits.ts', import.meta.url), 'utf8');
 const secureStorage = readFileSync(new URL('../src/lib/secure-storage.ts', import.meta.url), 'utf8');
 const imageFunction = readFileSync(new URL('../supabase/functions/populate-destination-images/index.ts', import.meta.url), 'utf8');
+const managerFunction = readFileSync(new URL('../supabase/functions/manage-department-manager/index.ts', import.meta.url), 'utf8');
 assert.match(profileMigration, /revoke select on table public\.profiles from anon/i);
 assert.match(profileMigration, /using \(id = \(select auth\.uid\(\)\)\)/i);
 assert.match(profileMigration, /security_barrier/i);
@@ -50,6 +51,10 @@ assert.match(app, /application\/x-pasaporte-motero-encrypted/);
 assert.match(app, /reportCommunityPost/);
 assert.match(app, /loadContentReports/);
 assert.match(app, /resolveContentReport/);
+assert.match(app, /saveDepartmentManager/);
+assert.match(managerFunction, /actor\?\.role !== "admin"/);
+assert.match(managerFunction, /upsert\(/);
+assert.match(managerFunction, /remaining_active_assignments/);
 assert.match(imageFunction, /body\.offset/);
 assert.match(imageFunction, /body\.limit/);
 assert.match(imageFunction, /item\.locationMatch/);
