@@ -40,7 +40,7 @@ const managerFunction = readFileSync(new URL('../supabase/functions/manage-depar
 assert.match(profileMigration, /revoke select on table public\.profiles from anon/i);
 assert.match(profileMigration, /using \(id = \(select auth\.uid\(\)\)\)/i);
 assert.match(profileMigration, /security_barrier/i);
-assert.match(profileMigration, /security_invoker\\s*=\\s*false/i);
+assert.match(profileMigration, /security_invoker\s*=\s*false/i);
 assert.match(secureStorage, /encryptOfflineBlob/);
 assert.match(secureStorage, /decryptOfflineBlob/);
 assert.match(secureStorage, /OFFLINE_KEY_ID/);
