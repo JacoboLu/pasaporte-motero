@@ -4944,3 +4944,213 @@ html,body,#root{background:var(--pm-paper)!important}
   }
   .app-shell .content .destination-compact .destination-copy{right:86px!important}
 }
+
+
+/* V6 · cierre de pendientes de contraste y accesos del perfil.
+   Se limita a componentes internos: no altera logo, portada ni navegación. */
+.app-shell .content .profile-quick-access{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;
+  align-items:stretch!important;
+  margin:12px 0 20px!important;
+}
+.app-shell .content .profile-quick-access>button{
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:36px minmax(0,1fr) 16px!important;
+  grid-template-rows:auto auto!important;
+  align-items:center!important;
+  column-gap:9px!important;
+  row-gap:4px!important;
+  min-width:0!important;
+  min-height:76px!important;
+  margin:0!important;
+  padding:11px!important;
+  border:1px solid #D6C29C!important;
+  border-radius:14px!important;
+  background:#FFF9EE!important;
+  color:#172F4B!important;
+  text-align:left!important;
+  box-shadow:0 3px 10px #3B2B1710!important;
+}
+.app-shell .content .profile-quick-access>button .profile-quick-icon{
+  grid-column:1;grid-row:1 / span 2;
+  display:grid!important;place-items:center!important;
+  width:36px!important;height:36px!important;
+  border-radius:11px!important;
+  background:#EDE1CB!important;color:#24415F!important;
+}
+.app-shell .content .profile-quick-access>button strong{
+  grid-column:2;grid-row:1;min-width:0!important;
+  color:#172F4B!important;font-size:11px!important;font-weight:800!important;
+  line-height:1.2!important;overflow-wrap:anywhere!important;
+}
+.app-shell .content .profile-quick-access>button small{
+  grid-column:2;grid-row:2;min-width:0!important;
+  color:#586879!important;font-size:9px!important;line-height:1.25!important;
+}
+.app-shell .content .profile-quick-access>button .profile-quick-arrow{
+  grid-column:3;grid-row:1 / span 2;color:#8B6A3F!important;
+}
+.app-shell .content .profile-quick-access>button.profile-quick-saved{
+  grid-column:1 / -1!important;
+}
+.app-shell.theme-dark .content .profile-quick-access>button{
+  border-color:#52677D!important;background:#20364F!important;
+  color:#FFF0D4!important;box-shadow:0 3px 10px #0003!important;
+}
+.app-shell.theme-dark .content .profile-quick-access>button .profile-quick-icon{
+  background:#314B67!important;color:#F0C77C!important;
+}
+.app-shell.theme-dark .content .profile-quick-access>button strong{color:#FFF0D4!important}
+.app-shell.theme-dark .content .profile-quick-access>button small{color:#C5D1DC!important}
+.app-shell.theme-dark .content .profile-quick-access>button .profile-quick-arrow{color:#E3BE7B!important}
+.app-shell .content .profile-quick-access>button:focus-visible{
+  outline:3px solid #B47B37!important;outline-offset:2px!important;
+}
+@media(max-width:360px){
+  .app-shell .content .profile-quick-access{gap:8px!important}
+  .app-shell .content .profile-quick-access>button{min-height:72px!important;padding:9px!important;column-gap:7px!important}
+  .app-shell .content .profile-quick-access>button .profile-quick-icon{width:32px!important;height:32px!important}
+  .app-shell .content .profile-quick-access>button strong{font-size:10px!important}
+  .app-shell .content .profile-quick-access>button small{font-size:8px!important}
+}
+
+/* Campos y formularios: contraste explícito en ambos temas. */
+.app-shell .content input:not([type=file]):not([type=checkbox]):not([type=radio]),
+.app-shell .content textarea,
+.app-shell .content select,
+.app-shell .composer-modal input:not([type=file]),
+.app-shell .composer-modal textarea,
+.app-shell .composer-modal select{
+  color:var(--main-text)!important;
+  background:var(--field-bg)!important;
+  border-color:var(--field-border)!important;
+}
+.app-shell .content input::placeholder,
+.app-shell .content textarea::placeholder,
+.app-shell .composer-modal input::placeholder,
+.app-shell .composer-modal textarea::placeholder{
+  color:var(--muted-text)!important;opacity:1!important;
+}
+.app-shell.theme-light .content input:not([type=file]):not([type=checkbox]):not([type=radio]),
+.app-shell.theme-light .content textarea,
+.app-shell.theme-light .content select,
+.app-shell.theme-light .composer-modal input:not([type=file]),
+.app-shell.theme-light .composer-modal textarea,
+.app-shell.theme-light .composer-modal select{
+  color:#172638!important;background:#FFFFFF!important;border-color:#B9C5D1!important;
+  color-scheme:light!important;
+}
+.app-shell.theme-dark .content input:not([type=file]):not([type=checkbox]):not([type=radio]),
+.app-shell.theme-dark .content textarea,
+.app-shell.theme-dark .content select,
+.app-shell.theme-dark .composer-modal input:not([type=file]),
+.app-shell.theme-dark .composer-modal textarea,
+.app-shell.theme-dark .composer-modal select{
+  color:#F4F7FA!important;background:#172B40!important;border-color:#60758A!important;
+  color-scheme:dark!important;
+}
+.app-shell.theme-light .content label,
+.app-shell.theme-light .composer-modal label{color:#34485B!important}
+.app-shell.theme-dark .content label,
+.app-shell.theme-dark .composer-modal label{color:#E1E8EF!important}
+.app-shell.theme-light .content .settings-card,
+.app-shell.theme-light .content .motorcycle-card,
+.app-shell.theme-light .content .admin-demo,
+.app-shell.theme-light .content .method-panel,
+.app-shell.theme-light .content .staff-scan-panel{
+  color:#172638!important;background:#FFFFFF!important;border-color:#D3DCE5!important;
+}
+.app-shell.theme-dark .content .settings-card,
+.app-shell.theme-dark .content .motorcycle-card,
+.app-shell.theme-dark .content .admin-demo,
+.app-shell.theme-dark .content .method-panel,
+.app-shell.theme-dark .content .staff-scan-panel{
+  color:#F2F5F8!important;background:#1C3046!important;border-color:#52677D!important;
+}
+.app-shell.theme-light .content .settings-card p,
+.app-shell.theme-light .content .motorcycle-card p,
+.app-shell.theme-light .content .admin-demo p,
+.app-shell.theme-light .content .method-panel p{color:#536477!important}
+.app-shell.theme-dark .content .settings-card p,
+.app-shell.theme-dark .content .motorcycle-card p,
+.app-shell.theme-dark .content .admin-demo p,
+.app-shell.theme-dark .content .method-panel p{color:#C5D1DC!important}
+
+/* Buscador de destinos y sugerencias, legibles al alternar tema. */
+.app-shell.theme-light .content .searchbox,
+.app-shell.theme-light .content .search-row-autocomplete{
+  background:#FFFFFF!important;border-color:#BAC6D2!important;color:#263B50!important;
+}
+.app-shell.theme-light .content .searchbox input,
+.app-shell.theme-light .content .search-row-autocomplete input{
+  background:transparent!important;color:#172638!important;
+}
+.app-shell.theme-light .content .searchbox input::placeholder,
+.app-shell.theme-light .content .search-row-autocomplete input::placeholder{color:#68798A!important}
+.app-shell.theme-dark .content .searchbox,
+.app-shell.theme-dark .content .search-row-autocomplete{
+  background:#1B3046!important;border-color:#60758A!important;color:#F1F5F8!important;
+}
+.app-shell.theme-dark .content .searchbox input,
+.app-shell.theme-dark .content .search-row-autocomplete input{
+  background:transparent!important;color:#F4F7FA!important;
+}
+.app-shell.theme-dark .content .searchbox input::placeholder,
+.app-shell.theme-dark .content .search-row-autocomplete input::placeholder{color:#C0CCD7!important}
+.app-shell.theme-light .content .search-suggestions{
+  background:#FFFFFF!important;border-color:#CDD6DF!important;
+}
+.app-shell.theme-light .content .search-suggestions button{color:#172638!important;border-bottom-color:#E0E6EC!important}
+.app-shell.theme-light .content .search-suggestion-copy strong{color:#172638!important}
+.app-shell.theme-light .content .search-suggestion-copy small{color:#617285!important}
+.app-shell.theme-dark .content .search-suggestions{
+  background:#1C3046!important;border-color:#52677D!important;
+}
+.app-shell.theme-dark .content .search-suggestions button{color:#F2F5F8!important;border-bottom-color:#3C5268!important}
+.app-shell.theme-dark .content .search-suggestion-copy strong{color:#F4F7FA!important}
+.app-shell.theme-dark .content .search-suggestion-copy small{color:#C5D1DC!important}
+
+/* Modales, tarjetas vacías y paneles de validación. */
+.app-shell.theme-light .composer-modal,
+.app-shell.theme-light .action-sheet{
+  background:#FFFFFF!important;color:#172638!important;border-color:#D4DDE5!important;
+}
+.app-shell.theme-dark .composer-modal,
+.app-shell.theme-dark .action-sheet{
+  background:#1B3046!important;color:#F2F5F8!important;border-color:#52677D!important;
+}
+.app-shell.theme-light .composer-modal h2,
+.app-shell.theme-light .composer-modal h3,
+.app-shell.theme-light .action-sheet h2,
+.app-shell.theme-light .action-sheet strong{color:#172638!important}
+.app-shell.theme-dark .composer-modal h2,
+.app-shell.theme-dark .composer-modal h3,
+.app-shell.theme-dark .action-sheet h2,
+.app-shell.theme-dark .action-sheet strong{color:#F4F7FA!important}
+.app-shell.theme-light .composer-modal .muted,
+.app-shell.theme-light .action-sheet small{color:#5A6B7D!important}
+.app-shell.theme-dark .composer-modal .muted,
+.app-shell.theme-dark .action-sheet small{color:#C5D1DC!important}
+.app-shell.theme-light .content .empty-card{
+  color:#263B50!important;background:#FFFFFF!important;border-color:#D4DDE5!important;
+}
+.app-shell.theme-light .content .empty-card h3{color:#172638!important}
+.app-shell.theme-light .content .empty-card p{color:#5A6B7D!important}
+.app-shell.theme-dark .content .empty-card{
+  color:#F2F5F8!important;background:#1C3046!important;border-color:#52677D!important;
+}
+.app-shell.theme-dark .content .empty-card h3{color:#F4F7FA!important}
+.app-shell.theme-dark .content .empty-card p{color:#C5D1DC!important}
+.app-shell.theme-light .content .status-card,
+.app-shell.theme-light .content .history-row,
+.app-shell.theme-light .content .notification-item{
+  color:#172638!important;background:#FFFFFF!important;border-color:#D4DDE5!important;
+}
+.app-shell.theme-dark .content .status-card,
+.app-shell.theme-dark .content .history-row,
+.app-shell.theme-dark .content .notification-item{
+  color:#F2F5F8!important;background:#1C3046!important;border-color:#52677D!important;
+}
