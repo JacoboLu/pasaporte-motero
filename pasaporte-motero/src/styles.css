@@ -4919,3 +4919,28 @@ html,body,#root{background:var(--pm-paper)!important}
   .app-shell .content .destination-compact .destination-tag{left:100px!important}
   .app-shell .content .destination-compact .destination-copy{left:100px!important;right:72px!important;top:38px!important}
 }
+
+
+/* Indicador de distancia en vista compacta: cápsula legible, no círculo */
+.app-shell .content .destination-compact .destination-distance{
+  position:absolute!important;right:10px!important;top:50%!important;bottom:auto!important;
+  transform:translateY(-50%)!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  width:auto!important;min-width:0!important;max-width:82px!important;
+  height:28px!important;min-height:28px!important;
+  padding:0 10px!important;border-radius:999px!important;
+  background:#1A3554!important;border:1px solid #C7A55F!important;
+  color:#F5D99F!important;font-size:9px!important;font-weight:700!important;
+  line-height:1!important;white-space:nowrap!important;
+  box-shadow:0 2px 5px #0002!important;
+}
+.app-shell.theme-dark .content .destination-compact .destination-distance{
+  background:#102A45!important;border-color:#D1AE70!important;color:#FFE4AD!important;
+}
+@media(max-width:380px){
+  .app-shell .content .destination-compact .destination-distance{
+    right:8px!important;max-width:76px!important;padding:0 8px!important;
+    height:26px!important;min-height:26px!important;font-size:8px!important;
+  }
+  .app-shell .content .destination-compact .destination-copy{right:86px!important}
+}
