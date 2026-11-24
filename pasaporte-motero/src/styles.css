@@ -4659,3 +4659,12 @@ html,body,#root{background:var(--pm-paper)!important}
   .app-shell .content .profile-bike-feature{grid-template-columns:34% minmax(0,1fr) 15px!important;gap:8px!important}
   .app-shell .content .profile-bike-copy strong{font-size:13px!important}
 }
+
+/* Ajuste responsive: acciones debajo de la identidad para evitar solapamientos */
+.app-shell .content .profile-hero-actions{
+  position:relative!important;inset:auto!important;align-self:flex-end!important;
+  margin-top:-7px!important;
+}
+@media(max-width:380px){
+  .app-shell .content .profile-hero-actions{position:relative!important;inset:auto!important}
+}
