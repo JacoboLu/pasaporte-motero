@@ -5834,3 +5834,77 @@ html[data-theme="dark"],html[data-theme="dark"] body,html[data-theme="dark"] #ro
   color:#fff!important;
   background:#10243bd9!important;
 }
+
+
+/* Selector de destino en publicaciones: búsqueda, catálogo y proximidad GPS */
+.app-shell .composer-modal .post-destination-picker{
+  display:flex;flex-direction:column;gap:8px;min-width:0;
+}
+.app-shell .composer-modal .post-destination-picker>label{
+  display:block;margin:0;color:#34465b;font-size:11px;font-weight:700;
+}
+.app-shell .composer-modal .post-destination-picker>input[type="search"],
+.app-shell .composer-modal .post-destination-picker>select{
+  display:block;width:100%;min-width:0;min-height:46px;padding:11px 13px;
+  border:1px solid #c6d0dc;border-radius:11px;background:#fff;color:#1d2e43;
+  font:inherit;font-size:14px;
+}
+.app-shell .composer-modal .post-destination-actions{
+  display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+}
+.app-shell .composer-modal .post-destination-actions .secondary{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:40px;padding:9px 12px;border:1px solid #c6d0dc;border-radius:10px;
+  background:#f1f5f9;color:#263c54;font-size:11px;font-weight:750;
+}
+.app-shell .composer-modal .post-destination-actions .secondary:disabled{opacity:.65;cursor:wait}
+.app-shell .composer-modal .post-nearby-list{
+  display:flex;flex-direction:column;gap:6px;padding:10px;
+  border:1px solid #d7c29c;border-radius:12px;background:#fffaf0;
+}
+.app-shell .composer-modal .post-nearby-list>strong{color:#604a2b;font-size:11px}
+.app-shell .composer-modal .post-nearby-list>button{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  width:100%;min-width:0;padding:9px 10px;border:1px solid #e5d8c1;
+  border-radius:9px;background:#fff;color:#24374d;text-align:left;
+}
+.app-shell .composer-modal .post-nearby-list>button.is-selected{
+  border-color:#d28a37;background:#fff0d9;
+}
+.app-shell .composer-modal .post-nearby-list>button>span{
+  display:flex;flex-direction:column;gap:3px;min-width:0;font-size:11px;font-weight:750;
+}
+.app-shell .composer-modal .post-nearby-list>button small{color:#68788a;font-size:9px;font-weight:500}
+.app-shell .composer-modal .post-nearby-list>button b{flex:0 0 auto;color:#8d5a20;font-size:10px}
+.app-shell .composer-modal .post-destination-selected{
+  display:flex;align-items:flex-start;gap:6px;margin:0;padding:9px 10px;
+  border:1px solid #d9b979;border-radius:9px;background:#fff5e4;color:#69491e;
+  font-size:10px;line-height:1.4;font-weight:700;overflow-wrap:anywhere;
+}
+.app-shell.theme-dark .composer-modal .post-destination-picker>label{color:#dce6f1!important}
+.app-shell.theme-dark .composer-modal .post-destination-picker>input[type="search"],
+.app-shell.theme-dark .composer-modal .post-destination-picker>select{
+  background:#17283b!important;color:#f7f9fc!important;border-color:#7189a2!important;
+  -webkit-text-fill-color:#f7f9fc!important;color-scheme:dark!important;
+}
+.app-shell.theme-dark .composer-modal .post-destination-picker>select option{
+  background:#17283b;color:#f7f9fc;
+}
+.app-shell.theme-dark .composer-modal .post-destination-actions .secondary{
+  background:#263d55!important;color:#ffe0a6!important;border-color:#7189a2!important;
+}
+.app-shell.theme-dark .composer-modal .post-nearby-list{
+  background:#17283b!important;border-color:#657b92!important;
+}
+.app-shell.theme-dark .composer-modal .post-nearby-list>strong{color:#ffe0a6!important}
+.app-shell.theme-dark .composer-modal .post-nearby-list>button{
+  background:#223950!important;border-color:#526b84!important;color:#f5f7fb!important;
+}
+.app-shell.theme-dark .composer-modal .post-nearby-list>button.is-selected{
+  background:#3c3427!important;border-color:#e0a34f!important;
+}
+.app-shell.theme-dark .composer-modal .post-nearby-list>button small{color:#c0cedd!important}
+.app-shell.theme-dark .composer-modal .post-nearby-list>button b{color:#ffd18a!important}
+.app-shell.theme-dark .composer-modal .post-destination-selected{
+  background:#3a3022!important;border-color:#d39b4e!important;color:#ffe0a6!important;
+}
