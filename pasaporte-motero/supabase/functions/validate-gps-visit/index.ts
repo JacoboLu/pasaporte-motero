@@ -36,10 +36,33 @@ Deno.serve(async (req: Request) => {
   const {data:destination,error:destError}=await admin.from("destination_catalog").select("id,latitude,longitude,geofence_radius_m,is_active,name,category").eq("id",id).maybeSingle();
   if (destError || !destination || !destination.is_active) return json(404,{error:"Destination not found"});
   const category = String(destination.category || "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLocaleLowerCase("es-PE");
-  if (category === "gastronomia" || category === "musicas y danzas") {
+  const nonPhysicalCategories = new Set([
+    "artesania y artes", "artisticos", "creencias populares", "etnias",
+    "eventos", "ferias y mercados", "fiestas", "gastronomia",
+    "gastronomico", "musicas y danzas", "otros"
+  ]);
+  if (nonPhysicalCategories.has(category)) {
     return json(422,{
-      error:"Este elemento representa una experiencia gastronómica o cultural, no un punto físico verificable por GPS. Registra la visita con evidencia fotográfica.",
-      validation_method:"photo"
+      error:"Este elemento representa una experiencia cultural, gastronómica o un evento, no un punto físico verificable por GPS. Registra la visita con evidencia fotográfica o QR.",
+      validation_method:"photo_or_qr"
+    });
+  }
+
+  // Coordinates shared by multiple active catalog entries cannot prove which
+  // destination the rider physically reached. Require evidence until those
+  // coordinates are individually reviewed and corrected.
+  const { count: sharedCoordinateCount, error: coordinateCheckError } = await supabase
+    .from("destination_catalog")
+    .select("id", { count: "exact", head: true })
+    .eq("is_active", true)
+    .eq("latitude", destination.latitude)
+    .eq("longitude", destination.longitude)
+    .neq("id", destination.id);
+  if (coordinateCheckError) return json(500,{error:"No se pudo verificar la unicidad de la ubicación. Intenta registrar la visita con evidencia."});
+  if ((sharedCoordinateCount || 0) > 0) {
+    return json(422,{
+      error:"La ubicación de este destino está compartida con otros registros del catálogo. Para evitar sellos GPS incorrectos, registra la visita con fotografía o QR.",
+      validation_method:"photo_or_qr"
     });
   }
   const distance=distanceMeters(lat,lng,destination.latitude,destination.longitude);
