@@ -30,3 +30,19 @@ assert.match(activity, /\.in\('post_id',postIds\)/);
 assert.doesNotMatch(activity, /\.eq\('post_id',row\.id\)/);
 
 console.log('Phase 1 security and community regression checks passed.');
+
+const profileMigration = readFileSync(new URL('../supabase/migrations/20261124180000_lock_down_profiles_public_access.sql', import.meta.url), 'utf8');
+const offlineQueue = readFileSync(new URL('../src/lib/offline-photo-visits.ts', import.meta.url), 'utf8');
+const secureStorage = readFileSync(new URL('../src/lib/secure-storage.ts', import.meta.url), 'utf8');
+assert.match(profileMigration, /revoke select on table public\\.profiles from anon/i);
+assert.match(profileMigration, /using \\(id = \\(select auth\\.uid\\(\\)\\)\\)/i);
+assert.match(profileMigration, /security_barrier/i);
+assert.match(app, /from\\('public_profiles'\\)\\.select\\('id,username,full_name,avatar_url'\\)/);
+assert.match(secureStorage, /encryptOfflineBlob/);
+assert.match(secureStorage, /decryptOfflineBlob/);
+assert.match(secureStorage, /OFFLINE_KEY_ID/);
+assert.match(offlineQueue, /encryptOfflineBlob/);
+assert.match(offlineQueue, /decryptOfflineBlob/);
+assert.match(offlineQueue, /if \\(!userId\\) return \\[\\]/);
+assert.match(gps, /geofence_radius_m/);
+assert.doesNotMatch(gps, /GPS_RADIUS_METERS\\s*=\\s*300/);
