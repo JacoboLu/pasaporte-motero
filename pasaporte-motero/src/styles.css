@@ -4513,3 +4513,149 @@ html,body,#root{background:var(--pm-paper)!important}
   .app-shell .content .profile-quick-access .profile-quick-icon{width:34px!important;height:34px!important}
   .app-shell .content .profile-quick-access button strong{font-size:11px!important}
 }
+
+
+/* Perfil viajero: tarjeta de identidad, moto y accesos al estilo del mockup */
+.app-shell .content .profile-hero-card{
+  position:relative!important;overflow:hidden!important;
+  display:flex!important;flex-direction:column!important;gap:18px!important;
+  margin:4px 0 14px!important;padding:18px 16px 14px!important;
+  border:1.5px solid #D3AD69!important;border-radius:22px!important;
+  color:#FFF4DF!important;
+  background:
+    radial-gradient(ellipse at 95% 100%,#49627d55 0,transparent 38%),
+    linear-gradient(140deg,#0D2946 0%,#173957 56%,#0B2743 100%)!important;
+  box-shadow:0 8px 22px #142b431f,inset 0 1px #ffffff20!important;
+}
+.app-shell .content .profile-hero-card:after{
+  content:"";position:absolute;right:-18px;bottom:72px;width:150px;height:92px;
+  opacity:.16;pointer-events:none;
+  background:linear-gradient(135deg,transparent 35%,#d9c08d 36%,#d9c08d 38%,transparent 39%),
+    linear-gradient(45deg,transparent 44%,#d9c08d 45%,#d9c08d 47%,transparent 48%);
+  clip-path:polygon(0 100%,20% 48%,34% 70%,58% 12%,72% 48%,84% 32%,100% 100%);
+  background-color:#d9c08d;
+}
+.app-shell .content .profile-hero-main{
+  position:relative;z-index:1;display:grid!important;
+  grid-template-columns:94px minmax(0,1fr)!important;gap:14px!important;
+  align-items:center!important;min-width:0!important;
+}
+.app-shell .content .profile-avatar-wrap{position:relative;width:94px;height:94px}
+.app-shell .content .profile-avatar-wrap .avatar.large{
+  width:94px!important;height:94px!important;min-width:94px!important;
+  margin:0!important;border-radius:50%!important;overflow:hidden!important;
+  border:3px solid #E8C77F!important;background:#29445E!important;
+  color:#F4D18A!important;box-shadow:0 0 0 4px #E8C77F24,0 5px 15px #0005!important;
+  display:grid!important;place-items:center!important;font-size:25px!important;
+}
+.app-shell .content .profile-avatar-wrap .avatar.large img{
+  width:100%!important;height:100%!important;object-fit:cover!important;border-radius:50%!important;
+}
+.app-shell .content .profile-avatar-status{
+  position:absolute;right:3px;bottom:4px;width:13px;height:13px;border-radius:50%;
+  background:#73C69B;border:2px solid #15334F;box-shadow:0 0 0 2px #73C69B35;
+}
+.app-shell .content .profile-identity{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.app-shell .content .profile-identity-kicker{
+  color:#E5C47F!important;font-size:8px!important;letter-spacing:1.5px!important;
+  font-weight:800!important;
+}
+.app-shell .content .profile-identity h2{
+  margin:0!important;color:#FFF1D7!important;font-size:clamp(17px,5vw,22px)!important;
+  font-weight:850!important;line-height:1.15!important;overflow-wrap:anywhere!important;
+}
+.app-shell .content .profile-handle{font-size:11px!important;color:#C7D4E1!important}
+.app-shell .content .profile-identity p{
+  margin:3px 0 0!important;color:#E1E8EE!important;font-size:10px!important;
+  line-height:1.45!important;display:-webkit-box;-webkit-line-clamp:3;
+  -webkit-box-orient:vertical;overflow:hidden;
+}
+.app-shell .content .profile-identity .profile-location{
+  display:inline-flex!important;align-items:center!important;gap:5px!important;
+  margin:2px 0 0!important;color:#F0D9AB!important;font-size:10px!important;
+}
+.app-shell .content .profile-identity .profile-location svg{color:#E7BE70!important}
+.app-shell .content .profile-hero-actions{
+  position:absolute;z-index:2;right:13px;top:13px;display:flex;gap:7px;
+}
+.app-shell .content .profile-edit-button,.app-shell .content .profile-share-button{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  gap:6px!important;min-height:34px!important;padding:0 10px!important;
+  border:1px solid #E6C47E!important;border-radius:11px!important;
+  background:#102D49!important;color:#FFE4AD!important;font-size:10px!important;font-weight:750!important;
+}
+.app-shell .content .profile-share-button{width:34px!important;padding:0!important}
+.app-shell .content .profile-hero-stats{
+  position:relative;z-index:1;display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  border-top:1px solid #FFFFFF30!important;padding-top:12px!important;
+  gap:2px!important;
+}
+.app-shell .content .profile-hero-stats>div{
+  min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  border-right:1px solid #FFFFFF24;
+}
+.app-shell .content .profile-hero-stats>div:last-child{border-right:0}
+.app-shell .content .profile-hero-stats strong{
+  display:flex;align-items:baseline;gap:1px;color:#F4D18A!important;
+  font-size:17px!important;font-weight:850!important;line-height:1.1!important;
+}
+.app-shell .content .profile-hero-stats strong small{font-size:9px!important;color:#E7D4B0!important}
+.app-shell .content .profile-hero-stats span{
+  color:#E0E8EF!important;font-size:8px!important;line-height:1.2!important;
+  text-align:center!important;white-space:nowrap!important;
+}
+.app-shell .content .profile-bike-feature{
+  width:100%!important;min-width:0!important;min-height:100px!important;
+  display:grid!important;grid-template-columns:38% minmax(0,1fr) 18px!important;
+  align-items:center!important;gap:11px!important;padding:8px!important;
+  margin:0 0 18px!important;text-align:left!important;
+  border:1px solid #D5BD91!important;border-radius:18px!important;
+  background:linear-gradient(110deg,#fffaf0,#f0e2c8)!important;
+  color:#172F4B!important;box-shadow:0 4px 13px #493a2515!important;
+}
+.app-shell .content .profile-bike-image{
+  display:grid!important;place-items:center!important;overflow:hidden!important;
+  height:84px!important;border-radius:12px!important;
+  background:linear-gradient(145deg,#d8e1e5,#b9c9d1 55%,#e9dfc9)!important;
+  color:#A8793D!important;
+}
+.app-shell .content .profile-bike-image img{
+  display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;
+}
+.app-shell .content .profile-bike-copy{min-width:0;display:flex;flex-direction:column;gap:4px}
+.app-shell .content .profile-bike-copy small{
+  color:#9A6A35!important;font-size:8px!important;letter-spacing:1px!important;font-weight:800!important;
+}
+.app-shell .content .profile-bike-copy strong{
+  color:#172F4B!important;font-size:15px!important;line-height:1.2!important;overflow-wrap:anywhere!important;
+}
+.app-shell .content .profile-bike-copy>span{
+  color:#637282!important;font-size:9px!important;line-height:1.3!important;
+}
+.app-shell .content .profile-bike-chevron{color:#A8793D!important}
+.app-shell.theme-dark .content .profile-bike-feature{
+  background:linear-gradient(110deg,#203A58,#172D49)!important;
+  border-color:#8E754B!important;box-shadow:0 4px 13px #0003!important;
+}
+.app-shell.theme-dark .content .profile-bike-copy small{color:#E4BC78!important}
+.app-shell.theme-dark .content .profile-bike-copy strong{color:#FFF0D4!important}
+.app-shell.theme-dark .content .profile-bike-copy>span{color:#C4D0DC!important}
+.app-shell.theme-dark .content .profile-bike-image{
+  background:linear-gradient(145deg,#314C68,#20364F)!important;color:#F0C77C!important;
+}
+@media(max-width:380px){
+  .app-shell .content .profile-hero-card{padding:15px 12px 12px!important;gap:14px!important}
+  .app-shell .content .profile-hero-main{grid-template-columns:76px minmax(0,1fr)!important;gap:10px!important}
+  .app-shell .content .profile-avatar-wrap{width:76px;height:76px}
+  .app-shell .content .profile-avatar-wrap .avatar.large{width:76px!important;height:76px!important;min-width:76px!important}
+  .app-shell .content .profile-identity h2{font-size:17px!important}
+  .app-shell .content .profile-identity p{-webkit-line-clamp:2;font-size:9px!important}
+  .app-shell .content .profile-hero-actions{right:9px;top:9px}
+  .app-shell .content .profile-edit-button{min-height:30px!important;font-size:9px!important;padding:0 7px!important}
+  .app-shell .content .profile-share-button{width:30px!important;min-height:30px!important}
+  .app-shell .content .profile-hero-stats strong{font-size:15px!important}
+  .app-shell .content .profile-hero-stats span{font-size:7px!important}
+  .app-shell .content .profile-bike-feature{grid-template-columns:34% minmax(0,1fr) 15px!important;gap:8px!important}
+  .app-shell .content .profile-bike-copy strong{font-size:13px!important}
+}
