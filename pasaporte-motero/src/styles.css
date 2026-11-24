@@ -5562,3 +5562,12 @@ html,body,#root{background:var(--pm-paper)!important}
  .admin-stat strong{font-size:22px}
  .admin-dashboard-nav button{padding:7px 10px}
 }
+
+
+.profile-quick-access .profile-quick-admin{grid-column:1/-1;border:1px solid #d7a16d;background:linear-gradient(120deg,#fff5e9,#fff);min-height:78px}
+.profile-quick-access .profile-quick-admin .profile-quick-icon{background:#ffead7;color:#9c572c}
+.profile-quick-access .profile-quick-admin strong{color:#58391f}
+.profile-quick-access .profile-quick-admin small{color:#806b59}
+.theme-dark .profile-quick-access .profile-quick-admin{background:linear-gradient(120deg,#382b21,#25272c);border-color:#80603f}
+.theme-dark .profile-quick-access .profile-quick-admin strong{color:#ffe4c8}
+.theme-dark .profile-quick-access .profile-quick-admin small{color:#c5b3a1}
