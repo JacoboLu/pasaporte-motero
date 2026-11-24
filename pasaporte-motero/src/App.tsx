@@ -777,7 +777,7 @@ export default function App() {
           if (!blob) continue
           if (!bestBlob || blob.size < bestBlob.size) bestBlob = blob
           if (blob.size <= maxBytes) {
-            const result = new File([blob],file.name.replace(/\\.[^.]+$/,'')+'.jpg',{type:'image/jpeg',lastModified:Date.now()})
+            const result = new File([blob],file.name.replace(/\.[^.]+$/,'')+'.jpg',{type:'image/jpeg',lastModified:Date.now()})
             if (result.size > maxBytes) throw new Error('La imagen todavía supera el límite permitido.')
             return result
           }
@@ -786,7 +786,7 @@ export default function App() {
         scale *= 0.82
       }
       if (!bestBlob || bestBlob.size > maxBytes) throw new Error('No fue posible reducir esta imagen al límite permitido. Prueba con una fotografía de menor resolución.')
-      const result = new File([bestBlob],file.name.replace(/\\.[^.]+$/,'')+'.jpg',{type:'image/jpeg',lastModified:Date.now()})
+      const result = new File([bestBlob],file.name.replace(/\.[^.]+$/,'')+'.jpg',{type:'image/jpeg',lastModified:Date.now()})
       if (result.size > maxBytes) throw new Error('La imagen todavía supera el límite permitido.')
       return result
     } finally { URL.revokeObjectURL(sourceUrl) }
