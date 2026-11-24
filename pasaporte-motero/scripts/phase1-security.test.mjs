@@ -15,6 +15,8 @@ assert.match(migration, /notify_destination_stamp_earned/i);
 assert.match(migration, /notify_department_stamp_earned/i);
 assert.match(gps, /accuracy_m/i);
 assert.match(gps, /distance \+ accuracy/i);
+assert.match(gps, /geofence_radius_m/i);
+assert.doesNotMatch(gps, /GPS_RADIUS_METERS\s*=\s*300/);
 assert.match(gps, /validation_status.*pending/i);
 assert.match(app, /accuracy_m:\s*accuracy/i);
 
@@ -23,26 +25,28 @@ const feedEnd = app.indexOf('async function loadMyActivity(', feedStart);
 const feed = app.slice(feedStart, feedEnd);
 assert.match(feed, /\.in\('visibility',\s*\['public','followers'\]\)/);
 assert.doesNotMatch(feed, /\.eq\('visibility','public'\)/);
+assert.match(feed, /from\('public_profiles'\)\.select\('id,username,full_name,avatar_url'\)/);
 const activityStart = app.indexOf('async function loadMyActivity(');
 const activityEnd = app.indexOf('async function openOwnComments', activityStart);
 const activity = app.slice(activityStart, activityEnd);
 assert.match(activity, /\.in\('post_id',postIds\)/);
 assert.doesNotMatch(activity, /\.eq\('post_id',row\.id\)/);
 
-console.log('Phase 1 security and community regression checks passed.');
-
 const profileMigration = readFileSync(new URL('../supabase/migrations/20261124180000_lock_down_profiles_public_access.sql', import.meta.url), 'utf8');
 const offlineQueue = readFileSync(new URL('../src/lib/offline-photo-visits.ts', import.meta.url), 'utf8');
 const secureStorage = readFileSync(new URL('../src/lib/secure-storage.ts', import.meta.url), 'utf8');
-assert.match(profileMigration, /revoke select on table public\\.profiles from anon/i);
-assert.match(profileMigration, /using \\(id = \\(select auth\\.uid\\(\\)\\)\\)/i);
+const imageFunction = readFileSync(new URL('../supabase/functions/populate-destination-images/index.ts', import.meta.url), 'utf8');
+assert.match(profileMigration, /revoke select on table public\.profiles from anon/i);
+assert.match(profileMigration, /using \(id = \(select auth\.uid\(\)\)\)/i);
 assert.match(profileMigration, /security_barrier/i);
-assert.match(app, /from\\('public_profiles'\\)\\.select\\('id,username,full_name,avatar_url'\\)/);
 assert.match(secureStorage, /encryptOfflineBlob/);
 assert.match(secureStorage, /decryptOfflineBlob/);
 assert.match(secureStorage, /OFFLINE_KEY_ID/);
+assert.match(secureStorage, /delete\(KEY_ID\)/);
 assert.match(offlineQueue, /encryptOfflineBlob/);
 assert.match(offlineQueue, /decryptOfflineBlob/);
-assert.match(offlineQueue, /if \\(!userId\\) return \\[\\]/);
-assert.match(gps, /geofence_radius_m/);
-assert.doesNotMatch(gps, /GPS_RADIUS_METERS\\s*=\\s*300/);
+assert.match(offlineQueue, /if \(!userId\) return \[\]/);
+assert.match(imageFunction, /body\.offset/);
+assert.match(imageFunction, /body\.limit/);
+
+console.log('Phase 1 and integral hardening regression checks passed.');
