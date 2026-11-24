@@ -994,7 +994,23 @@ export default function App() {
             user_id: user.id, destination_id: item.destinationId, visited_at: item.visitedAt,
             validation_method: 'photo', validation_status: 'pending', notes: item.note || null, evidence_path: path
           })
-          if (error && error.code !== '23505') throw error
+          if (error?.code === '23505') {
+            // A retry may find a duplicate visit. Keep the uploaded object if an
+            // existing visit already references this exact evidence path.
+            const { data: existingEvidence, error: lookupError } = await supabase
+              .from('app_visits')
+              .select('id')
+              .eq('user_id', user.id)
+              .eq('evidence_path', path)
+              .maybeSingle()
+            if (lookupError) throw lookupError
+            if (!existingEvidence) {
+              const { error: cleanupError } = await supabase.storage.from('travel-media').remove([path])
+              if (cleanupError) console.warn('No se pudo limpiar un archivo de evidencia duplicado:', cleanupError)
+            }
+          } else if (error) {
+            throw error
+          }
           await removeQueuedPhotoVisit(item.id)
           synced += 1
         } catch (error) {
