@@ -4141,3 +4141,62 @@ html,body,#root{background:var(--pm-paper)!important}
 .app-shell .content .chip{font-weight:600}
 .app-shell.theme-light .content button:disabled{color:#68798A!important;opacity:.85!important}
 .app-shell.theme-dark .content button:disabled{color:#D2DCE5!important;opacity:.78!important}
+
+
+/* Barra de identidad Pasaporte Motero: montañas originales en transparencia */
+.app-shell .topbar,
+.app-shell header.topbar,
+.app-shell .topbar.topbar-contextual{
+  height:78px!important;min-height:78px!important;flex:0 0 78px!important;
+  padding:0 16px!important;position:relative!important;isolation:isolate!important;overflow:hidden!important;
+  background:#1A2F5C!important;
+  background-image:linear-gradient(105deg,#142947 0%,#1A2F5C 54%,#1B3154 100%)!important;
+  border-bottom:2px solid #C7A55F!important;box-shadow:0 4px 14px rgba(10,25,46,.24)!important;
+}
+.app-shell .topbar::before{
+  content:""!important;position:absolute!important;z-index:0!important;top:0!important;left:29%!important;
+  width:48%!important;height:100%!important;pointer-events:none!important;opacity:.68!important;
+  background-image:url('/header-andes-mountain.webp')!important;background-repeat:no-repeat!important;
+  background-position:center center!important;background-size:100% 100%!important;
+}
+.app-shell .topbar .brand,.app-shell .topbar .top-actions{position:relative!important;z-index:2!important}
+.app-shell .topbar .brand{min-width:0!important;gap:10px!important}
+.app-shell .topbar .brand-mark{
+  width:50px!important;height:50px!important;flex:0 0 50px!important;border:1.5px solid #C7A55F!important;
+  border-radius:50%!important;overflow:hidden!important;background:#1A2F5C!important;
+  box-shadow:0 2px 8px rgba(4,15,30,.55)!important;
+}
+.app-shell .topbar .brand-mark img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;border-radius:50%!important}
+.app-shell .topbar .brand-heading{min-width:0!important}
+.app-shell .topbar .brand-heading strong{
+  color:#F2C879!important;font-family:Georgia,'Times New Roman',serif!important;font-size:18px!important;
+  font-weight:700!important;line-height:1.02!important;letter-spacing:.55px!important;
+  text-shadow:0 1px 3px rgba(4,15,30,.9)!important;
+}
+.app-shell .topbar .brand-heading small{
+  display:block!important;margin-top:3px!important;color:#F4E8D2!important;
+  font-family:Georgia,'Times New Roman',serif!important;font-size:10px!important;line-height:1.1!important;
+  letter-spacing:.45px!important;text-shadow:0 1px 3px rgba(4,15,30,.9)!important;
+}
+.app-shell .topbar .icon-button{
+  color:#F2C879!important;background:rgba(12,31,56,.72)!important;border:1px solid #C7A55F!important;
+  border-radius:13px!important;min-width:40px!important;min-height:40px!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.1)!important;
+}
+.app-shell .topbar .connection-dot{box-shadow:0 0 0 3px rgba(255,255,255,.1)!important}
+@media(max-width:520px){
+  .app-shell .topbar,.app-shell header.topbar,.app-shell .topbar.topbar-contextual{
+    height:72px!important;min-height:72px!important;flex-basis:72px!important;padding:0 12px!important;
+  }
+  .app-shell .topbar::before{left:31%!important;width:46%!important;opacity:.52!important}
+  .app-shell .topbar .brand-mark{width:44px!important;height:44px!important;flex-basis:44px!important}
+  .app-shell .topbar .brand-heading strong{font-size:16px!important;letter-spacing:.25px!important}
+  .app-shell .topbar .brand-heading small{font-size:9px!important;letter-spacing:.2px!important}
+  .app-shell .topbar .top-actions{gap:5px!important}
+  .app-shell .topbar .icon-button{min-width:36px!important;min-height:36px!important;padding:7px!important;border-radius:11px!important}
+}
+@media(max-width:370px){
+  .app-shell .topbar::before{left:34%!important;width:42%!important;opacity:.42!important}
+  .app-shell .topbar .brand-heading strong{font-size:14px!important}
+  .app-shell .topbar .brand-heading small{font-size:8px!important}
+}
