@@ -33,8 +33,15 @@ Deno.serve(async (req: Request) => {
   if (!Number.isInteger(id) || !Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) return json(400,{error:"Invalid destination or coordinates"});
   if (!Number.isFinite(accuracy) || accuracy <= 0 || accuracy > 100) return json(422,{error:"GPS accuracy is insufficient. Maximum accepted accuracy is 100 meters.",accuracy_limit_m:100});
   const admin=createClient(url,service,{auth:{persistSession:false,autoRefreshToken:false}});
-  const {data:destination,error:destError}=await admin.from("destination_catalog").select("id,latitude,longitude,geofence_radius_m,is_active,name").eq("id",id).maybeSingle();
+  const {data:destination,error:destError}=await admin.from("destination_catalog").select("id,latitude,longitude,geofence_radius_m,is_active,name,category").eq("id",id).maybeSingle();
   if (destError || !destination || !destination.is_active) return json(404,{error:"Destination not found"});
+  const category = String(destination.category || "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLocaleLowerCase("es-PE");
+  if (category === "gastronomia" || category === "musicas y danzas") {
+    return json(422,{
+      error:"Este elemento representa una experiencia gastronómica o cultural, no un punto físico verificable por GPS. Registra la visita con evidencia fotográfica.",
+      validation_method:"photo"
+    });
+  }
   const distance=distanceMeters(lat,lng,destination.latitude,destination.longitude);
   if (distance + accuracy > destination.geofence_radius_m) return json(422,{error:"GPS uncertainty overlaps the destination geofence boundary. Improve GPS accuracy or submit photo evidence.",distance_m:Math.round(distance),accuracy_m:Math.round(accuracy),radius_m:destination.geofence_radius_m});
   const {data:pendingVisit,error:pendingError}=await admin.from("app_visits")
