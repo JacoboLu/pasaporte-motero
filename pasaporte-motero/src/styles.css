@@ -5571,3 +5571,24 @@ html,body,#root{background:var(--pm-paper)!important}
 .theme-dark .profile-quick-access .profile-quick-admin{background:linear-gradient(120deg,#382b21,#25272c);border-color:#80603f}
 .theme-dark .profile-quick-access .profile-quick-admin strong{color:#ffe4c8}
 .theme-dark .profile-quick-access .profile-quick-admin small{color:#c5b3a1}
+
+/* Perfil: accesos rápidos equilibrados en una cuadrícula de dos columnas.
+   Guardados ocupa una sola celda para evitar filas descompensadas. */
+.app-shell .content .profile-quick-access{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  grid-auto-flow:row!important;
+  align-items:stretch!important;
+}
+.app-shell .content .profile-quick-access>button.profile-quick-saved{
+  grid-column:auto!important;
+  min-height:82px!important;
+}
+@media(max-width:360px){
+  .app-shell .content .profile-quick-access{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  .app-shell .content .profile-quick-access>button.profile-quick-saved{
+    grid-column:auto!important;
+    min-height:72px!important;
+  }
+}
