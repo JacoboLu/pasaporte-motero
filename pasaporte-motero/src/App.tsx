@@ -1144,7 +1144,7 @@ export default function App() {
     const { data: reporters } = reporterIds.length
       ? await supabase.from('public_profiles').select('id,username,full_name').in('id', reporterIds)
       : { data: [] as any[] }
-    const reporterById = new globalThis.Map<string, any>((reporters || []).map((item:any) => [item.id, item]))
+    const reporterById = new globalThis.Map<string, any>((reporters || []).map((item:any):[string,any] => [item.id, item]))
     setAdminReports((data || []).map((item:any) => ({ ...item, reporter: reporterById.get(item.reporter_id) || null })))
     setAdminReportsBusy(false)
   }
@@ -1186,7 +1186,7 @@ export default function App() {
     const { data: profiles } = ids.length
       ? await supabase.from('public_profiles').select('id,username,full_name').in('id', ids)
       : { data: [] as any[] }
-    const byId = new globalThis.Map<string, any>((profiles || []).map((item:any) => [item.id, item]))
+    const byId = new globalThis.Map<string, any>((profiles || []).map((item:any):[string,any] => [item.id, item]))
     setManagerAssignments((data || []).map((item:any) => ({ ...item, profile: byId.get(item.user_id) || null })))
     setManagerBusy(false)
   }
