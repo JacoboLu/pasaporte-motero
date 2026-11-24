@@ -688,12 +688,12 @@ export default function App() {
     window.open('https://www.google.com/maps/dir/?' + params.toString(), '_blank', 'noopener,noreferrer')
   }
 
-  function startMotorcycleCrop(event: import('react').PointerEvent<HTMLDivElement>) {
+  function startMotorcycleCrop(event: import('react').PointerEvent<HTMLSpanElement>) {
     if (!(motorcyclePhotoPreview || motorcyclePhoto)) return
     event.currentTarget.setPointerCapture(event.pointerId)
     cropDrag.current={x:event.clientX,y:event.clientY,cropX:motorcycleCropX,cropY:motorcycleCropY}
   }
-  function moveMotorcycleCrop(event: import('react').PointerEvent<HTMLDivElement>) {
+  function moveMotorcycleCrop(event: import('react').PointerEvent<HTMLSpanElement>) {
     const start=cropDrag.current; if(!start)return
     const rect=event.currentTarget.getBoundingClientRect()
     setMotorcycleCropX(Math.max(0,Math.min(100,start.cropX-(event.clientX-start.x)/rect.width*100)))
