@@ -6022,3 +6022,57 @@ html[data-theme="dark"],html[data-theme="dark"] body,html[data-theme="dark"] #ro
   max-width:100%!important;
   box-sizing:border-box!important;
 }
+
+
+/* Autocompletado y destinos recomendados: sin desplegar el catálogo completo */
+.composer-modal .post-destination-suggestions,
+.composer-modal .post-destination-recommended{
+  display:flex!important;flex-direction:column!important;gap:7px!important;
+  width:100%!important;max-width:100%!important;min-width:0!important;
+  max-height:260px!important;overflow-y:auto!important;
+  padding:9px!important;box-sizing:border-box!important;
+  border:1px solid #7189a2!important;border-radius:12px!important;
+  background:#20364d!important;
+}
+.composer-modal .post-destination-suggestions>button,
+.composer-modal .post-destination-recommended-list>button{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  gap:10px!important;width:100%!important;min-width:0!important;min-height:48px!important;
+  margin:0!important;padding:9px 10px!important;box-sizing:border-box!important;
+  border:1px solid #526b84!important;border-radius:9px!important;
+  background:#172b40!important;color:#f5f8fc!important;text-align:left!important;
+}
+.composer-modal .post-destination-suggestions>button.is-selected,
+.composer-modal .post-destination-recommended-list>button.is-selected{
+  border-color:#e6a34a!important;background:#3c3427!important;
+}
+.composer-modal .post-destination-suggestions>button>span,
+.composer-modal .post-destination-recommended-list>button>span{
+  display:flex!important;flex:1 1 auto!important;flex-direction:column!important;
+  gap:3px!important;min-width:0!important;
+}
+.composer-modal .post-destination-suggestions strong,
+.composer-modal .post-destination-recommended strong{
+  color:#f5f8fc!important;font-size:12px!important;font-weight:750!important;
+}
+.composer-modal .post-destination-suggestions small,
+.composer-modal .post-destination-recommended small{
+  color:#c0cedd!important;font-size:10px!important;font-weight:500!important;
+  white-space:normal!important;
+}
+.composer-modal .post-destination-suggestions svg,
+.composer-modal .post-destination-recommended-list svg{flex:0 0 auto!important;color:#ffd18a!important}
+.composer-modal .post-destination-recommended>strong{margin:0 0 2px!important;color:#ffe0a6!important;font-size:11px!important}
+.composer-modal .post-destination-recommended-list{display:flex!important;flex-direction:column!important;gap:6px!important}
+.app-shell.theme-light .composer-modal .post-destination-suggestions,
+.app-shell.theme-light .composer-modal .post-destination-recommended{
+  background:#fffaf0!important;border-color:#d8c49e!important;
+}
+.app-shell.theme-light .composer-modal .post-destination-suggestions>button,
+.app-shell.theme-light .composer-modal .post-destination-recommended-list>button{
+  background:#fff!important;border-color:#e5d8c1!important;color:#24374d!important;
+}
+.app-shell.theme-light .composer-modal .post-destination-suggestions strong,
+.app-shell.theme-light .composer-modal .post-destination-recommended strong{color:#24374d!important}
+.app-shell.theme-light .composer-modal .post-destination-suggestions small,
+.app-shell.theme-light .composer-modal .post-destination-recommended small{color:#68788a!important}
