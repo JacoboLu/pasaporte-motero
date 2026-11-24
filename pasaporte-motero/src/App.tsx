@@ -865,7 +865,7 @@ export default function App() {
   async function publishAchievementToFeed(item: Achievement & {current:number;unlocked:boolean;progress:number}) {
     if(!item.unlocked)return;
     try { const file=await makeAchievementShareFile(item); const dataUrl=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(new Error('No se pudo preparar la imagen'));reader.readAsDataURL(file)});
-      setPostTitle('¡Logro desbloqueado: '+item.title+'!'); setPostText(item.description+'\\n\\nHe conseguido esta nueva conquista en mi Pasaporte Motero. ¡Seguimos sumando rutas y experiencias! 🏍️'); setPostPlace('Pasaporte Motero · Perú'); setPostImage(dataUrl); setPostVisibility('public'); setEditingPostId(null); setSubview(''); setTab('community'); setAction('post'); notify('Tarjeta preparada. Revisa la publicación y pulsa Publicar para compartirla en Comunidad.');
+      setPostTitle('¡Logro desbloqueado: '+item.title+'!'); setPostText(item.description+'\\n\\nHe conseguido esta nueva conquista en mi Pasaporte Motero. ¡Seguimos sumando rutas y experiencias! 🏍️'); setPostPlace('Pasaporte Motero · Perú'); setPostDestinationId(''); setPostDestinationSearch(''); setPostNearbyDestinations([]); setPostLocationHint(''); setPostImage(dataUrl); setPostVisibility('public'); setEditingPostId(null); setSubview(''); setTab('community'); setAction('post'); notify('Tarjeta preparada. Revisa la publicación y pulsa Publicar para compartirla en Comunidad.');
     } catch { notify('No se pudo preparar la tarjeta del logro.'); }
   }
 
@@ -1600,7 +1600,7 @@ export default function App() {
       {enableHighAccuracy:true,timeout:12000,maximumAge:0}
     )
   }
-  function createMemory() { setAction('post'); setPostTitle('Un recuerdo de viaje'); setPostVisibility('private') }
+  function createMemory() { setAction('post'); setPostTitle('Un recuerdo de viaje'); setPostVisibility('private'); setPostDestinationId(''); setPostDestinationSearch(''); setPostNearbyDestinations([]); setPostLocationHint(''); setPostPlace('') }
 
   async function loadSocialData(userId: string) {
     if (!supabase) return
