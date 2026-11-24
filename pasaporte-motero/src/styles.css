@@ -4356,3 +4356,39 @@ html,body,#root{background:var(--pm-paper)!important}
     clip-path:inset(0 round 14px);
   }
 }
+
+
+/* Buscador de destinos: contraste y fondo coherentes en modo oscuro */
+.app-shell.theme-dark .content .searchbox.search-row-autocomplete{
+  display:flex!important;align-items:center!important;gap:10px!important;
+  background:#172D50!important;
+  border:1px solid #71869A!important;
+  border-radius:15px!important;
+  color:#E8D8B8!important;
+  box-shadow:inset 0 1px 2px #0003,0 2px 8px #0002!important;
+}
+.app-shell.theme-dark .content .searchbox.search-row-autocomplete>svg{
+  flex:0 0 auto!important;color:#D8C7A5!important;
+}
+.app-shell.theme-dark .content .searchbox.search-row-autocomplete input{
+  flex:1 1 auto!important;min-width:0!important;width:100%!important;
+  min-height:24px!important;margin:0!important;padding:0!important;
+  background:transparent!important;background-color:transparent!important;
+  border:0!important;border-radius:0!important;outline:0!important;
+  box-shadow:none!important;
+  color:#FFF5E3!important;-webkit-text-fill-color:#FFF5E3!important;
+  caret-color:#F0C77C!important;
+}
+.app-shell.theme-dark .content .searchbox.search-row-autocomplete input::placeholder{
+  color:#C2CED9!important;-webkit-text-fill-color:#C2CED9!important;
+  opacity:1!important;
+}
+.app-shell.theme-dark .content .searchbox.search-row-autocomplete:focus-within,
+.app-shell.theme-dark .content .searchbox.search-row-autocomplete.is-focused{
+  border-color:#D6AD70!important;
+  box-shadow:0 0 0 3px #C7A55F30,inset 0 1px 2px #0003!important;
+}
+.app-shell.theme-dark .content .searchbox.search-row-autocomplete .search-clear{
+  flex:0 0 auto!important;background:transparent!important;border:0!important;
+  color:#E8D8B8!important;padding:5px!important;
+}
