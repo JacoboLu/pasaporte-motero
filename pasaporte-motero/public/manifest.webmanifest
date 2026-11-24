@@ -1,17 +1,18 @@
 {
   "name": "Pasaporte Motero",
-  "short_name": "Pasaporte",
+  "short_name": "Pasaporte Motero",
   "description": "Tu pasaporte de aventuras por el Perú",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#101214",
   "theme_color": "#101214",
   "icons": [
     {
-      "src": "/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "src": "/logo-pasaporte-motero.png?v=20261124",
+      "sizes": "660x660",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
