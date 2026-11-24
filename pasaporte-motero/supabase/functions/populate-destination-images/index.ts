@@ -172,6 +172,7 @@ Deno.serve(async (req: Request) => {
         (item.info.width || 0) >= 400 && (item.info.height || 0) >= 250 &&
         !usedUrls.has(item.info.thumburl || item.info.url) &&
         item.coreCoverage >= (core.length <= 1 ? 1 : 0.66) &&
+        item.locationMatch &&
         (item.exactCore || item.distinctiveSingle) &&
         item.score >= 0.68
       ).sort((a: any, b: any) => b.score - a.score);
