@@ -4795,3 +4795,127 @@ html,body,#root{background:var(--pm-paper)!important}
 @media(max-width:380px){
   .app-shell .content .profile-menu.settings-menu>button{padding:11px 12px!important}
 }
+
+
+/* Exploración: tarjetas de destinos legibles y consistentes en lista/cuadrícula/compacta */
+.app-shell .content .destination-list:not(.destination-compact) .destination-card{
+  position:relative!important;isolation:isolate!important;overflow:hidden!important;
+  border:1px solid #C7A55F!important;border-radius:17px!important;
+  background:#172D49!important;box-shadow:0 5px 15px #26384a20!important;
+}
+.app-shell .content .destination-list:not(.destination-compact) .destination-card>img{
+  position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+  object-fit:cover!important;z-index:-2!important;
+  filter:saturate(1.02) contrast(1.04)!important;
+}
+.app-shell .content .destination-list:not(.destination-compact) .destination-overlay{
+  position:absolute!important;inset:0!important;z-index:-1!important;
+  background:linear-gradient(180deg,#07182a18 0%,#07182a08 35%,#07182a9c 72%,#07182af2 100%)!important;
+}
+.app-shell .content .destination-list:not(.destination-compact) .destination-tag{
+  top:13px!important;left:13px!important;
+  max-width:calc(100% - 26px)!important;
+  padding:6px 10px!important;border:1px solid #FFFFFF66!important;
+  border-radius:999px!important;background:#10243bd9!important;
+  color:#FFF3DC!important;font-size:9px!important;font-weight:700!important;
+  text-shadow:none!important;backdrop-filter:blur(6px)!important;
+}
+.app-shell .content .destination-list:not(.destination-compact) .destination-copy{
+  left:14px!important;right:65px!important;bottom:14px!important;
+  top:auto!important;max-width:none!important;min-width:0!important;
+  display:flex!important;flex-direction:column!important;gap:6px!important;
+  z-index:2!important;
+}
+.app-shell .content .destination-list:not(.destination-compact) .destination-copy strong{
+  display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important;
+  overflow:hidden!important;white-space:normal!important;
+  color:#FFF5E4!important;font-size:16px!important;font-weight:800!important;
+  line-height:1.18!important;text-shadow:0 2px 5px #000D!important;
+}
+.app-shell .content .destination-list:not(.destination-compact) .destination-copy small{
+  display:flex!important;align-items:center!important;gap:5px!important;
+  color:#F1E7D7!important;font-size:10px!important;font-weight:600!important;
+  line-height:1.2!important;text-shadow:0 1px 4px #000E!important;
+}
+.app-shell .content .destination-list:not(.destination-compact) .destination-copy small svg{
+  color:#F3D08B!important;flex:0 0 13px!important;
+}
+.app-shell .content .destination-list:not(.destination-compact) .destination-distance{
+  right:12px!important;bottom:13px!important;top:auto!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  min-width:30px!important;min-height:30px!important;padding:6px 8px!important;
+  border:1px solid #D59A4C!important;border-radius:50%!important;
+  background:#142B48D9!important;color:#F6D69A!important;
+  font-size:10px!important;font-weight:800!important;text-shadow:none!important;
+  box-shadow:0 2px 7px #0005!important;
+}
+.app-shell .content .destination-grid{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;align-items:stretch!important;
+}
+.app-shell .content .destination-grid .destination-card{
+  height:auto!important;min-height:174px!important;aspect-ratio:1.12/1!important;
+}
+.app-shell .content .destination-grid .destination-copy{
+  left:10px!important;right:42px!important;bottom:11px!important;gap:5px!important;
+}
+.app-shell .content .destination-grid .destination-copy strong{font-size:13px!important;line-height:1.16!important}
+.app-shell .content .destination-grid .destination-copy small{font-size:9px!important}
+.app-shell .content .destination-grid .destination-tag{
+  top:10px!important;left:10px!important;padding:5px 8px!important;font-size:8px!important;
+}
+.app-shell .content .destination-grid .destination-distance{
+  right:8px!important;bottom:9px!important;min-width:27px!important;min-height:27px!important;
+}
+.app-shell .content .destination-compact .destination-card{
+  min-height:112px!important;height:112px!important;
+  border:1px solid #C7A55F!important;border-radius:15px!important;
+  background:#F5EAD6!important;box-shadow:0 4px 12px #3B2B1718!important;
+}
+.app-shell .content .destination-compact .destination-card>img,
+.app-shell .content .destination-compact .destination-card>.destination-photo-placeholder{
+  width:100px!important;border-radius:0!important;
+}
+.app-shell .content .destination-compact .destination-overlay{
+  left:100px!important;background:#F5EAD6!important;
+}
+.app-shell .content .destination-compact .destination-tag{
+  left:112px!important;top:10px!important;
+}
+.app-shell .content .destination-compact .destination-copy{
+  left:112px!important;right:83px!important;top:39px!important;bottom:8px!important;
+  justify-content:center!important;gap:5px!important;
+}
+.app-shell .content .destination-compact .destination-copy strong{
+  color:#172F4B!important;font-size:12px!important;font-weight:800!important;
+  line-height:1.2!important;text-shadow:none!important;
+}
+.app-shell .content .destination-compact .destination-copy small{
+  color:#536579!important;font-size:9px!important;font-weight:600!important;
+  text-shadow:none!important;
+}
+.app-shell .content .destination-compact .destination-distance{
+  right:9px!important;max-width:66px!important;min-width:28px!important;
+  min-height:28px!important;padding:6px 7px!important;
+  border-radius:50%!important;background:#1A3554!important;
+  border:1px solid #C7A55F!important;color:#F5D99F!important;
+  font-size:9px!important;
+}
+.app-shell.theme-dark .content .destination-compact .destination-card,
+.app-shell.theme-dark .content .destination-compact .destination-overlay{
+  background:#20364F!important;
+}
+.app-shell.theme-dark .content .destination-compact .destination-copy strong{color:#FFF0D4!important}
+.app-shell.theme-dark .content .destination-compact .destination-copy small{color:#C9D5E0!important}
+@media(max-width:380px){
+  .app-shell .content .destination-grid{gap:8px!important}
+  .app-shell .content .destination-grid .destination-card{min-height:158px!important}
+  .app-shell .content .destination-grid .destination-copy{right:35px!important;left:8px!important}
+  .app-shell .content .destination-grid .destination-copy strong{font-size:12px!important}
+  .app-shell .content .destination-compact .destination-card{height:108px!important;min-height:108px!important}
+  .app-shell .content .destination-compact .destination-card>img,
+  .app-shell .content .destination-compact .destination-card>.destination-photo-placeholder{width:88px!important}
+  .app-shell .content .destination-compact .destination-overlay{left:88px!important}
+  .app-shell .content .destination-compact .destination-tag{left:100px!important}
+  .app-shell .content .destination-compact .destination-copy{left:100px!important;right:72px!important;top:38px!important}
+}
