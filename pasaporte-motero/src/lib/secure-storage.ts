@@ -159,6 +159,7 @@ export async function clearPrivateCache(): Promise<void> {
       tx.onerror = () => reject(tx.error || new Error('No se pudo limpiar la clave de sesión.'))
       tx.onabort = () => reject(tx.error || new Error('Se canceló la limpieza de la clave de sesión.'))
     })
+    encryptionKeyPromises.delete(KEY_ID)
   } finally { db.close() }
 }
 
