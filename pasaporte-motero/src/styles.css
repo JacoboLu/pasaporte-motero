@@ -3977,3 +3977,167 @@ html,body,#root{background:var(--pm-paper)!important}
   background-blend-mode:normal!important;
   filter:none!important;
 }
+
+
+/* AUDITORÍA GLOBAL DE CONTRASTE + PAPEL EN SEGUNDO PLANO
+   La imagen original permanece intacta; la capa crema reduce sólo su intensidad visual. */
+.app-shell main.content,
+.app-shell.theme-light main.content,
+.app-shell.theme-dark main.content{
+  position:relative!important;
+  isolation:isolate!important;
+  color:#24364A!important;
+  background-color:#F4E9D5!important;
+  background-image:
+    linear-gradient(rgba(248,241,226,.76),rgba(248,241,226,.76)),
+    url('/passport-parchment-background.png')!important;
+  background-position:center top!important;
+  background-size:100% auto,100% auto!important;
+  background-repeat:repeat-y,repeat-y!important;
+  background-attachment:local!important;
+  background-blend-mode:normal!important;
+  filter:none!important;
+}
+/* Texto sobre el papel: tinta oscura y metadatos legibles en ambas apariencias. */
+.app-shell .content{
+  color:#24364A;
+}
+.app-shell .content h1,
+.app-shell .content h2,
+.app-shell .content h3,
+.app-shell .content h4,
+.app-shell .content .page-heading,
+.app-shell .content .section-heading{
+  color:#1A2F5C;
+  text-shadow:none!important;
+}
+.app-shell .content p,
+.app-shell .content label,
+.app-shell .content small,
+.app-shell .content .muted,
+.app-shell .content .helper-text,
+.app-shell .content .field-hint,
+.app-shell .content .form-hint{
+  color:#526273;
+}
+/* Modo claro: no permitir títulos crema/dorados sobre superficies claras. */
+.app-shell.theme-light .content h1,
+.app-shell.theme-light .content h2,
+.app-shell.theme-light .content h3,
+.app-shell.theme-light .content h4,
+.app-shell.theme-light .content .page-heading,
+.app-shell.theme-light .content .section-heading,
+.app-shell.theme-light .content .profile-name,
+.app-shell.theme-light .content .community-author-meta strong{
+  color:#1A2F5C!important;
+}
+.app-shell.theme-light .content p,
+.app-shell.theme-light .content small,
+.app-shell.theme-light .content .muted,
+.app-shell.theme-light .content .helper-text,
+.app-shell.theme-light .content .field-hint{
+  color:#526273!important;
+}
+/* Modo oscuro: el papel queda suave; las superficies oscuras mantienen texto claro. */
+.app-shell.theme-dark .content{
+  color:#24364A!important;
+}
+.app-shell.theme-dark .content h1,
+.app-shell.theme-dark .content h2,
+.app-shell.theme-dark .content h3,
+.app-shell.theme-dark .content h4,
+.app-shell.theme-dark .content .page-heading,
+.app-shell.theme-dark .content .section-heading{
+  color:#1A2F5C!important;
+}
+.app-shell.theme-dark .content p,
+.app-shell.theme-dark .content small,
+.app-shell.theme-dark .content .muted,
+.app-shell.theme-dark .content .helper-text,
+.app-shell.theme-dark .content .field-hint{
+  color:#526273!important;
+}
+/* Tarjetas azul marino del tema oscuro: texto crema, subtítulos gris claro. */
+.app-shell.theme-dark .content .profile-card,
+.app-shell.theme-dark .content .public-profile-card,
+.app-shell.theme-dark .content .community-post,
+.app-shell.theme-dark .content .community-post-header,
+.app-shell.theme-dark .content .community-post-content,
+.app-shell.theme-dark .content .destination-card,
+.app-shell.theme-dark .content .nearby-destination-card,
+.app-shell.theme-dark .content .passport-summary-card,
+.app-shell.theme-dark .content .validation-panel,
+.app-shell.theme-dark .content .motorcycle-card,
+.app-shell.theme-dark .content .motorcycle-spec-card,
+.app-shell.theme-dark .content .document-panel,
+.app-shell.theme-dark .content .admin-panel{
+  color:#F2E6D0!important;
+}
+.app-shell.theme-dark .content .profile-card h1,
+.app-shell.theme-dark .content .profile-card h2,
+.app-shell.theme-dark .content .profile-card h3,
+.app-shell.theme-dark .content .public-profile-card h1,
+.app-shell.theme-dark .content .public-profile-card h2,
+.app-shell.theme-dark .content .community-post-header strong,
+.app-shell.theme-dark .content .community-post-content h3,
+.app-shell.theme-dark .content .destination-card strong,
+.app-shell.theme-dark .content .nearby-destination-card strong,
+.app-shell.theme-dark .content .validation-panel h2,
+.app-shell.theme-dark .content .validation-panel h3,
+.app-shell.theme-dark .content .motorcycle-card h2,
+.app-shell.theme-dark .content .motorcycle-card h3{
+  color:#F2E6D0!important;
+}
+.app-shell.theme-dark .content .profile-card p,
+.app-shell.theme-dark .content .profile-card small,
+.app-shell.theme-dark .content .public-profile-card p,
+.app-shell.theme-dark .content .public-profile-card small,
+.app-shell.theme-dark .content .community-post-header small,
+.app-shell.theme-dark .content .community-post-content p,
+.app-shell.theme-dark .content .destination-card small,
+.app-shell.theme-dark .content .nearby-destination-card small,
+.app-shell.theme-dark .content .validation-panel p,
+.app-shell.theme-dark .content .validation-panel small,
+.app-shell.theme-dark .content .motorcycle-card p,
+.app-shell.theme-dark .content .motorcycle-card small{
+  color:#D2DCE5!important;
+}
+/* Campos y selectores: contraste explícito para texto, placeholder, foco y borde. */
+.app-shell .content input,
+.app-shell .content textarea,
+.app-shell .content select{
+  border-color:#AEBBC8!important;
+  outline-color:#C17C42;
+}
+.app-shell.theme-light .content input,
+.app-shell.theme-light .content textarea,
+.app-shell.theme-light .content select{
+  background:#FFFFFF!important;
+  color:#20364F!important;
+  -webkit-text-fill-color:#20364F!important;
+}
+.app-shell.theme-dark .content input,
+.app-shell.theme-dark .content textarea,
+.app-shell.theme-dark .content select{
+  background:#20364F!important;
+  color:#FFF5E3!important;
+  -webkit-text-fill-color:#FFF5E3!important;
+  border-color:#71869A!important;
+}
+.app-shell.theme-light .content input::placeholder,
+.app-shell.theme-light .content textarea::placeholder{color:#68798A!important;opacity:1!important}
+.app-shell.theme-dark .content input::placeholder,
+.app-shell.theme-dark .content textarea::placeholder{color:#C2CED9!important;opacity:1!important}
+.app-shell .content button:focus-visible,
+.app-shell .content a:focus-visible,
+.app-shell .content input:focus-visible,
+.app-shell .content textarea:focus-visible,
+.app-shell .content select:focus-visible{
+  outline:3px solid #C17C42!important;outline-offset:2px!important;
+}
+/* Etiquetas, estados y controles pequeños. */
+.app-shell .content .status,
+.app-shell .content .badge,
+.app-shell .content .chip{font-weight:600}
+.app-shell.theme-light .content button:disabled{color:#68798A!important;opacity:.85!important}
+.app-shell.theme-dark .content button:disabled{color:#D2DCE5!important;opacity:.78!important}
