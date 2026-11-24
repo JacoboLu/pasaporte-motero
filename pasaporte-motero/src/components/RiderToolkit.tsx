@@ -33,6 +33,7 @@ export function RiderToolkit({onBack,userId}:{onBack:()=>void;userId:string|null
  const [activePackageId,setActivePackageId]=useState('')
  const [packageName,setPackageName]=useState('')
  const [renamePackage,setRenamePackage]=useState(false)
+ const [confirmDeletePackage,setConfirmDeletePackage]=useState(false)
  const [editingExpenseId,setEditingExpenseId]=useState<string|null>(null)
  const expenses=packages.find(x=>x.id===activePackageId)?.expenses||[]
  const [date,setDate]=useState(today())
@@ -61,9 +62,9 @@ export function RiderToolkit({onBack,userId}:{onBack:()=>void;userId:string|null
     const mergedExpenses=expenseValues(data.expenses)
     for(const expense of expenseValues(local?.expenses))if(!mergedExpenses.some(x=>x.id===expense.id))mergedExpenses.push(expense)
     let savedPackages=packageValues(data.expense_packages)
-    if(!savedPackages.length){
+    if(!savedPackages.length&&mergedExpenses.length){
      const legacyExpenses=mergedExpenses.slice(0,100)
-     savedPackages=[{id:crypto.randomUUID(),name:legacyExpenses.length?'Mis gastos':'Ruta actual',expenses:legacyExpenses,created_at:new Date().toISOString()}]
+     savedPackages=[{id:crypto.randomUUID(),name:'Mis gastos',expenses:legacyExpenses,created_at:new Date().toISOString()}]
     }
     for(const oldPackage of packageValues(local?.packages))if(!savedPackages.some(x=>x.id===oldPackage.id))savedPackages.push(oldPackage)
     payload={
@@ -75,7 +76,7 @@ export function RiderToolkit({onBack,userId}:{onBack:()=>void;userId:string|null
    }else{
     const localPackages=packageValues(local?.packages)
     const localExpenses=expenseValues(local?.expenses)
-    payload={checklist:checkedValues(local?.checked),contact_name:typeof local?.contactName==='string'?local.contactName:'',contact_phone:typeof local?.contactPhone==='string'?local.contactPhone:'',expenses:localExpenses,expense_packages:localPackages.length?localPackages:[{id:crypto.randomUUID(),name:localExpenses.length?'Mis gastos':'Ruta actual',expenses:localExpenses,created_at:new Date().toISOString()}]}
+    payload={checklist:checkedValues(local?.checked),contact_name:typeof local?.contactName==='string'?local.contactName:'',contact_phone:typeof local?.contactPhone==='string'?local.contactPhone:'',expenses:localExpenses,expense_packages:localPackages.length?localPackages:(localExpenses.length?[{id:crypto.randomUUID(),name:'Mis gastos',expenses:localExpenses,created_at:new Date().toISOString()}]:[])}
    }
    setChecked(payload.checklist);setContactName(payload.contact_name);setContactPhone(payload.contact_phone);setPackages(payload.expense_packages);setActivePackageId(payload.expense_packages[0]?.id||'')
    lastPayload.current=JSON.stringify(payload)
@@ -115,9 +116,9 @@ export function RiderToolkit({onBack,userId}:{onBack:()=>void;userId:string|null
  function addExpense(){const n=Number(amount);if(!Number.isFinite(n)||n<=0||!date||!activePackageId)return;const next:Expense={id:editingExpenseId||crypto.randomUUID(),date,category,amount:Math.round(n*100)/100,note:note.trim()};updateActiveExpenses(editingExpenseId?expenses.map(x=>x.id===editingExpenseId?next:x):[next,...expenses].slice(0,100));setEditingExpenseId(null);setAmount('');setNote('')}
  function editExpense(item:Expense){setEditingExpenseId(item.id);setDate(item.date);setCategory(item.category);setAmount(String(item.amount));setNote(item.note)}
  function cancelExpenseEdit(){setEditingExpenseId(null);setAmount('');setNote('');setDate(today());setCategory(categories[0])}
- function createPackage(){const name=packageName.trim();if(!name)return;const next={id:crypto.randomUUID(),name,expenses:[],created_at:new Date().toISOString()};setPackages(v=>[next,...v]);setActivePackageId(next.id);setPackageName('');setEditingExpenseId(null);setAmount('');setNote('')}
+ function createPackage(){const name=packageName.trim();if(!name)return;const next={id:crypto.randomUUID(),name,expenses:[],created_at:new Date().toISOString()};setPackages(v=>[next,...v]);setActivePackageId(next.id);setPackageName('');setEditingExpenseId(null);setAmount('');setNote('');setRenamePackage(false);setConfirmDeletePackage(false)}
  function renameActivePackage(){const name=packageName.trim();if(!name||!activePackageId)return;setPackages(v=>v.map(p=>p.id===activePackageId?{...p,name}:p));setPackageName('');setRenamePackage(false)}
- function deleteActivePackage(){if(!activePackageId||packages.length<2)return;const remaining=packages.filter(p=>p.id!==activePackageId);setPackages(remaining);setActivePackageId(remaining[0].id);cancelExpenseEdit()}
+ function deleteActivePackage(){if(!activePackageId)return;const remaining=packages.filter(p=>p.id!==activePackageId);setPackages(remaining);setActivePackageId(remaining[0]?.id||'');setConfirmDeletePackage(false);setRenamePackage(false);setPackageName('');cancelExpenseEdit()}
  function shareLocation(){
   if(!navigator.geolocation){setLocationMessage('Este dispositivo no permite obtener la ubicación.');return}
   setLocationMessage('Obteniendo ubicación…')
@@ -149,11 +150,16 @@ export function RiderToolkit({onBack,userId}:{onBack:()=>void;userId:string|null
   <div className="settings-card toolkit-card">
    <div className="toolkit-heading"><span className="toolkit-icon"><Wallet size={19}/></span><div><h2>Gastos del viaje</h2><small>Control de tus gastos en soles.</small></div></div>
    <div className="toolkit-package-manager">
-    <label>Paquete de gastos<select value={activePackageId} onChange={e=>{setActivePackageId(e.target.value);cancelExpenseEdit()}}>{packages.map(p=><option value={p.id} key={p.id}>{p.name}</option>)}</select></label>
-    <div className="toolkit-package-actions"><input aria-label="Nombre del paquete" value={packageName} onChange={e=>setPackageName(e.target.value)} placeholder={renamePackage?'Nuevo nombre del paquete':'Ej. Ruta Anchas'}/>{renamePackage?<><button type="button" className="secondary" onClick={renameActivePackage} disabled={!packageName.trim()}>Guardar</button><button type="button" className="secondary" onClick={()=>{setRenamePackage(false);setPackageName('')}}>Cancelar</button></>:<button type="button" className="primary" onClick={createPackage} disabled={!packageName.trim()}><Plus size={15}/> Crear</button>}</div>
-    <div className="toolkit-package-tools"><button type="button" className="text-action" disabled={!activePackageId} onClick={()=>{setPackageName(packages.find(p=>p.id===activePackageId)?.name||'');setRenamePackage(true)}}>Renombrar paquete</button><button type="button" className="text-action danger" disabled={packages.length<2} onClick={deleteActivePackage}>Eliminar paquete</button></div>
+    <label>Ruta guardada<select value={activePackageId} onChange={e=>{setActivePackageId(e.target.value);cancelExpenseEdit();setRenamePackage(false);setConfirmDeletePackage(false)}}><option value="">Selecciona una ruta</option>{packages.map(p=><option value={p.id} key={p.id}>{p.name}</option>)}</select></label>
+    {activePackageId&&!renamePackage&&!confirmDeletePackage&&<div className="toolkit-package-tools">
+     <button type="button" className="text-action" onClick={()=>{setPackageName(packages.find(p=>p.id===activePackageId)?.name||'');setRenamePackage(true)}}><Pencil size={13}/> Renombrar ruta</button>
+     <button type="button" className="text-action danger" onClick={()=>setConfirmDeletePackage(true)}><Trash2 size={13}/> Eliminar ruta</button>
+    </div>}
+    {renamePackage&&<div className="toolkit-package-editor"><label>Nombre de la ruta<input aria-label="Nuevo nombre de la ruta" value={packageName} onChange={e=>setPackageName(e.target.value)} placeholder="Nombre de la ruta"/></label><div><button type="button" className="primary" onClick={renameActivePackage} disabled={!packageName.trim()}>Guardar</button><button type="button" className="secondary" onClick={()=>{setRenamePackage(false);setPackageName('')}}>Cancelar</button></div></div>}
+    {confirmDeletePackage&&<div className="toolkit-package-confirm" role="group" aria-label="Confirmar eliminación de ruta"><strong>¿Eliminar esta ruta?</strong><small>Se eliminarán esta ruta y todos sus gastos guardados. Esta acción no se puede deshacer.</small><div><button type="button" className="danger-button" onClick={deleteActivePackage}>Sí, eliminar ruta</button><button type="button" className="secondary" onClick={()=>setConfirmDeletePackage(false)}>Cancelar</button></div></div>}
+    <div className="toolkit-package-create"><label>Nueva ruta<input aria-label="Nombre de la nueva ruta" value={renamePackage?'':packageName} onChange={e=>setPackageName(e.target.value)} placeholder="Ej. Ruta Anchas" disabled={renamePackage}/></label><button type="button" className="primary" onClick={createPackage} disabled={!packageName.trim()||renamePackage}><Plus size={16}/> Crear ruta</button></div>
    </div>
-   <div className="toolkit-expense-total"><small>Total de {packages.find(p=>p.id===activePackageId)?.name||'este paquete'}</small><strong>S/ {total.toFixed(2)}</strong><small>{expenses.length} movimientos registrados</small></div>
+   <div className="toolkit-expense-total"><small>Total de {packages.find(p=>p.id===activePackageId)?.name||'esta ruta'}</small><strong>S/ {total.toFixed(2)}</strong><small>{expenses.length} movimientos registrados</small></div>
    <div className="toolkit-expense-form">
     <label>Fecha<input className="toolkit-date-input" type="date" value={date} onChange={e=>setDate(e.target.value)}/></label>
     <label>Categoría<select value={category} onChange={e=>setCategory(e.target.value)}>{categories.map(x=><option key={x}>{x}</option>)}</select></label>
@@ -162,7 +168,7 @@ export function RiderToolkit({onBack,userId}:{onBack:()=>void;userId:string|null
    <label>Detalle (opcional)<input value={note} onChange={e=>setNote(e.target.value)} placeholder="Ej. tanque lleno en Huancayo"/></label>
    <button type="button" className="primary full" disabled={!amount||Number(amount)<=0||!date||!activePackageId} onClick={addExpense}>{editingExpenseId?'Guardar cambios':'Añadir gasto'} <Plus size={16}/></button>
    {editingExpenseId&&<button type="button" className="secondary full" onClick={cancelExpenseEdit}>Cancelar edición</button>}
-   {expenses.length?<div className="toolkit-expense-list">{expenses.map(x=><div className="toolkit-expense-row" key={x.id}><div><strong>{x.category}</strong><small>{x.date}{x.note?' · '+x.note:''}</small></div><b>S/ {x.amount.toFixed(2)}</b><div className="toolkit-expense-row-actions"><button type="button" aria-label="Editar gasto" onClick={()=>editExpense(x)}><Pencil size={15}/></button><button type="button" aria-label="Eliminar gasto" onClick={()=>updateActiveExpenses(expenses.filter(y=>y.id!==x.id))}><Trash2 size={15}/></button></div></div>)}</div>:<p className="muted tiny">Este paquete aún no tiene gastos.</p>}
+   {!activePackageId?<p className="muted tiny">Crea o selecciona una ruta para comenzar a registrar gastos.</p>:expenses.length?<div className="toolkit-expense-list">{expenses.map(x=><div className="toolkit-expense-row" key={x.id}><div><strong>{x.category}</strong><small>{x.date}{x.note?' · '+x.note:''}</small></div><b>S/ {x.amount.toFixed(2)}</b><div className="toolkit-expense-row-actions"><button type="button" aria-label="Editar gasto" onClick={()=>editExpense(x)}><Pencil size={15}/></button><button type="button" aria-label="Eliminar gasto" onClick={()=>updateActiveExpenses(expenses.filter(y=>y.id!==x.id))}><Trash2 size={15}/></button></div></div>)}</div>:<p className="muted tiny">Este paquete aún no tiene gastos.</p>}
   </div>
   <p className={'toolkit-storage-note toolkit-sync-'+syncState}><span>{syncState==='saving'||syncState==='loading'?<RefreshCw size={14}/>:<CheckCircle2 size={14}/>}</span>{syncMessage}</p>
  </section>
