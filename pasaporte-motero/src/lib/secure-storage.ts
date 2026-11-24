@@ -16,27 +16,56 @@ function openKeyDb(): Promise<IDBDatabase> {
   })
 }
 
-async function getEncryptionKey(keyId = KEY_ID): Promise<CryptoKey> {
-  const db = await openKeyDb()
-  try {
-    const existing = await new Promise<CryptoKey | undefined>((resolve, reject) => {
-      const request = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).get(keyId)
-      request.onsuccess = () => resolve(request.result as CryptoKey | undefined)
-      request.onerror = () => reject(request.error)
-    })
-    if (existing) return existing
-    const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt'])
-    await new Promise<void>((resolve, reject) => {
-      const transaction = db.transaction(STORE_NAME, 'readwrite')
-      transaction.objectStore(STORE_NAME).put(key, keyId)
-      transaction.oncomplete = () => resolve()
-      transaction.onerror = () => reject(transaction.error)
-      transaction.onabort = () => reject(transaction.error)
-    })
-    return key
-  } finally {
-    db.close()
-  }
+// Share key initialization between concurrent callers in this tab. The IndexedDB
+// read-write transaction also serializes first-time creation across tabs.
+const encryptionKeyPromises = new Map<string, Promise<CryptoKey>>()
+
+function getEncryptionKey(keyId = KEY_ID): Promise<CryptoKey> {
+  const pending = encryptionKeyPromises.get(keyId)
+  if (pending) return pending
+
+  const initialization = (async (): Promise<CryptoKey> => {
+    if (!globalThis.crypto?.subtle) throw new Error('Este navegador no ofrece cifrado seguro.')
+    const candidate = await crypto.subtle.generateKey(
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['encrypt', 'decrypt']
+    )
+    const db = await openKeyDb()
+    try {
+      return await new Promise<CryptoKey>((resolve, reject) => {
+        const transaction = db.transaction(STORE_NAME, 'readwrite')
+        const store = transaction.objectStore(STORE_NAME)
+        const request = store.get(keyId)
+        let selectedKey: CryptoKey | undefined
+
+        request.onsuccess = () => {
+          const existing = request.result as CryptoKey | undefined
+          if (existing) {
+            selectedKey = existing
+            return
+          }
+          selectedKey = candidate
+          store.put(candidate, keyId)
+        }
+        request.onerror = () => reject(request.error || new Error('No se pudo recuperar la clave de cifrado.'))
+        transaction.oncomplete = () => {
+          if (selectedKey) resolve(selectedKey)
+          else reject(new Error('No se pudo inicializar la clave de cifrado.'))
+        }
+        transaction.onerror = () => reject(transaction.error || new Error('Falló la transacción de la clave de cifrado.'))
+        transaction.onabort = () => reject(transaction.error || new Error('Se canceló la inicialización de la clave de cifrado.'))
+      })
+    } finally {
+      db.close()
+    }
+  })()
+
+  encryptionKeyPromises.set(keyId, initialization)
+  initialization.catch(() => {
+    if (encryptionKeyPromises.get(keyId) === initialization) encryptionKeyPromises.delete(keyId)
+  })
+  return initialization
 }
 
 function toBase64(bytes: Uint8Array): string {
