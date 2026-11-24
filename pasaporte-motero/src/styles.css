@@ -4739,3 +4739,59 @@ html,body,#root{background:var(--pm-paper)!important}
   .app-shell .content .profile-menu.settings-menu>button strong{font-size:12px!important}
   .app-shell .content .profile-menu.settings-menu>button small{font-size:9px!important}
 }
+
+
+/* FIX DEFINITIVO: la lista de configuración es una sola superficie continua.
+   Evita que reglas globales de botones dejen esquinas del fondo visibles. */
+.app-shell .content .profile-menu.settings-menu,
+.app-shell .content .profile-menu.settings-menu:before,
+.app-shell .content .profile-menu.settings-menu:after{
+  background:#F3E7D0!important;
+  background-image:none!important;
+  padding:0!important;
+  gap:0!important;
+  border:1px solid #C49A55!important;
+  border-radius:14px!important;
+  overflow:hidden!important;
+  isolation:isolate!important;
+}
+.app-shell .content .profile-menu.settings-menu>button,
+.app-shell .content .profile-menu.settings-menu>button:first-child,
+.app-shell .content .profile-menu.settings-menu>button:last-child{
+  display:flex!important;
+  width:100%!important;min-width:0!important;
+  margin:0!important;
+  padding:12px 15px!important;
+  border:0!important;
+  border-bottom:1px solid #D4B987!important;
+  border-radius:0!important;
+  outline:0!important;
+  background:#F3E7D0!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+.app-shell .content .profile-menu.settings-menu>button:last-child{border-bottom:0!important}
+.app-shell .content .profile-menu.settings-menu>button:before,
+.app-shell .content .profile-menu.settings-menu>button:after{display:none!important;content:none!important}
+.app-shell .content .profile-menu.settings-menu>button>span,
+.app-shell .content .profile-menu.settings-menu>button>strong,
+.app-shell .content .profile-menu.settings-menu>button>small{
+  background:transparent!important;background-image:none!important;box-shadow:none!important;
+}
+.app-shell.theme-dark .content .profile-menu.settings-menu,
+.app-shell.theme-dark .content .profile-menu.settings-menu>button,
+.app-shell.theme-dark .content .profile-menu.settings-menu>button:first-child,
+.app-shell.theme-dark .content .profile-menu.settings-menu>button:last-child{
+  background:#20364F!important;
+  background-image:none!important;
+}
+.app-shell.theme-dark .content .profile-menu.settings-menu{
+  border-color:#92764B!important;
+}
+.app-shell.theme-dark .content .profile-menu.settings-menu>button{
+  border-bottom-color:#465A70!important;
+}
+@media(max-width:380px){
+  .app-shell .content .profile-menu.settings-menu>button{padding:11px 12px!important}
+}
