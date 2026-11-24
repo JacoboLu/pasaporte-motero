@@ -46,7 +46,12 @@ assert.match(secureStorage, /delete\(KEY_ID\)/);
 assert.match(offlineQueue, /encryptOfflineBlob/);
 assert.match(offlineQueue, /decryptOfflineBlob/);
 assert.match(offlineQueue, /if \(!userId\) return \[\]/);
+assert.match(app, /application\/x-pasaporte-motero-encrypted/);
+assert.match(app, /reportCommunityPost/);
+assert.match(app, /loadContentReports/);
+assert.match(app, /resolveContentReport/);
 assert.match(imageFunction, /body\.offset/);
 assert.match(imageFunction, /body\.limit/);
+assert.match(imageFunction, /item\.locationMatch/);
 
 console.log('Phase 1 and integral hardening regression checks passed.');
