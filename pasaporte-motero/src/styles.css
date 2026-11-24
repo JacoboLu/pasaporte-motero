@@ -5738,3 +5738,99 @@ html[data-theme="dark"],html[data-theme="dark"] body,html[data-theme="dark"] #ro
 @media(prefers-reduced-motion:reduce){
   .app-shell.theme-dark *{scroll-behavior:auto!important;transition-duration:.01ms!important}
 }
+
+
+/* Corrección específica y de alta prioridad: ficha técnica de motocicleta en modo oscuro.
+   Se aplica al final para prevalecer sobre estilos heredados de formularios y componentes. */
+.app-shell.theme-dark .content .motorcycle-card{
+  background:#1c3046!important;
+  color:#f4f7fb!important;
+  border:1px solid #607991!important;
+}
+.app-shell.theme-dark .content .motorcycle-card .collapsible-heading,
+.app-shell.theme-dark .content .motorcycle-card .collapsible-heading span,
+.app-shell.theme-dark .content .motorcycle-card .collapsible-heading svg{
+  color:#f5f7fb!important;
+}
+.app-shell.theme-dark .content .motorcycle-card label,
+.app-shell.theme-dark .content .motorcycle-card .form-grid>label,
+.app-shell.theme-dark .content .motorcycle-card>label{
+  color:#d7e2ee!important;
+  opacity:1!important;
+  font-size:11px!important;
+  font-weight:650!important;
+}
+.app-shell.theme-dark .content .motorcycle-card input:not([type=file]),
+.app-shell.theme-dark .content .motorcycle-card textarea,
+.app-shell.theme-dark .content .motorcycle-card select,
+.app-shell.theme-dark .content .motorcycle-card .form-grid input,
+.app-shell.theme-dark .content .motorcycle-card .form-grid select{
+  background:#17283b!important;
+  color:#f7f9fc!important;
+  -webkit-text-fill-color:#f7f9fc!important;
+  border:1px solid #7189a2!important;
+  opacity:1!important;
+  color-scheme:dark!important;
+}
+.app-shell.theme-dark .content .motorcycle-card select option{
+  background:#17283b!important;
+  color:#f7f9fc!important;
+}
+.app-shell.theme-dark .content .motorcycle-card input::placeholder,
+.app-shell.theme-dark .content .motorcycle-card textarea::placeholder{
+  color:#b8c6d5!important;
+  -webkit-text-fill-color:#b8c6d5!important;
+  opacity:1!important;
+}
+.app-shell.theme-dark .content .motorcycle-card .file-pick,
+.app-shell.theme-dark .content .motorcycle-card label.motorcycle-file{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:9px!important;
+  min-height:50px!important;
+  padding:12px!important;
+  color:#ffe0a6!important;
+  -webkit-text-fill-color:#ffe0a6!important;
+  background:#263d55!important;
+  border:1px dashed #d9a34f!important;
+  border-radius:12px!important;
+  opacity:1!important;
+}
+.app-shell.theme-dark .content .motorcycle-card .file-pick svg,
+.app-shell.theme-dark .content .motorcycle-card label.motorcycle-file svg{
+  color:#ffd18a!important;
+  opacity:1!important;
+}
+.app-shell.theme-dark .content .motorcycle-card .muted,
+.app-shell.theme-dark .content .motorcycle-card p{
+  color:#c3cfdb!important;
+  opacity:1!important;
+}
+.app-shell.theme-dark .content .motorcycle-card .primary,
+.app-shell.theme-dark .content .motorcycle-card button.primary,
+.app-shell.theme-dark .content .motorcycle-card button.primary:disabled{
+  min-height:46px!important;
+  background:#d18a3d!important;
+  border:1px solid #f0bd72!important;
+  color:#17283b!important;
+  -webkit-text-fill-color:#17283b!important;
+  font-weight:800!important;
+  opacity:1!important;
+  cursor:pointer!important;
+}
+.app-shell.theme-dark .content .motorcycle-card button:disabled{
+  background:#35485d!important;
+  border:1px solid #71849a!important;
+  color:#d7e0e9!important;
+  -webkit-text-fill-color:#d7e0e9!important;
+  opacity:1!important;
+  cursor:not-allowed!important;
+}
+.app-shell.theme-dark .content .motorcycle-card .motorcycle-crop-frame{
+  border:1px solid #7189a2!important;
+}
+.app-shell.theme-dark .content .motorcycle-card .crop-hint{
+  color:#fff!important;
+  background:#10243bd9!important;
+}
