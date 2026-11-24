@@ -166,11 +166,11 @@ export function RiderToolkit({onBack,userId}:{onBack:()=>void;userId:string|null
    <div className="toolkit-expense-form"><div className="toolkit-expense-form-heading"><span className="toolkit-step">3</span><div><strong>{editingExpenseId?'Editar movimiento':'Añade un gasto'}</strong><small>Registra cada gasto de este viaje.</small></div></div>
     <label>Fecha<input className="toolkit-date-input" type="date" value={date} onChange={e=>setDate(e.target.value)}/></label>
     <label>Categoría<select value={category} onChange={e=>setCategory(e.target.value)}>{categories.map(x=><option key={x}>{x}</option>)}</select></label>
+    <label className="toolkit-field-wide">Importe (S/)<input type="number" min="0.01" step="0.01" inputMode="decimal" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="0.00"/></label>
+    <label className="toolkit-field-wide">Detalle (opcional)<input value={note} onChange={e=>setNote(e.target.value)} placeholder="Ej. tanque lleno en Huancayo"/></label>
+    <button type="button" className="primary full toolkit-expense-submit" disabled={!amount||Number(amount)<=0||!date||!activePackageId} onClick={addExpense}>{editingExpenseId?'Guardar cambios':'Guardar gasto'} <Plus size={16}/></button>
+    {editingExpenseId&&<button type="button" className="secondary full toolkit-field-wide" onClick={cancelExpenseEdit}>Cancelar edición</button>}
    </div>
-   <label>Importe (S/)<input type="number" min="0.01" step="0.01" inputMode="decimal" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="0.00"/></label>
-   <label>Detalle (opcional)<input value={note} onChange={e=>setNote(e.target.value)} placeholder="Ej. tanque lleno en Huancayo"/></label>
-   <button type="button" className="primary full" disabled={!amount||Number(amount)<=0||!date||!activePackageId} onClick={addExpense}>{editingExpenseId?'Guardar cambios':'Guardar gasto'} <Plus size={16}/></button>
-   {editingExpenseId&&<button type="button" className="secondary full" onClick={cancelExpenseEdit}>Cancelar edición</button>}
    {!activePackageId?<p className="muted tiny">Crea o selecciona una ruta para comenzar a registrar gastos.</p>:expenses.length?<div className="toolkit-expense-list">{expenses.map(x=><div className="toolkit-expense-row" key={x.id}><div><strong>{x.category}</strong><small>{x.date}{x.note?' · '+x.note:''}</small></div><b>S/ {x.amount.toFixed(2)}</b><div className="toolkit-expense-row-actions"><button type="button" aria-label="Editar gasto" onClick={()=>editExpense(x)}><Pencil size={15}/></button><button type="button" aria-label="Eliminar gasto" onClick={()=>updateActiveExpenses(expenses.filter(y=>y.id!==x.id))}><Trash2 size={15}/></button></div></div>)}</div>:<p className="muted tiny">Este paquete aún no tiene gastos.</p>}
   </div>
   <p className={'toolkit-storage-note toolkit-sync-'+syncState}><span>{syncState==='saving'||syncState==='loading'?<RefreshCw size={14}/>:<CheckCircle2 size={14}/>}</span>{syncMessage}</p>
