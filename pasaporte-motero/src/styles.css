@@ -3537,3 +3537,77 @@ html,body,#root{background:var(--pm-paper)!important}
   .app-shell.theme-dark .content p,.app-shell.theme-dark .content small,
   .app-shell.theme-dark .content .muted{color:#E6DDC8!important}
 }
+
+
+/* FIX MODO CLARO — restablecer tinta oscura en superficies blancas */
+.app-shell.theme-light .topbar,
+.app-shell.theme-light header.topbar{
+  background:#FFFFFF!important;
+  background-image:none!important;
+  color:#1A2F5C!important;
+  border-bottom:1px solid #D8DDE3!important;
+  box-shadow:0 3px 12px rgba(26,47,92,.10)!important;
+}
+.app-shell.theme-light .topbar .brand,
+.app-shell.theme-light .topbar .brand strong,
+.app-shell.theme-light .topbar .brand-heading strong{
+  color:#1A2F5C!important;
+  text-shadow:none!important;
+}
+.app-shell.theme-light .topbar .brand small,
+.app-shell.theme-light .topbar .brand-heading small{
+  color:#526273!important;
+  text-shadow:none!important;
+}
+.app-shell.theme-light .topbar .icon-button{
+  color:#A85E2D!important;
+  background:#FFFFFF!important;
+  border:1px solid #C7A55F!important;
+  box-shadow:none!important;
+}
+.app-shell.theme-light .topbar .icon-button svg{color:#A85E2D!important;stroke:currentColor!important}
+.app-shell.theme-light .topbar::before{opacity:0!important;background-image:none!important}
+/* Publicaciones claras: autor, usuario y fecha con tinta legible */
+.app-shell.theme-light .content .community-post-header{
+  background:#FFFFFF!important;
+  color:#24364A!important;
+}
+.app-shell.theme-light .content .community-author-meta,
+.app-shell.theme-light .content .community-author-open{
+  color:#24364A!important;
+}
+.app-shell.theme-light .content .community-author-meta strong,
+.app-shell.theme-light .content .community-author-open strong{
+  color:#1A2F5C!important;
+  text-shadow:none!important;
+}
+.app-shell.theme-light .content .community-author-meta span,
+.app-shell.theme-light .content .community-author-open span{
+  color:#526273!important;
+}
+.app-shell.theme-light .content .community-author-meta small,
+.app-shell.theme-light .content .community-author-open small{
+  color:#718096!important;
+}
+.app-shell.theme-light .content .community-more{
+  color:#526273!important;
+}
+.app-shell.theme-light .content .community-post-content h3{color:#1A2F5C!important}
+.app-shell.theme-light .content .community-post-content p{color:#425466!important}
+/* Cabeceras y ayudas: evitar heredar crema/dorado en fondos claros */
+.app-shell.theme-light .content .page-heading,
+.app-shell.theme-light .content .section-heading,
+.app-shell.theme-light .content .page-heading p,
+.app-shell.theme-light .content .section-heading p{
+  color:#24364A!important;
+}
+.app-shell.theme-light .content .muted,
+.app-shell.theme-light .content .eyebrow,
+.app-shell.theme-light .content .section-heading .muted{
+  color:#526273!important;
+}
+.app-shell.theme-light .content .text-action{color:#A85E2D!important}
+.app-shell.theme-light .content .community-feed-tabs button{color:#526273!important}
+.app-shell.theme-light .content .community-feed-tabs button.active{
+  color:#A84E12!important;background:#FFF0E3!important;
+}
