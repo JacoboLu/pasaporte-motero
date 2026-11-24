@@ -1129,8 +1129,8 @@ export default function App() {
   async function loadCommunityPosts() {
     if (!supabase) return
     const [{ data: postRows, error: postsError }, { data: tripRows, error: tripsError }] = await Promise.all([
-      supabase.from('posts').select('id,user_id,title,content,visibility,status,created_at,post_photos(storage_path)').eq('status','published').order('created_at',{ascending:false}).limit(50),
-      supabase.from('trips').select('id,user_id,name,description,start_date,end_date,visibility,created_at,trip_photos(storage_path),trip_custom_stops(name,sort_order)').eq('visibility','public').order('created_at',{ascending:false}).limit(50)
+      supabase.from('posts').select('id,user_id,title,content,visibility,status,created_at,post_photos(storage_path)').eq('status','published').in('visibility',['public','followers']).order('created_at',{ascending:false}).limit(50),
+      supabase.from('trips').select('id,user_id,name,description,start_date,end_date,visibility,created_at,trip_photos(storage_path),trip_custom_stops(name,sort_order)').in('visibility',['public','followers']).order('created_at',{ascending:false}).limit(50)
     ])
     if (postsError) { notify('No pudimos cargar las publicaciones: '+postsError.message); return }
     if (tripsError) { notify('No pudimos cargar las bitácoras públicas: '+tripsError.message); return }
@@ -1173,16 +1173,22 @@ export default function App() {
     if (!supabase) return
     const {data:rows,error}=await supabase.from('posts').select('id,user_id,title,content,visibility,status,created_at,post_photos(storage_path)').eq('user_id',userId).order('created_at',{ascending:false}).limit(100)
     if(error){notify('No se pudo cargar tu actividad: '+error.message);return}
+    const postIds=(rows||[]).map((row:any)=>row.id)
+    const [{data:likeRows,error:likesError},{data:commentRows,error:commentsError},{data:savedRows,error:savesError}]=await Promise.all([
+      postIds.length ? supabase.from('post_likes').select('post_id').in('post_id',postIds) : Promise.resolve({data:[] as any[],error:null}),
+      postIds.length ? supabase.from('comments').select('post_id').in('post_id',postIds) : Promise.resolve({data:[] as any[],error:null}),
+      postIds.length ? supabase.from('saved_posts').select('post_id').in('post_id',postIds) : Promise.resolve({data:[] as any[],error:null})
+    ])
+    if(likesError||commentsError||savesError){notify('No se pudieron cargar las estadísticas de tus publicaciones.');return}
+    const countByPost=(items:any[])=>items.reduce((counts,item)=>{counts.set(item.post_id,(counts.get(item.post_id)||0)+1);return counts},new globalThis.Map<string,number>())
+    const likesByPost=countByPost(likeRows||[])
+    const commentsByPost=countByPost(commentRows||[])
+    const savesByPost=countByPost(savedRows||[])
     const ownPosts=await Promise.all((rows||[]).map(async(row:any)=>{
       let image:string|undefined
       const photo=row.post_photos?.[0]?.storage_path
       if(photo){const {data:signed}=await supabase!.storage.from('community').createSignedUrl(photo,3600);image=signed?.signedUrl||undefined}
-      const [{count:likes},{count:comments},{count:saves}]=await Promise.all([
-        supabase!.from('post_likes').select('id',{count:'exact',head:true}).eq('post_id',row.id),
-        supabase!.from('comments').select('id',{count:'exact',head:true}).eq('post_id',row.id),
-        supabase!.from('saved_posts').select('id',{count:'exact',head:true}).eq('post_id',row.id)
-      ])
-      return {id:row.id,authorId:userId,title:row.title||'Una nueva aventura',text:row.content,place:'Comunidad motera',date:new Intl.DateTimeFormat('es-PE',{dateStyle:'medium'}).format(new Date(row.created_at)),likes:likes||0,visibility:row.visibility,image,comments:[],kind:'post',authorName:displayName,authorUsername:username,authorAvatar:avatarUrl,createdAt:row.created_at,activityComments:comments||0,activitySaves:saves||0,status:row.status} as any
+      return {id:row.id,authorId:userId,title:row.title||'Una nueva aventura',text:row.content,place:'Comunidad motera',date:new Intl.DateTimeFormat('es-PE',{dateStyle:'medium'}).format(new Date(row.created_at)),likes:likesByPost.get(row.id)||0,visibility:row.visibility,image,comments:[],kind:'post',authorName:displayName,authorUsername:username,authorAvatar:avatarUrl,createdAt:row.created_at,activityComments:commentsByPost.get(row.id)||0,activitySaves:savesByPost.get(row.id)||0,status:row.status} as any
     }))
     setPosts(current=>[...current.filter(p=>p.authorId!==userId),...ownPosts])
     const [{count:comments},{count:likes},{count:saves}]=await Promise.all([
