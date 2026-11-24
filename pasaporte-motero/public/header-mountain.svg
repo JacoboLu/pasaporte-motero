@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 320" width="960" height="320">
+<defs>
+ <linearGradient id="night" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#10294d" stop-opacity=".08"/><stop offset="1" stop-color="#071a34" stop-opacity=".96"/></linearGradient>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#bd8b48"/><stop offset=".48" stop-color="#f3d39a"/><stop offset="1" stop-color="#bd8b48"/></linearGradient>
+ <filter id="glow" x="-20%" y="-30%" width="140%" height="160%"><feGaussianBlur stdDeviation="9"/></filter>
+</defs>
+<path d="M0 244 105 151 158 194 255 93 316 154 427 28 500 115 572 67 652 145 724 105 816 188 875 150 960 232V320H0Z" fill="#071b35" opacity=".82" filter="url(#glow)"/>
+<path d="M0 250 105 157 158 200 255 99 316 160 427 34 500 121 572 73 652 151 724 111 816 194 875 156 960 238V320H0Z" fill="url(#night)"/>
+<path d="m28 247 77-90 53 43 97-101 61 61 111-126 73 87 72-48 80 78 72-40 91 83 59-38 85 76" fill="none" stroke="url(#gold)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="m76 192 29-35 20 26 18-7-28 31-39-15Zm144-39 35-54 21 28 18-9-39 47-35-12Zm154-34 53-85 39 50 24-8-56 64-60-21Zm111-12 15-28 23 28 22 7-38 8-22-15Zm78-7 9-27 30 39 18-3-34 19-23-28Zm101 61 60-39 24 26 18-5-48 39-54-21Zm126 32 61-38 28 25 18-4-53 37-54-20Z" fill="#f0d19a" opacity=".9"/>
+<path d="M0 270Q240 235 480 267T960 264" fill="none" stroke="#d7b477" stroke-opacity=".3" stroke-width="2"/>
+</svg>
