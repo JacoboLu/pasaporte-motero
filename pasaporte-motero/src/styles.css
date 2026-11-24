@@ -6193,3 +6193,58 @@ html[data-theme="dark"],html[data-theme="dark"] body,html[data-theme="dark"] #ro
   font-weight:800!important;
   opacity:1!important;
 }
+
+
+/* Ajuste de fotografía directamente desde la pantalla principal del perfil */
+.app-shell .content .profile-bike-editor{width:100%;min-width:0;margin:0 0 18px}
+.app-shell .content .profile-bike-editor .profile-bike-feature{
+  position:relative!important;cursor:pointer!important;outline-offset:3px!important;
+}
+.app-shell .content .profile-bike-editor .profile-bike-feature:focus-visible{
+  outline:2px solid #e6b85f!important;
+}
+.app-shell .content .profile-bike-editor .profile-bike-image{
+  position:relative!important;width:100%!important;min-width:0!important;
+  user-select:none!important;-webkit-user-select:none!important;
+}
+.app-shell .content .profile-bike-editor .profile-bike-image.is-cropping{
+  cursor:grab!important;touch-action:none!important;
+  outline:2px solid #f0bd62!important;outline-offset:2px!important;
+}
+.app-shell .content .profile-bike-editor .profile-bike-image.is-cropping:active{cursor:grabbing!important}
+.app-shell .content .profile-bike-editor .profile-bike-image img{
+  pointer-events:none!important;user-select:none!important;-webkit-user-drag:none!important;
+}
+.app-shell .content .profile-bike-crop-hint{
+  position:absolute!important;left:5px!important;right:5px!important;bottom:5px!important;
+  display:block!important;padding:5px 7px!important;border-radius:7px!important;
+  background:#10243ddd!important;color:#fff!important;text-align:center!important;
+  font-size:9px!important;font-weight:750!important;line-height:1.2!important;
+  pointer-events:none!important;
+}
+.app-shell .content .profile-bike-crop-save{
+  grid-column:1/-1!important;justify-self:end!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  gap:6px!important;min-height:32px!important;padding:6px 10px!important;
+  border:1px solid #e6b85f!important;border-radius:9px!important;
+  background:#f5e8cf!important;color:#17324e!important;
+  font-size:10px!important;font-weight:800!important;
+}
+.app-shell .content .profile-bike-crop-save:disabled{opacity:.65!important}
+.app-shell .content .profile-bike-editor-actions{
+  display:flex!important;justify-content:flex-end!important;min-height:0!important;
+  margin-top:7px!important;
+}
+.app-shell .content .profile-bike-editor-actions button{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  gap:6px!important;min-height:30px!important;padding:5px 9px!important;
+  border:1px solid #b58a4b!important;border-radius:8px!important;
+  background:#fff8eb!important;color:#24405d!important;
+  font-size:10px!important;font-weight:750!important;
+}
+.app-shell.theme-dark .content .profile-bike-editor-actions button{
+  background:#263f5a!important;color:#ffe1ad!important;border-color:#b58a4b!important;
+}
+.app-shell .content .profile-bike-editor-actions button:disabled{
+  opacity:.55!important;cursor:not-allowed!important;
+}
