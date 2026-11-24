@@ -5154,3 +5154,46 @@ html,body,#root{background:var(--pm-paper)!important}
 .app-shell.theme-dark .content .notification-item{
   color:#F2F5F8!important;background:#1C3046!important;border-color:#52677D!important;
 }
+
+
+/* V6 · normalización de círculos de avatar.
+   Recorta imágenes al círculo real y evita esquinas o fondos rectangulares residuales. */
+.app-shell .content .avatar,
+.app-shell .content .community-author-avatar,
+.app-shell .content .public-profile-avatar,
+.app-shell .content .profile-avatar-wrap .avatar.large,
+.app-shell .content .profile-card .avatar.large{
+  aspect-ratio:1 / 1!important;
+  border-radius:50%!important;
+  overflow:hidden!important;
+  isolation:isolate!important;
+  flex-shrink:0!important;
+}
+.app-shell .content .avatar img,
+.app-shell .content .community-author-avatar img,
+.app-shell .content .public-profile-avatar img,
+.app-shell .content .profile-avatar-wrap .avatar.large img,
+.app-shell .content .profile-card .avatar.large img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:100%!important;
+  min-height:100%!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  border:0!important;
+  border-radius:inherit!important;
+  background:transparent!important;
+}
+.app-shell.theme-light .content .avatar,
+.app-shell.theme-light .content .community-author-avatar,
+.app-shell.theme-light .content .public-profile-avatar{
+  background:#E8EDF2!important;
+  color:#34485B!important;
+}
+.app-shell.theme-dark .content .avatar,
+.app-shell.theme-dark .content .community-author-avatar,
+.app-shell.theme-dark .content .public-profile-avatar{
+  background:#29445E!important;
+  color:#F4D18A!important;
+}
