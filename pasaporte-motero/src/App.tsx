@@ -1141,6 +1141,8 @@ export default function App() {
     let processedTotal = 0
     let updatedTotal = 0
     let unmatchedTotal = 0
+    let alreadyHadImageTotal = 0
+    let failedTotal = 0
     try {
       for (let batch = 0; batch < 5; batch += 1) {
         const { data, error } = await supabase.functions.invoke('populate-destination-images', {
@@ -1151,14 +1153,17 @@ export default function App() {
         if (!processed) break
         processedTotal += processed
         updatedTotal += Number(data?.updated || 0)
-        unmatchedTotal += Array.isArray(data?.results) ? data.results.filter((item:any) => item.status === 'no_confident_match').length : 0
+        const results = Array.isArray(data?.results) ? data.results : []
+        unmatchedTotal += results.filter((item:any) => item.status === 'no_confident_match').length
+        alreadyHadImageTotal += results.filter((item:any) => item.status === 'already_has_image').length
+        failedTotal += results.filter((item:any) => ['update_error','error','commons_error','license_or_image_unverified'].includes(item.status)).length
         nextOffset += processed
         if (processed < 4) break
       }
       setImageBackfillOffset(nextOffset)
       try { localStorage.setItem('pm_image_backfill_offset', String(nextOffset)) } catch { /* El progreso permanece en esta sesión. */ }
       setImageBackfillStatus(processedTotal
-        ? `Revisados ${processedTotal} destinos · ${updatedTotal} imágenes verificadas añadidas · ${unmatchedTotal} sin coincidencia confiable. Siguiente posición: ${nextOffset}.`
+        ? `Revisados ${processedTotal} destinos · ${updatedTotal} imágenes nuevas añadidas · ${alreadyHadImageTotal} ya tenían imagen · ${unmatchedTotal} sin coincidencia confiable · ${failedTotal} con error o licencia no verificable. Siguiente posición: ${nextOffset}.`
         : 'No hay más destinos activos para revisar en este recorrido.')
     } catch (error:any) {
       setImageBackfillOffset(nextOffset)
