@@ -1161,7 +1161,7 @@ export default function App() {
 
   async function searchManagerCandidates() {
     if (!supabase || profileRole !== 'admin') return
-    const term = managerQuery.trim().replace(/[\\\\,%()_*]/g, ' ').replace(/\\s+/g, ' ')
+    const term = managerQuery.trim().replace(/[\\,%()_*]/g, ' ').replace(/\s+/g, ' ')
     if (term.length < 2) { notify('Escribe al menos 2 caracteres para buscar al encargado.'); return }
     setManagerBusy(true)
     const pattern = '%' + term + '%'
