@@ -3951,3 +3951,29 @@ html,body,#root{background:var(--pm-paper)!important}
   background-color:#EBD9BA!important;
   filter:none!important;
 }
+
+
+/* FONDO ORIGINAL GLOBAL — aplicar la ilustración al contenedor real de la app.
+   Se mantiene el PNG subido por el usuario, sin filtros, tintes ni recortes. */
+.app-shell,
+.app-shell.theme-light,
+.app-shell.theme-dark{
+  background-color:#EBD9BA!important;
+  background-image:url('/passport-parchment-background.png')!important;
+  background-position:center top!important;
+  background-size:100% auto!important;
+  background-repeat:repeat-y!important;
+  background-attachment:scroll!important;
+}
+.app-shell main.content,
+.app-shell.theme-light main.content,
+.app-shell.theme-dark main.content{
+  background-color:transparent!important;
+  background-image:url('/passport-parchment-background.png')!important;
+  background-position:center top!important;
+  background-size:100% auto!important;
+  background-repeat:repeat-y!important;
+  background-attachment:local!important;
+  background-blend-mode:normal!important;
+  filter:none!important;
+}
