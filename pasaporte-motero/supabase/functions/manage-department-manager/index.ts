@@ -70,6 +70,8 @@ Deno.serve(async (req: Request) => {
         department_code: departmentCode,
         assigned_by: authData.user.id,
         is_active: true,
+        deactivated_by: null,
+        deactivated_at: null,
       }, { onConflict: "user_id,department_code" })
       .select("id,user_id,department_code,is_active")
       .single();
@@ -86,7 +88,7 @@ Deno.serve(async (req: Request) => {
   }
 
   const { data: assignment, error: assignmentError } = await admin.from("department_managers")
-    .update({ is_active: false })
+    .update({ is_active: false, deactivated_by: authData.user.id, deactivated_at: new Date().toISOString() })
     .eq("user_id", userId)
     .eq("department_code", departmentCode)
     .eq("is_active", true)
