@@ -6,7 +6,7 @@ import {
   Images, List as ListIcon, X, LocateFixed, CalendarDays, Bookmark, SlidersHorizontal,
   ArrowLeft, Clock3, Send, ImagePlus, Globe2, Settings, LogOut, QrCode,
   BadgeCheck, AlertCircle, CloudOff, MoreHorizontal, Flag, UserPlus, Stamp,
-  MapPinned, Trophy, Sparkles, FileCheck2, ScanLine, Wrench, CalendarClock, FileText, ChevronDown, Sun, Moon, Pencil, Trash2, Activity
+  MapPinned, Trophy, Sparkles, FileCheck2, ScanLine, Wrench, CalendarClock, FileText, ChevronDown, Sun, Moon, Pencil, Trash2, Activity, Save, Crop
 } from 'lucide-react'
 import { allRegions, regions } from './data'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
