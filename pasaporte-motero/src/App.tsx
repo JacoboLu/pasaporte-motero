@@ -1168,7 +1168,15 @@ export default function App() {
   async function resolveContentReport(reportId:string, status:'resolved'|'dismissed') {
     if (!supabase || profileRole !== 'admin') return
     setAdminReportsBusy(true)
-    const { error } = await supabase.from('content_reports').update({ status }).eq('id', reportId).eq('status', 'pending')
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      setAdminReportsBusy(false)
+      notify('No se pudo verificar la sesión administrativa. Vuelve a iniciar sesión.')
+      return
+    }
+    const { error } = await supabase.from('content_reports')
+      .update({ status, reviewed_by: user.id, reviewed_at: new Date().toISOString() })
+      .eq('id', reportId).eq('status', 'pending')
     setAdminReportsBusy(false)
     if (error) { notify('No se pudo actualizar el reporte: ' + error.message); return }
     setAdminReports(items => items.filter(item => item.id !== reportId))
