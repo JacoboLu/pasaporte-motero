@@ -921,6 +921,7 @@ html[data-theme="light"] .community-author-open small,.theme-light .community-au
 .passport-book-page.has-stamp{box-shadow:inset 8px 0 15px #6e4a2528,inset 0 0 22px #9a6b3820}
 .passport-book-page .passport-page-title{text-shadow:0 1px #fff8e8}
 .passport-ink-stamp{
+  appearance:none;cursor:pointer;font:inherit;
   --stamp-ink:#8b4d3b;
   position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;justify-content:center;
   width:clamp(112px,34vw,148px);height:clamp(112px,34vw,148px);flex-shrink:0;margin:13px 0 8px;padding:10px 7px;
@@ -1109,6 +1110,7 @@ html[data-theme="light"] .community-feed-tabs button.active,.theme-light .commun
   overflow:hidden;
 }
 .tourist-mini-stamp{
+  appearance:none;cursor:pointer;font:inherit;background:transparent;
   display:flex;
   align-items:center;
   justify-content:center;
