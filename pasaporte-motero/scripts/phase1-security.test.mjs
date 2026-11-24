@@ -33,6 +33,7 @@ assert.match(activity, /\.in\('post_id',postIds\)/);
 assert.doesNotMatch(activity, /\.eq\('post_id',row\.id\)/);
 
 const profileMigration = readFileSync(new URL('../supabase/migrations/20261124180000_lock_down_profiles_public_access.sql', import.meta.url), 'utf8');
+const profileProjectionMigration = readFileSync(new URL('../supabase/migrations/20261124183000_materialize_public_profiles.sql', import.meta.url), 'utf8');
 const offlineQueue = readFileSync(new URL('../src/lib/offline-photo-visits.ts', import.meta.url), 'utf8');
 const secureStorage = readFileSync(new URL('../src/lib/secure-storage.ts', import.meta.url), 'utf8');
 const imageFunction = readFileSync(new URL('../supabase/functions/populate-destination-images/index.ts', import.meta.url), 'utf8');
@@ -41,6 +42,12 @@ assert.match(profileMigration, /revoke select on table public\.profiles from ano
 assert.match(profileMigration, /using \(id = \(select auth\.uid\(\)\)\)/i);
 assert.match(profileMigration, /security_barrier/i);
 assert.match(profileMigration, /security_invoker\s*=\s*false/i);
+assert.match(profileProjectionMigration, /drop view if exists public\\.public_profiles/i);
+assert.match(profileProjectionMigration, /enable row level security/i);
+assert.match(profileProjectionMigration, /create policy "Public profiles are readable"/i);
+assert.match(profileProjectionMigration, /security definer/i);
+assert.match(profileProjectionMigration, /set search_path = pg_catalog, public/i);
+assert.match(profileProjectionMigration, /sync_public_profile_projection/);
 assert.match(secureStorage, /encryptOfflineBlob/);
 assert.match(secureStorage, /decryptOfflineBlob/);
 assert.match(secureStorage, /OFFLINE_KEY_ID/);
