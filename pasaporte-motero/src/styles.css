@@ -5592,3 +5592,149 @@ html,body,#root{background:var(--pm-paper)!important}
     min-height:72px!important;
   }
 }
+
+
+/* Accesibilidad transversal del modo oscuro: contraste legible en todas las vistas */
+.app-shell.theme-dark{
+  --page-bg:#111820;
+  --shell-bg:#111820;
+  --topbar-bg:#172536;
+  --main-text:#f4f7fb;
+  --muted-text:#b7c3d1;
+  --card-bg:#1c2d40;
+  --field-bg:#17283b;
+  --field-border:#60758c;
+  --line-color:#34495f;
+  color:#f4f7fb;
+  color-scheme:dark;
+}
+html[data-theme="dark"],html[data-theme="dark"] body,html[data-theme="dark"] #root{
+  background:#111820!important;
+  color-scheme:dark;
+}
+.app-shell.theme-dark .content{color:var(--main-text);background:var(--page-bg)}
+.app-shell.theme-dark h1,.app-shell.theme-dark h2,.app-shell.theme-dark h3,
+.app-shell.theme-dark h4,.app-shell.theme-dark strong,
+.app-shell.theme-dark .section-heading h2,
+.app-shell.theme-dark .settings-card h2{color:#f4f7fb}
+.app-shell.theme-dark p,.app-shell.theme-dark small,
+.app-shell.theme-dark label,.app-shell.theme-dark .eyebrow,
+.app-shell.theme-dark .muted,.app-shell.theme-dark .profile-quick-caption,
+.app-shell.theme-dark .settings-card label,
+.app-shell.theme-dark .settings-card p,
+.app-shell.theme-dark .settings-card small{
+  color:#bdc9d7;
+}
+.app-shell.theme-dark .settings-card,
+.app-shell.theme-dark .profile-card,
+.app-shell.theme-dark .profile-menu,
+.app-shell.theme-dark .post-card,
+.app-shell.theme-dark .trip-card,
+.app-shell.theme-dark .stat,
+.app-shell.theme-dark .empty-card,
+.app-shell.theme-dark .history-row,
+.app-shell.theme-dark .qr-card,
+.app-shell.theme-dark .composer-modal,
+.app-shell.theme-dark .action-sheet,
+.app-shell.theme-dark .filter-panel,
+.app-shell.theme-dark .map-placeholder,
+.app-shell.theme-dark .signed-out-card,
+.app-shell.theme-dark .staff-scan-panel,
+.app-shell.theme-dark .admin-demo{
+  background:#1c2d40!important;
+  color:#f4f7fb!important;
+  border-color:#526a83!important;
+}
+.app-shell.theme-dark .settings-card label,
+.app-shell.theme-dark .composer-modal label,
+.app-shell.theme-dark .filter-panel label,
+.app-shell.theme-dark .staff-scan-panel label,
+.app-shell.theme-dark .admin-demo label,
+.app-shell.theme-dark .form-grid>label,
+.app-shell.theme-dark .crop-controls label{
+  color:#c5d1df!important;
+  font-weight:600;
+}
+.app-shell.theme-dark .settings-card input:not([type=file]),
+.app-shell.theme-dark .settings-card textarea,
+.app-shell.theme-dark .settings-card select,
+.app-shell.theme-dark .composer-modal input:not([type=file]),
+.app-shell.theme-dark .composer-modal textarea,
+.app-shell.theme-dark .composer-modal select,
+.app-shell.theme-dark .filter-panel input,
+.app-shell.theme-dark .filter-panel textarea,
+.app-shell.theme-dark .filter-panel select,
+.app-shell.theme-dark .staff-scan-panel input,
+.app-shell.theme-dark .staff-scan-panel textarea,
+.app-shell.theme-dark .staff-scan-panel select,
+.app-shell.theme-dark input:not([type=file]):not([type=checkbox]):not([type=radio]):not([type=range]),
+.app-shell.theme-dark textarea,
+.app-shell.theme-dark select{
+  background:#17283b!important;
+  color:#f7f9fc!important;
+  border-color:#607991!important;
+  color-scheme:dark;
+}
+.app-shell.theme-dark input::placeholder,
+.app-shell.theme-dark textarea::placeholder{color:#a8b7c8!important;opacity:1}
+.app-shell.theme-dark .settings-card input:focus,
+.app-shell.theme-dark .settings-card textarea:focus,
+.app-shell.theme-dark .settings-card select:focus,
+.app-shell.theme-dark input:focus-visible,
+.app-shell.theme-dark textarea:focus-visible,
+.app-shell.theme-dark select:focus-visible{
+  border-color:#e4a34d!important;
+  outline:2px solid #e4a34d!important;
+  outline-offset:2px;
+}
+.app-shell.theme-dark .file-pick{
+  color:#ffd08a!important;
+  border-color:#d99a43!important;
+  background:#23384d!important;
+}
+.app-shell.theme-dark .secondary,
+.app-shell.theme-dark .feed-switch button,
+.app-shell.theme-dark .method-tabs button,
+.app-shell.theme-dark .method-panel,
+.app-shell.theme-dark .searchbox,
+.app-shell.theme-dark .filter-button{
+  background:#263b52!important;
+  color:#edf3fa!important;
+  border-color:#60758c!important;
+}
+.app-shell.theme-dark .primary{
+  color:#fff!important;
+}
+.app-shell.theme-dark .primary:disabled{
+  background:#9b5725!important;
+  color:#fff!important;
+  border:1px solid #e3ad69!important;
+  opacity:1!important;
+  cursor:not-allowed;
+}
+.app-shell.theme-dark .text-action,
+.app-shell.theme-dark .back-link,
+.app-shell.theme-dark .profile-menu button,
+.app-shell.theme-dark .icon-button{color:#ffc078}
+.app-shell.theme-dark .settings-card .section-heading,
+.app-shell.theme-dark .profile-stats,
+.app-shell.theme-dark .profile-hero-stats,
+.app-shell.theme-dark .post-actions{border-color:#52677d}
+.app-shell.theme-dark .trip-card p,
+.app-shell.theme-dark .post-body p,
+.app-shell.theme-dark .method-panel p,
+.app-shell.theme-dark .history-row small,
+.app-shell.theme-dark .trip-card small{color:#bdc9d7}
+.app-shell.theme-dark .toast{
+  background:#263b52!important;
+  color:#f7f9fc!important;
+  border-color:#60758c!important;
+}
+.app-shell.theme-dark button:focus-visible,
+.app-shell.theme-dark a:focus-visible{
+  outline:2px solid #ffc078!important;
+  outline-offset:3px;
+}
+@media(prefers-reduced-motion:reduce){
+  .app-shell.theme-dark *{scroll-behavior:auto!important;transition-duration:.01ms!important}
+}
