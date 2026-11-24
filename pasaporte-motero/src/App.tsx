@@ -1332,7 +1332,7 @@ export default function App() {
   async function loadCommunityPosts() {
     if (!supabase) return
     const [{ data: postRows, error: postsError }, { data: tripRows, error: tripsError }] = await Promise.all([
-      supabase.from('posts').select('id,user_id,title,content,visibility,status,created_at,catalog_destination_id,post_photos(storage_path)').eq('status','published').in('visibility',['public','followers']).order('created_at',{ascending:false}).limit(50),
+      supabase.from('posts').select('id,user_id,title,content,visibility,status,created_at,catalog_destination_id,destination:destination_catalog!posts_catalog_destination_id_fkey(title,city,region),post_photos(storage_path)').eq('status','published').in('visibility',['public','followers']).order('created_at',{ascending:false}).limit(50),
       supabase.from('trips').select('id,user_id,name,description,start_date,end_date,visibility,created_at,trip_photos(storage_path),trip_custom_stops(name,sort_order)').in('visibility',['public','followers']).order('created_at',{ascending:false}).limit(50)
     ])
     if (postsError) { notify('No pudimos cargar las publicaciones: '+postsError.message); return }
@@ -1352,7 +1352,7 @@ export default function App() {
       let image: string | undefined
       if (photo) { const {data:signed} = await supabase!.storage.from('community').createSignedUrl(photo,3600); image=signed?.signedUrl || undefined }
       const profile = profileById.get(row.user_id)
-      const linkedDestination = mapDestinations.find(destination => destination.id === row.catalog_destination_id)
+      const linkedDestination = row.destination || mapDestinations.find(destination => destination.id === row.catalog_destination_id)
       const likesForPost = (likeRows || []).filter((item: any) => item.post_id === row.id)
       const commentsForPost = (commentRows || []).filter((item: any) => item.post_id === row.id).map((item: any) => item.content)
       return {id:row.id,authorId:row.user_id,title:row.title || 'Una nueva aventura',text:row.content,place:linkedDestination?[linkedDestination.title,[linkedDestination.city,linkedDestination.region].filter(Boolean).join(', ')].filter(Boolean).join(' · '):'Comunidad motera',catalogDestinationId:row.catalog_destination_id??null,date:new Intl.DateTimeFormat('es-PE',{dateStyle:'medium'}).format(new Date(row.created_at)),likes:likesForPost.length,liked:!!currentUserId && likesForPost.some((item:any)=>item.user_id===currentUserId),visibility:row.visibility,image,comments:commentsForPost,kind:'post',authorName:profile?.full_name || 'Motero',authorUsername:profile?.username || 'viajero',authorAvatar:profile?.avatar_url || null,createdAt:row.created_at} as Post
@@ -1375,7 +1375,7 @@ export default function App() {
   }
   async function loadMyActivity(userId:string) {
     if (!supabase) return
-    const {data:rows,error}=await supabase.from('posts').select('id,user_id,title,content,visibility,status,created_at,catalog_destination_id,post_photos(storage_path)').eq('user_id',userId).order('created_at',{ascending:false}).limit(100)
+    const {data:rows,error}=await supabase.from('posts').select('id,user_id,title,content,visibility,status,created_at,catalog_destination_id,destination:destination_catalog!posts_catalog_destination_id_fkey(title,city,region),post_photos(storage_path)').eq('user_id',userId).order('created_at',{ascending:false}).limit(100)
     if(error){notify('No se pudo cargar tu actividad: '+error.message);return}
     const postIds=(rows||[]).map((row:any)=>row.id)
     const [{data:likeRows,error:likesError},{data:commentRows,error:commentsError},{data:savedRows,error:savesError}]=await Promise.all([
@@ -1392,7 +1392,7 @@ export default function App() {
       let image:string|undefined
       const photo=row.post_photos?.[0]?.storage_path
       if(photo){const {data:signed}=await supabase!.storage.from('community').createSignedUrl(photo,3600);image=signed?.signedUrl||undefined}
-      const linkedDestination=mapDestinations.find(destination=>destination.id===row.catalog_destination_id)
+      const linkedDestination=row.destination||mapDestinations.find(destination=>destination.id===row.catalog_destination_id)
       return {id:row.id,authorId:userId,title:row.title||'Una nueva aventura',text:row.content,place:linkedDestination?[linkedDestination.title,[linkedDestination.city,linkedDestination.region].filter(Boolean).join(', ')].filter(Boolean).join(' · '):'Comunidad motera',catalogDestinationId:row.catalog_destination_id??null,date:new Intl.DateTimeFormat('es-PE',{dateStyle:'medium'}).format(new Date(row.created_at)),likes:likesByPost.get(row.id)||0,visibility:row.visibility,image,comments:[],kind:'post',authorName:displayName,authorUsername:username,authorAvatar:avatarUrl,createdAt:row.created_at,activityComments:commentsByPost.get(row.id)||0,activitySaves:savesByPost.get(row.id)||0,status:row.status} as any
     }))
     setPosts(current=>[...current.filter(p=>p.authorId!==userId),...ownPosts])
