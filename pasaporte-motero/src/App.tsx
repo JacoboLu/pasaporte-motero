@@ -487,7 +487,7 @@ export default function App() {
   useEffect(() => {
     let active = true
     const refreshQueue = async () => {
-      try { const items = await authUserId ? getQueuedPhotoVisits(authUserId) : Promise.resolve([]); if (active) setOfflinePhotoQueueCount(items.length) }
+      try { const items = authUserId ? await getQueuedPhotoVisits(authUserId) : []; if (active) setOfflinePhotoQueueCount(items.length) }
       catch (error) { console.warn('No se pudo leer la cola local de evidencias:', error) }
     }
     void refreshQueue()
@@ -1093,8 +1093,6 @@ export default function App() {
         ? `Bloque revisado: ${processed} destinos · ${updated} imágenes verificadas añadidas · ${unmatched} sin coincidencia confiable. Siguiente bloque: ${nextOffset}.`
         : 'No hay más destinos para revisar en este recorrido.')
       if (processed) {
-        const { data: remaining } = await supabase.from('destination_catalog').select('id', { count: 'exact', head: true }).eq('is_active', true).is('image_url', null)
-        if (remaining === null) setImageBackfillStatus(current => current + ' Revisa el catálogo para confirmar el avance.')
       }
     } catch (error:any) {
       setImageBackfillStatus(error?.message || 'No se pudo completar el bloque.')
