@@ -1,3 +1,5 @@
+import { decryptOfflineBlob, encryptOfflineBlob } from './secure-storage'
+
 export type QueuedPhotoVisit = {
   id: string
   userId: string
@@ -31,7 +33,7 @@ function openQueueDb(): Promise<IDBDatabase> {
   })
 }
 
-export async function addQueuedPhotoVisit(item: QueuedPhotoVisit): Promise<void> {
+async function putStoredItem(item: QueuedPhotoVisit): Promise<void> {
   const db = await openQueueDb()
   try {
     await new Promise<void>((resolve, reject) => {
@@ -44,17 +46,41 @@ export async function addQueuedPhotoVisit(item: QueuedPhotoVisit): Promise<void>
   } finally { db.close() }
 }
 
-export async function getQueuedPhotoVisits(userId?: string): Promise<QueuedPhotoVisit[]> {
+/** New evidence is encrypted before it is written to IndexedDB. */
+export async function addQueuedPhotoVisit(item: QueuedPhotoVisit): Promise<void> {
+  const encrypted = await encryptOfflineBlob(item.blob)
+  await putStoredItem({ ...item, blob: encrypted })
+}
+
+/** Returns only the signed-in user's queue and upgrades legacy plaintext blobs in place. */
+export async function getQueuedPhotoVisits(userId: string): Promise<QueuedPhotoVisit[]> {
+  if (!userId) return []
   const db = await openQueueDb()
+  let stored: QueuedPhotoVisit[]
   try {
-    return await new Promise((resolve, reject) => {
+    stored = await new Promise((resolve, reject) => {
       const tx = db.transaction(STORE, 'readonly')
-      const store = tx.objectStore(STORE)
-      const request = userId ? store.index('userId').getAll(userId) : store.getAll()
+      const request = tx.objectStore(STORE).index('userId').getAll(userId)
       request.onsuccess = () => resolve((request.result || []) as QueuedPhotoVisit[])
       request.onerror = () => reject(request.error || new Error('No se pudo leer la cola local.'))
     })
   } finally { db.close() }
+
+  const result: QueuedPhotoVisit[] = []
+  for (const item of stored) {
+    try {
+      const encrypted = item.blob.type === 'application/x-pasaporte-motero-encrypted'
+        ? item.blob
+        : await encryptOfflineBlob(item.blob)
+      if (encrypted !== item.blob) await putStoredItem({ ...item, blob: encrypted })
+      result.push({ ...item, blob: await decryptOfflineBlob(encrypted) })
+    } catch (error) {
+      // Preserve legacy evidence if encryption is unavailable; never delete a queued visit.
+      console.warn('No se pudo migrar una evidencia local al formato cifrado:', error)
+      result.push(item)
+    }
+  }
+  return result
 }
 
 export async function removeQueuedPhotoVisit(id: string): Promise<void> {

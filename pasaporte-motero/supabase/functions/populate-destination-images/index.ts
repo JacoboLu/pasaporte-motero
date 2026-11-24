@@ -34,8 +34,9 @@ Deno.serve(async (req: Request) => {
   if (profile?.role !== "admin") return json({ error: "Solo un administrador puede actualizar el catálogo de imágenes" }, 403);
 
   const url = new URL(req.url);
-  const offset = Number(url.searchParams.get("offset") || 0);
-  const limit = Number(url.searchParams.get("limit") || 4);
+  const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
+  const offset = Number(url.searchParams.get("offset") ?? body.offset ?? 0);
+  const limit = Number(url.searchParams.get("limit") ?? body.limit ?? 4);
   if (!Number.isSafeInteger(offset) || offset < 0) return json({ error: "Offset inválido" }, 400);
   if (!Number.isSafeInteger(limit) || limit < 1 || limit > 4) return json({ error: "El límite debe estar entre 1 y 4" }, 400);
 
@@ -112,7 +113,7 @@ Deno.serve(async (req: Request) => {
     return json({ manual: true, results });
   }
   const [rowsResponse, imagesResponse] = await Promise.all([
-    fetch(base + "/rest/v1/destination_catalog?select=id,name,department,province,city,source_note,image_url&order=id.asc&limit=" + limit + "&offset=" + offset, { headers }),
+    fetch(base + "/rest/v1/destination_catalog?select=id,name,department,province,city,source_note,image_url&is_active=eq.true&order=id.asc&limit=" + limit + "&offset=" + offset, { headers }),
     fetch(base + "/rest/v1/destination_catalog?select=image_url&image_url=not.is.null", { headers })
   ]);
   if (!rowsResponse.ok) return Response.json({ error: await rowsResponse.text() }, { status: 502 });
@@ -171,6 +172,7 @@ Deno.serve(async (req: Request) => {
         (item.info.width || 0) >= 400 && (item.info.height || 0) >= 250 &&
         !usedUrls.has(item.info.thumburl || item.info.url) &&
         item.coreCoverage >= (core.length <= 1 ? 1 : 0.66) &&
+        item.locationMatch &&
         (item.exactCore || item.distinctiveSingle) &&
         item.score >= 0.68
       ).sort((a: any, b: any) => b.score - a.score);

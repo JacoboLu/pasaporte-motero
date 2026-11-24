@@ -1,6 +1,8 @@
 const DB_NAME = 'pasaporte-motero-secure'
 const STORE_NAME = 'crypto'
 const KEY_ID = 'local-cache-aes-gcm-v1'
+const OFFLINE_KEY_ID = 'offline-photo-aes-gcm-v1'
+const OFFLINE_BLOB_TYPE = 'application/x-pasaporte-motero-encrypted'
 const PRIVATE_KEYS = ['pm_visits', 'pm_posts', 'pm_trips', 'pm_saved', 'pm_followed', 'pm_name', 'pm_username', 'pm_bio', 'pm_city']
 
 function openKeyDb(): Promise<IDBDatabase> {
@@ -14,11 +16,11 @@ function openKeyDb(): Promise<IDBDatabase> {
   })
 }
 
-async function getEncryptionKey(): Promise<CryptoKey> {
+async function getEncryptionKey(keyId = KEY_ID): Promise<CryptoKey> {
   const db = await openKeyDb()
   try {
     const existing = await new Promise<CryptoKey | undefined>((resolve, reject) => {
-      const request = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).get(KEY_ID)
+      const request = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).get(keyId)
       request.onsuccess = () => resolve(request.result as CryptoKey | undefined)
       request.onerror = () => reject(request.error)
     })
@@ -26,7 +28,7 @@ async function getEncryptionKey(): Promise<CryptoKey> {
     const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt'])
     await new Promise<void>((resolve, reject) => {
       const transaction = db.transaction(STORE_NAME, 'readwrite')
-      transaction.objectStore(STORE_NAME).put(key, KEY_ID)
+      transaction.objectStore(STORE_NAME).put(key, keyId)
       transaction.oncomplete = () => resolve()
       transaction.onerror = () => reject(transaction.error)
       transaction.onabort = () => reject(transaction.error)
@@ -54,6 +56,26 @@ async function encryptValue(value: string): Promise<string> {
   const iv = crypto.getRandomValues(new Uint8Array(12))
   const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(value))
   return JSON.stringify({ version: 1, iv: toBase64(iv), data: toBase64(new Uint8Array(encrypted)) })
+}
+
+/** Encrypts offline photo evidence with a separate device key that survives sign-out. */
+export async function encryptOfflineBlob(blob: Blob): Promise<Blob> {
+  if (!globalThis.crypto?.subtle) throw new Error('Este navegador no ofrece cifrado seguro para evidencias sin conexión.')
+  const key = await getEncryptionKey(OFFLINE_KEY_ID)
+  const iv = crypto.getRandomValues(new Uint8Array(12))
+  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, await blob.arrayBuffer())
+  const envelope = JSON.stringify({ version: 1, type: blob.type || 'application/octet-stream', iv: toBase64(iv), data: toBase64(new Uint8Array(encrypted)) })
+  return new Blob([envelope], { type: OFFLINE_BLOB_TYPE })
+}
+
+/** Decrypts offline evidence while preserving the original MIME type. */
+export async function decryptOfflineBlob(blob: Blob): Promise<Blob> {
+  if (blob.type !== OFFLINE_BLOB_TYPE) return blob
+  const envelope = JSON.parse(await blob.text()) as { version: number; type: string; iv: string; data: string }
+  if (envelope.version !== 1 || !envelope.iv || !envelope.data) throw new Error('La evidencia local cifrada no tiene un formato válido.')
+  const key = await getEncryptionKey(OFFLINE_KEY_ID)
+  const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromBase64(envelope.iv) }, key, fromBase64(envelope.data))
+  return new Blob([decrypted], { type: envelope.type || 'application/octet-stream' })
 }
 
 async function decryptValue(value: string): Promise<string> {
@@ -93,16 +115,22 @@ export async function migrateLegacyPrivateCache(): Promise<void> {
   }
 }
 
-/** Removes all private cached data and the non-extractable device key on sign-out. */
+/** Clears account cache and the auth key on sign-out, but preserves the offline-evidence key. */
 export async function clearPrivateCache(): Promise<void> {
   for (const key of PRIVATE_KEYS) {
     localStorage.removeItem(key)
     localStorage.removeItem(`pm_secure_${key}`)
   }
-  await new Promise<void>(resolve => {
-    const request = indexedDB.deleteDatabase(DB_NAME)
-    request.onsuccess = request.onerror = request.onblocked = () => resolve()
-  })
+  const db = await openKeyDb()
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite')
+      tx.objectStore(STORE_NAME).delete(KEY_ID)
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => reject(tx.error || new Error('No se pudo limpiar la clave de sesión.'))
+      tx.onabort = () => reject(tx.error || new Error('Se canceló la limpieza de la clave de sesión.'))
+    })
+  } finally { db.close() }
 }
 
 /** Supabase Auth custom storage: session and refresh tokens are encrypted at rest too. */
