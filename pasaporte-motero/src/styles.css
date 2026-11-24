@@ -3874,3 +3874,48 @@ html,body,#root{background:var(--pm-paper)!important}
   background:#F7EEDC!important;color:#24364A!important;border:1px solid #C7A55F!important;
 }
 .app-shell.theme-dark .content .toast *{color:#24364A!important}
+
+
+/* Excepciones de superficies claras dentro del tema oscuro:
+   la tinta de estas tarjetas debe seguir siendo azul marino. */
+.app-shell.theme-dark .content .settings-card,
+.app-shell.theme-dark .content .profile-menu,
+.app-shell.theme-dark .content .achievement-card,
+.app-shell.theme-dark .content .achievement-summary,
+.app-shell.theme-dark .content .trip-card{
+  background:#F7EEDC!important;
+  color:#24364A!important;
+  border-color:#C7A55F!important;
+}
+.app-shell.theme-dark .content .settings-card *,
+.app-shell.theme-dark .content .profile-menu *,
+.app-shell.theme-dark .content .achievement-card *,
+.app-shell.theme-dark .content .achievement-summary *,
+.app-shell.theme-dark .content .trip-card *{
+  color:#24364A!important;
+}
+.app-shell.theme-dark .content .settings-card p,
+.app-shell.theme-dark .content .settings-card small,
+.app-shell.theme-dark .content .profile-menu small,
+.app-shell.theme-dark .content .achievement-card p,
+.app-shell.theme-dark .content .achievement-card small,
+.app-shell.theme-dark .content .achievement-summary small,
+.app-shell.theme-dark .content .trip-card p,
+.app-shell.theme-dark .content .trip-card small{
+  color:#526273!important;
+}
+.app-shell.theme-dark .content .settings-card .text-action,
+.app-shell.theme-dark .content .profile-menu .text-action,
+.app-shell.theme-dark .content .trip-card .text-action{
+  color:#A85E2D!important;
+}
+.app-shell.theme-dark .content .settings-card input,
+.app-shell.theme-dark .content .settings-card textarea,
+.app-shell.theme-dark .content .settings-card select{
+  background:#FFFFFF!important;color:#20364F!important;
+  -webkit-text-fill-color:#20364F!important;border-color:#C9B88F!important;
+}
+.app-shell.theme-dark .content .settings-card input::placeholder,
+.app-shell.theme-dark .content .settings-card textarea::placeholder{
+  color:#647487!important;
+}
