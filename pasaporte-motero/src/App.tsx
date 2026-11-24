@@ -1006,7 +1006,7 @@ export default function App() {
             if (lookupError) throw lookupError
             if (!existingEvidence) {
               const { error: cleanupError } = await supabase.storage.from('travel-media').remove([path])
-              if (cleanupError) console.warn('No se pudo limpiar un archivo de evidencia duplicado:', cleanupError)
+              if (cleanupError) throw cleanupError
             }
           } else if (error) {
             throw error
