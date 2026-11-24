@@ -6076,3 +6076,84 @@ html[data-theme="dark"],html[data-theme="dark"] body,html[data-theme="dark"] #ro
 .app-shell.theme-light .composer-modal .post-destination-recommended strong{color:#24374d!important}
 .app-shell.theme-light .composer-modal .post-destination-suggestions small,
 .app-shell.theme-light .composer-modal .post-destination-recommended small{color:#68788a!important}
+
+
+/* Perfil y privacidad: contraste completo en modo oscuro */
+.app-shell.theme-dark .content .settings-card{
+  background:#1c3046!important;
+  color:#f4f7fb!important;
+  border:1px solid #607991!important;
+}
+.app-shell.theme-dark .content .settings-card .section-heading h2,
+.app-shell.theme-dark .content .settings-card h2{
+  color:#f5f7fb!important;
+}
+.app-shell.theme-dark .content .settings-card .section-heading .text-action{
+  color:#f0a04a!important;
+  opacity:1!important;
+}
+.app-shell.theme-dark .content .settings-card>label,
+.app-shell.theme-dark .content .settings-card .form-grid>label{
+  display:block!important;
+  color:#dce6f1!important;
+  opacity:1!important;
+  font-size:11px!important;
+  font-weight:650!important;
+}
+.app-shell.theme-dark .content .settings-card input:not([type=file]),
+.app-shell.theme-dark .content .settings-card textarea,
+.app-shell.theme-dark .content .settings-card select{
+  background:#17283b!important;
+  color:#f7f9fc!important;
+  -webkit-text-fill-color:#f7f9fc!important;
+  border:1px solid #7189a2!important;
+  opacity:1!important;
+  color-scheme:dark!important;
+}
+.app-shell.theme-dark .content .settings-card input::placeholder,
+.app-shell.theme-dark .content .settings-card textarea::placeholder{
+  color:#b8c6d5!important;
+  -webkit-text-fill-color:#b8c6d5!important;
+  opacity:1!important;
+}
+.app-shell.theme-dark .content .settings-card input:focus,
+.app-shell.theme-dark .content .settings-card textarea:focus,
+.app-shell.theme-dark .content .settings-card select:focus{
+  border-color:#e6a34a!important;
+  box-shadow:0 0 0 2px #e6a34a30!important;
+  outline:none!important;
+}
+.app-shell.theme-dark .content .settings-card .profile-photo-pick{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  min-height:46px!important;
+  padding:11px!important;
+  color:#ffe0a6!important;
+  -webkit-text-fill-color:#ffe0a6!important;
+  background:#263d55!important;
+  border:1px dashed #d9a34f!important;
+  border-radius:11px!important;
+  opacity:1!important;
+}
+.app-shell.theme-dark .content .settings-card .profile-photo-pick svg{
+  color:#ffd18a!important;
+  opacity:1!important;
+}
+.app-shell.theme-dark .content .settings-card button.primary,
+.app-shell.theme-dark .content .settings-card button.primary:disabled{
+  min-height:46px!important;
+  background:#d18a3d!important;
+  border:1px solid #f0bd72!important;
+  color:#17283b!important;
+  -webkit-text-fill-color:#17283b!important;
+  font-weight:800!important;
+  opacity:1!important;
+}
+.app-shell.theme-dark .content .settings-card button.primary:disabled{
+  background:#35485d!important;
+  color:#d7e0e9!important;
+  -webkit-text-fill-color:#d7e0e9!important;
+  border-color:#71849a!important;
+}
