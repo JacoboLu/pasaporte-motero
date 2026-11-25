@@ -16,7 +16,8 @@ const qualityMigration = read('../supabase/migrations/20261125193215_destination
 const nameMigration = read('../supabase/migrations/20261125200143_destination_name_homologation.sql');
 const aliasGuardMigration = read('../supabase/migrations/20261125200151_destination_name_alias_guard.sql');
 const nationalNameMigration = read('../supabase/migrations/20261125200955_national_destination_name_homologation.sql');
-const nameReviewMigration = read('../supabase/migrations/20261125201400_destination_name_review_report.sql');
+const nameReviewMigration = read('../supabase/migrations/20261125201026_destination_name_review_report.sql');
+const nationalBatch2Migration = read('../supabase/migrations/20261125201109_national_destination_name_consolidation_batch2.sql');
 
 test('reminders are owner-scoped, date/km based, and support completion', () => {
   assert.match(reminders, /from\('rider_reminders'\)/);
@@ -93,4 +94,16 @@ test('national name review report is restricted to service role', () => {
   assert.match(nameReviewMigration, /having count\(\)>1/i);
   assert.match(nameReviewMigration, /revoke all on function public\.admin_destination_name_review_report\(\) from public,anon,authenticated/i);
   assert.match(nameReviewMigration, /grant execute on function public\.admin_destination_name_review_report\(\) to service_role/i);
+});
+
+test('national batch consolidates verified official/proposed pairs while retaining MINCETUR coordinates', () => {
+  assert.match(nationalBatch2Migration, /where id=2907/);
+  assert.match(nationalBatch2Migration, /where id=4331/);
+  assert.match(nationalBatch2Migration, /where id=3836/);
+  assert.match(nationalBatch2Migration, /where id=4339/);
+  assert.match(nationalBatch2Migration, /where id=3884/);
+  assert.match(nationalBatch2Migration, /where id=4283/);
+  assert.match(nationalBatch2Migration, /MINCETUR ficha 1971/);
+  assert.match(nationalBatch2Migration, /MINCETUR ficha 11665/);
+  assert.match(nationalBatch2Migration, /MINCETUR ficha 494/);
 });
