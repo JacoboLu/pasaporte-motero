@@ -12,6 +12,7 @@ Deno.serve(async(req:Request)=>{
  const {data:profile,error:profileError}=await userClient.from("profiles").select("role").eq("id",user.id).maybeSingle();if(profileError||profile?.role!=="admin")return json(403,{error:"Solo un administrador puede gestionar el catálogo."});
  let body:any={};try{body=await req.json();}catch{return json(400,{error:"Invalid JSON"});}
  const admin=createClient(url,service,{auth:{persistSession:false,autoRefreshToken:false}});
+ if(body.action==="quality"){const {data,error}=await admin.rpc("admin_destination_quality_report");if(error)return json(500,{error:"No se pudo generar el diagnóstico de calidad."});return json(200,{ok:true,quality:data||{}});}
  if(body.action==="list"){const limit=Math.max(1,Math.min(100,Number(body.limit)||50)),search=String(body.search||"").trim().replace(/[%,()]/g," ");let q=admin.from("destination_catalog").select("id,name,department,province,city,category,description,latitude,longitude,geofence_radius_m,is_active,image_url").order("name").limit(limit);if(search)q=q.or("name.ilike.%"+search+"%,department.ilike.%"+search+"%");const {data,error}=await q;if(error)return json(500,{error:"No se pudo consultar el catálogo."});return json(200,{ok:true,destinations:data||[]});}
  const action=body.action;if(!["create","update","archive"].includes(action))return json(400,{error:"Acción no válida"});
  const id=Number(body.id??body.destination?.id);if(action!=="create"&&(!Number.isInteger(id)||id<=0))return json(400,{error:"ID de destino no válido"});
