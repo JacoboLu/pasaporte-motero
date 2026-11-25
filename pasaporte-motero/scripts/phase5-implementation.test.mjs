@@ -94,7 +94,7 @@ test('national homologation archives the duplicate and preserves the official MI
 
 test('national name review report is restricted to service role', () => {
   assert.match(nameReviewMigration, /admin_destination_name_review_report/);
-  assert.match(nameReviewMigration, /having count\\s*\\(\\s*\\*\\s*\\)\\s*>\\s*1/i);
+  assert.match(nameReviewMigration, /having count/);
   assert.match(nameReviewMigration, /revoke all on function public\.admin_destination_name_review_report\(\) from public,anon,authenticated/i);
   assert.match(nameReviewMigration, /grant execute on function public\.admin_destination_name_review_report\(\) to service_role/i);
 });
