@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "test:phase1": "node --test scripts/phase1-security.test.mjs"
+    "test:phase1": "node --test scripts/phase1-security.test.mjs",
+    "test:gps": "node --test scripts/gps-validation.test.mjs",
+    "test:all": "npm run test:phase1 && npm run test:gps"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0",
