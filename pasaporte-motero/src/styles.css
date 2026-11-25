@@ -2904,7 +2904,7 @@ html,body,#root{background:var(--pm-paper)!important}
 
 /* Fondo oficial: papel envejecido y sellos postales ilustrados */
 .app-shell .content{
-  background:#EBD9BA url('/passport-parchment-background.webp') center top / 100% auto repeat-y!important;
+  background:#EBD9BA url('/passport-parchment-background.jpg') center top / 100% auto repeat-y!important;
   background-attachment:local!important;
 }
 .app-shell .content::before{
@@ -2938,7 +2938,7 @@ html,body,#root{background:var(--pm-paper)!important}
 }
 .app-shell .content .passport-page-face{
   background:
-    url('/passport-parchment-background.webp') center/cover,
+    url('/passport-parchment-background.jpg') center/cover,
     linear-gradient(105deg,#e7d5b6,#f8f0df 11%,#f4e9d3)!important;
 }
 /* Apertura: breve movimiento de bisagra, sin desvanecimiento brusco */
@@ -3924,12 +3924,12 @@ html,body,#root{background:var(--pm-paper)!important}
 
 
 /* Fondo maestro del Pasaporte Motero: archivo original, sin filtros ni overlays.
-   El PNG se incorpora sin editar en /public/passport-parchment-background.png */
+   El PNG se incorpora sin editar en /public/passport-parchment-background.jpg */
 .app-shell .content,
 .app-shell.theme-light .content,
 .app-shell.theme-dark .content{
   background-color:#EBD9BA!important;
-  background-image:url('/passport-parchment-background.png')!important;
+  background-image:url('/passport-parchment-background.jpg')!important;
   background-position:center top!important;
   background-size:100% auto!important;
   background-repeat:repeat-y!important;
@@ -3949,7 +3949,7 @@ html,body,#root{background:var(--pm-paper)!important}
 }
 /* El tema oscuro no oscurece ni tiñe la ilustración del papel. */
 .app-shell.theme-dark .content{
-  background-image:url('/passport-parchment-background.png')!important;
+  background-image:url('/passport-parchment-background.jpg')!important;
   background-color:#EBD9BA!important;
   filter:none!important;
 }
@@ -3961,7 +3961,7 @@ html,body,#root{background:var(--pm-paper)!important}
 .app-shell.theme-light,
 .app-shell.theme-dark{
   background-color:#EBD9BA!important;
-  background-image:url('/passport-parchment-background.png')!important;
+  background-image:url('/passport-parchment-background.jpg')!important;
   background-position:center top!important;
   background-size:100% auto!important;
   background-repeat:repeat-y!important;
@@ -3971,7 +3971,7 @@ html,body,#root{background:var(--pm-paper)!important}
 .app-shell.theme-light main.content,
 .app-shell.theme-dark main.content{
   background-color:transparent!important;
-  background-image:url('/passport-parchment-background.png')!important;
+  background-image:url('/passport-parchment-background.jpg')!important;
   background-position:center top!important;
   background-size:100% auto!important;
   background-repeat:repeat-y!important;
@@ -3992,7 +3992,7 @@ html,body,#root{background:var(--pm-paper)!important}
   background-color:#F4E9D5!important;
   background-image:
     linear-gradient(rgba(248,241,226,.76),rgba(248,241,226,.76)),
-    url('/passport-parchment-background.png')!important;
+    url('/passport-parchment-background.jpg')!important;
   background-position:center top!important;
   background-size:100% auto,100% auto!important;
   background-repeat:repeat-y,repeat-y!important;
@@ -6247,4 +6247,95 @@ html[data-theme="dark"],html[data-theme="dark"] body,html[data-theme="dark"] #ro
 }
 .app-shell .content .profile-bike-editor-actions button:disabled{
   opacity:.55!important;cursor:not-allowed!important;
+}
+
+/* Fases 3–5: recordatorios, privacidad de cuenta y catálogo administrativo */
+.reminder-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}
+.reminder-summary>div{padding:13px 8px;border:1px solid #ffffff18;border-radius:12px;background:#202a35;text-align:center}
+.reminder-summary strong{display:block;font-size:22px;color:#f0b75c}.reminder-summary small{display:block;font-size:10px;color:#b8c2cf;margin-top:3px}
+.reminder-form h2,.reminder-list-heading h2{display:flex;align-items:center;gap:8px;font-size:16px;margin:0 0 14px}
+.reminder-form label,.catalog-editor label,.account-delete-card label{display:flex;flex-direction:column;gap:6px;margin:10px 0;font-size:12px;font-weight:600;color:#e7edf4;text-align:left}
+.reminder-form input,.reminder-form select,.reminder-form textarea,.catalog-editor input,.catalog-editor textarea,.account-delete-card input{width:100%;min-width:0;padding:12px;border:1px solid #53677b;border-radius:10px;background:#17283a;color:#f7fafc;font-size:14px}
+.reminder-list-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:22px 0 10px}
+.reminder-items,.catalog-admin-list{display:flex;flex-direction:column;gap:10px}
+.reminder-item,.catalog-admin-item{padding:14px;border:1px solid #ffffff20;border-radius:13px;background:#1c3045;color:#f4f6f8}
+.reminder-item.is-complete{opacity:.72}
+.reminder-item-top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11px}
+.reminder-kind{padding:4px 8px;border-radius:99px;background:#344b61;color:#e9c17b}
+.reminder-item h3{margin:10px 0 5px;font-size:15px;color:inherit}
+.reminder-item p{margin:5px 0;color:#c1ccd8;font-size:12px;line-height:1.5}
+.reminder-item-top strong{color:#d5e0ea}.reminder-item-top strong.is-overdue{color:#ff9a85}
+.reminder-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;color:#c5d0dc;font-size:11px}
+.reminder-actions,.catalog-admin-item>div:last-child{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.reminder-actions button,.catalog-admin-item button{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.reminder-error,.catalog-admin-error{padding:10px;border:1px solid #b85c55;border-radius:9px;background:#472b2b;color:#ffe0db;font-size:12px}
+.account-export-card,.account-delete-card{margin-top:14px}
+.account-export-card>svg{color:#e8b965}.account-delete-card{border-color:#9d4949}
+.account-delete-card>svg{color:#ff9187}.account-delete-card p{font-size:12px;line-height:1.6}
+.account-data-status{padding:12px;border-radius:10px;background:#263e32;color:#c8f3d8;font-size:12px}
+.catalog-admin-tools{display:flex;gap:7px;align-items:center;margin:14px 0;flex-wrap:wrap}
+.catalog-admin-tools>label{display:flex;align-items:center;gap:7px;flex:1;min-width:180px;margin:0;padding:0 10px;border:1px solid #53677b;border-radius:10px;background:#17283a;color:#dce5ee}
+.catalog-admin-tools input{min-width:0;width:100%;padding:11px 0;border:0;outline:0;background:transparent;color:inherit}
+.catalog-admin-item{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.catalog-admin-item>div:first-child{min-width:0;display:flex;flex-direction:column;gap:5px}
+.catalog-admin-item strong{font-size:13px}.catalog-admin-item small{font-size:10px;color:#c3ceda;overflow-wrap:anywhere}
+.catalog-active,.catalog-inactive{font-size:10px;font-weight:700}.catalog-active{color:#9ee0b7}.catalog-inactive{color:#f1b2a9}
+.catalog-editor{margin:14px 0}.catalog-editor h2{font-size:16px}
+.catalog-active-toggle{display:flex!important;flex-direction:row!important;align-items:center!important}
+.catalog-active-toggle input{width:auto!important}
+.theme-light .reminder-summary>div{background:#fff;border-color:#e2e5e9}
+.theme-light .reminder-summary small,.theme-light .catalog-admin-item small{color:#657180}
+.theme-light .reminder-form label,.theme-light .catalog-editor label,.theme-light .account-delete-card label{color:#344054}
+.theme-light .reminder-form input,.theme-light .reminder-form select,.theme-light .reminder-form textarea,.theme-light .catalog-editor input,.theme-light .catalog-editor textarea,.theme-light .account-delete-card input,.theme-light .catalog-admin-tools>label{background:#fff;border-color:#cbd3dc;color:#202a35}
+.theme-light .reminder-item,.theme-light .catalog-admin-item{background:#fff;border-color:#dfe4ea;color:#263445}
+.theme-light .reminder-item p,.theme-light .reminder-meta,.theme-light .reminder-item-top strong{color:#536273}
+.theme-light .reminder-kind{background:#f7edda;color:#76521e}
+.theme-light .account-data-status{background:#e8f6ed;color:#24613b}
+@media(max-width:390px){.catalog-admin-item{flex-direction:column}.catalog-admin-tools>button{font-size:11px;padding:9px}.reminder-actions button{font-size:10px;padding:8px}}
+
+.catalog-audit{margin-top:20px;padding:14px;border:1px solid #ffffff1a;border-radius:13px;background:#182a3c}
+.catalog-audit h2{font-size:15px;margin:0}.catalog-audit-row{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #ffffff16}
+.catalog-audit-row:last-child{border-bottom:0}.catalog-audit-row span{display:flex;flex-direction:column;gap:3px;min-width:0}
+.catalog-audit-row strong{font-size:11px}.catalog-audit-row small{font-size:9px;color:#bdc9d6;overflow-wrap:anywhere}
+.theme-light .catalog-audit{background:#fff;border-color:#e0e5eb}.theme-light .catalog-audit-row{border-color:#e5e9ee}.theme-light .catalog-audit-row small{color:#657180}
+
+.achievement-level-card{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin:12px 0 18px;padding:14px;border:1px solid #c69a4a66;border-radius:14px;background:linear-gradient(120deg,#263b50,#1b2c3d);color:#f5f0e5}
+.achievement-level-card>div:first-child{display:flex;flex-direction:column;gap:4px}.achievement-level-card>div:first-child strong{font-size:22px;color:#f3c66f}.achievement-level-card small{font-size:10px;color:#d0d9e2}
+.achievement-level-track{grid-column:1/-1;height:7px;border-radius:99px;background:#ffffff22;overflow:hidden}.achievement-level-track i{display:block;height:100%;border-radius:99px;background:#e9b65c}
+.achievement-streak{display:flex;flex-direction:column;align-items:flex-end;gap:3px}.achievement-streak strong{font-size:20px}
+.theme-light .achievement-level-card{background:linear-gradient(120deg,#fff8e9,#f5e8cc);color:#26384a;border-color:#d9b56f}.theme-light .achievement-level-card small{color:#5b6672}
+
+
+/* Diagnóstico geográfico: panel de calidad legible en ambos temas. */
+.catalog-quality{margin:16px 0;padding:14px;border:1px solid #53677b;border-radius:14px;background:#17283a;color:#f4f7fb}
+.catalog-quality-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.catalog-quality-head h2{margin:4px 0;font-size:16px;color:#f7f9fc}
+.catalog-quality-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+.catalog-quality-grid>div{min-width:0;padding:11px;border:1px solid #53677b;border-radius:10px;background:#20364d}
+.catalog-quality-grid strong{display:block;font-size:20px;line-height:1.2;color:#ffd18a;font-variant-numeric:tabular-nums}
+.catalog-quality-grid small{display:block;margin-top:4px;font-size:10px;line-height:1.4;color:#d4dfeb}
+.catalog-quality-clusters{margin-top:12px;padding-top:12px;border-top:1px solid #53677b}
+.catalog-quality-clusters>strong{font-size:12px;color:#f7f9fc}
+.catalog-quality-clusters details{margin-top:7px;border:1px solid #53677b;border-radius:9px;background:#20364d;overflow:hidden}
+.catalog-quality-clusters summary{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px;cursor:pointer;font-size:10px;color:#f4f7fb}
+.catalog-quality-clusters summary small{color:#c5d2df;font-variant-numeric:tabular-nums;text-align:right}
+.catalog-quality-clusters ul{list-style:none;margin:0;padding:0 10px 9px}
+.catalog-quality-clusters li{display:flex;flex-direction:column;gap:3px;padding:7px 0;border-top:1px solid #ffffff18}
+.catalog-quality-clusters li strong{font-size:10px;color:#fff}
+.catalog-quality-clusters li small{font-size:9px;color:#c5d2df}
+.theme-light .catalog-quality{background:#fff;border-color:#d8dee6;color:#263445}
+.theme-light .catalog-quality-head h2,.theme-light .catalog-quality-clusters>strong{color:#202a35}
+.theme-light .catalog-quality-grid>div,.theme-light .catalog-quality-clusters details{background:#f4f6f8;border-color:#d8dee6}
+.theme-light .catalog-quality-grid strong{color:#a65a1b}
+.theme-light .catalog-quality-grid small,.theme-light .catalog-quality-clusters summary small,.theme-light .catalog-quality-clusters li small{color:#596779}
+.theme-light .catalog-quality-clusters summary{color:#263445}
+.theme-light .catalog-quality-clusters li strong{color:#202a35}
+@media(max-width:360px){.catalog-quality-grid{grid-template-columns:1fr 1fr}.catalog-quality-head{flex-direction:column}}
+
+
+/* Evita el zoom automático de Safari iOS y mejora la legibilidad de campos táctiles. */
+@media(max-width:480px){
+  .app-shell input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  .app-shell textarea,
+  .app-shell select{font-size:16px!important;}
 }

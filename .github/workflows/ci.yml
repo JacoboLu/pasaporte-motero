@@ -5,8 +5,9 @@ on:
     paths:
       - "pasaporte-motero/**"
       - ".github/workflows/ci.yml"
+  workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, "stabilization/**"]
     paths:
       - "pasaporte-motero/**"
       - ".github/workflows/ci.yml"
@@ -23,6 +24,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install
+      - run: npm install --no-audit --no-fund
       - run: npm run build
-      - run: npm run test:phase1
+      - run: npm run test:all
