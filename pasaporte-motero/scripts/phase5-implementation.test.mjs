@@ -57,4 +57,5 @@ test('destination quality audit is read-only and available only through the admi
   assert.match(catalogFn, /body\.action==="quality"/);
   assert.match(catalog, /Calidad de destinos/);
   assert.match(catalog, /Ubicaciones compartidas que requieren verificación/);
+  assert.doesNotMatch(catalog, /duplicate_clusters\\.slice/);
 });
