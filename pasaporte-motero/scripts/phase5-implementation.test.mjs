@@ -53,8 +53,8 @@ test('destination quality audit is read-only and available only through the admi
   assert.match(qualityMigration, /admin_destination_quality_report/);
   assert.match(qualityMigration, /duplicate_coordinate_groups/);
   assert.match(qualityMigration, /duplicate_coordinate_destinations/);
-  assert.match(qualityMigration, /revoke all on function public\\.admin_destination_quality_report\\(\\) from public, anon, authenticated/i);
-  assert.match(catalogFn, /body\\.action===\"quality\"/);
+  assert.match(qualityMigration, /revoke all on function public\.admin_destination_quality_report\(\) from public, anon, authenticated/i);
+  assert.match(catalogFn, /body\.action==="quality"/);
   assert.match(catalog, /Calidad de destinos/);
   assert.match(catalog, /Ubicaciones compartidas que requieren verificación/);
 });
