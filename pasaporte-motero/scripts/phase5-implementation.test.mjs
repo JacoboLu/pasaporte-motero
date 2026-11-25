@@ -13,6 +13,8 @@ const migration = read('../supabase/migrations/20261125184054_rider_reminders_an
 const deleteFn = read('../supabase/functions/delete-account/index.ts');
 const catalogFn = read('../supabase/functions/manage-destination-catalog/index.ts');
 const qualityMigration = read('../supabase/migrations/20261125193215_destination_quality_audit.sql');
+const nameMigration = read('../supabase/migrations/20261125200143_destination_name_homologation.sql');
+const aliasGuardMigration = read('../supabase/migrations/20261125200151_destination_name_alias_guard.sql');
 
 test('reminders are owner-scoped, date/km based, and support completion', () => {
   assert.match(reminders, /from\('rider_reminders'\)/);
@@ -52,7 +54,6 @@ test('regional managers receive a scoped review panel, not global admin controls
   assert.match(app, /ridingStreak/);
 });
 
-
 test('destination quality audit is read-only and available only through the admin edge function', () => {
   assert.match(qualityMigration, /admin_destination_quality_report/);
   assert.match(qualityMigration, /duplicate_coordinate_groups/);
@@ -62,4 +63,15 @@ test('destination quality audit is read-only and available only through the admi
   assert.match(catalog, /Calidad de destinos/);
   assert.match(catalog, /Ubicaciones compartidas que requieren verificación/);
   assert.doesNotMatch(catalog, /duplicate_clusters\\.slice/);
+});
+
+test('destination names resolve to a single canonical record and prevent future duplicate aliases', () => {
+  assert.match(nameMigration, /create table if not exists public\.destination_name_aliases/i);
+  assert.match(nameMigration, /Formaciones Geológicas de Torre Torre/);
+  assert.match(nameMigration, /where id = 1996/);
+  assert.match(nameMigration, /where id = 5/);
+  assert.match(nameMigration, /set is_active = false/i);
+  assert.match(aliasGuardMigration, /destination_catalog_alias_guard/);
+  assert.match(aliasGuardMigration, /normalize_destination_name\(new\.name\)/);
+  assert.match(aliasGuardMigration, /using errcode = '23505'/i);
 });
