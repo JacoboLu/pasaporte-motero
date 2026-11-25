@@ -16,6 +16,7 @@ test('reminders are owner-scoped, date/km based, and support completion', () => 
   assert.match(reminders, /from\('rider_reminders'\)/);
   assert.match(reminders, /due_odometer_km/);
   assert.match(reminders, /is_completed/);
+  assert.match(reminders, /currentOdometer/);
   assert.match(migration, /alter table public\.rider_reminders enable row level security/i);
   assert.match(migration, /user_id=\(select auth\.uid\(\)\)/i);
 });
