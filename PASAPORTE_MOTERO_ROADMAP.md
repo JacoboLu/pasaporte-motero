@@ -91,3 +91,17 @@ Una fase solo se marca completa cuando su interfaz, permisos, base de datos y fl
 - La modularización de `App.tsx` será incremental para no alterar pantallas que ya funcionan.
 
 **Criterio de cierre:** ningún bloque se considerará terminado hasta que compile, pase pruebas automatizadas y supere pruebas funcionales con cuentas y dispositivos reales.
+
+### Verificación de la rama y despliegues — 25/11/2026
+
+- [x] GitHub Actions ejecutó `npm run build` y `npm run test:all`: ambos finalizaron correctamente en el commit `b03cb5c`.
+- [x] Cloudflare Pages generó un deployment Preview exitoso para la rama de estabilización: https://f75453b1.pasaporte-motero.pages.dev
+- [x] Supabase Edge Function `validate-gps-visit` desplegada en versión 9, con `verify_jwt=true` y los dos archivos versionados (`index.ts`, `validation.mjs`).
+- [ ] Falta prueba funcional de una visita real con GPS en Android/iOS; el despliegue y las pruebas unitarias no sustituyen esa validación.
+- [ ] No se desplegó a la rama de producción de Cloudflare Pages (`main`).
+
+### Hallazgos adicionales de almacenamiento y catálogo
+
+- El catálogo activo presenta 107 grupos de coordenadas compartidas que abarcan 332 destinos. Se mantiene la protección: esos destinos no deben obtener sellos por GPS hasta verificar y corregir sus coordenadas individualmente.
+- Storage conserva políticas duplicadas o solapadas para algunos archivos de avatar y comunidad. No se eliminaron para evitar interrumpir lectura/borrado de archivos.
+- El aviso de Supabase sobre `visit_qr_challenges` corresponde a RLS sin políticas, pero los permisos de tabla de `anon` y `authenticated` están revocados. No se creó una política de acceso para ocultar el aviso.
