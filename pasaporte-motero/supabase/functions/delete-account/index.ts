@@ -48,5 +48,5 @@ Deno.serve(async(req:Request)=>{
   const cleanupWarnings:string[]=[];
   for(const bucket of buckets){try{const files=await listFiles(admin,bucket,user.id);for(let i=0;i<files.length;i+=100){const {error}=await admin.storage.from(bucket).remove(files.slice(i,i+100));if(error)throw error;}}catch(error){cleanupWarnings.push(bucket);console.error("Storage cleanup after account deletion failed",bucket,error);}}
   return json(200,{ok:true,...(cleanupWarnings.length?{cleanup_warning:"Tu cuenta fue eliminada, pero quedó pendiente limpiar archivos en: "+cleanupWarnings.join(", ")+". Contacta soporte."}:{})});
- }catch(error){console.error("Account deletion failed",error);return json(500,{error:"No se pudo eliminar la cuenta de forma segura. No se confirmó la eliminación. "+(error instanceof Error?error.message:"")});}
+ }catch(error){console.error("Account deletion failed",error);return json(500,{error:"No se pudo completar la eliminación de forma segura. La solicitud no fue confirmada; contacta soporte si el problema continúa."});}
 });
