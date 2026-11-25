@@ -6292,3 +6292,9 @@ html[data-theme="dark"],html[data-theme="dark"] body,html[data-theme="dark"] #ro
 .theme-light .reminder-kind{background:#f7edda;color:#76521e}
 .theme-light .account-data-status{background:#e8f6ed;color:#24613b}
 @media(max-width:390px){.catalog-admin-item{flex-direction:column}.catalog-admin-tools>button{font-size:11px;padding:9px}.reminder-actions button{font-size:10px;padding:8px}}
+
+.catalog-audit{margin-top:20px;padding:14px;border:1px solid #ffffff1a;border-radius:13px;background:#182a3c}
+.catalog-audit h2{font-size:15px;margin:0}.catalog-audit-row{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #ffffff16}
+.catalog-audit-row:last-child{border-bottom:0}.catalog-audit-row span{display:flex;flex-direction:column;gap:3px;min-width:0}
+.catalog-audit-row strong{font-size:11px}.catalog-audit-row small{font-size:9px;color:#bdc9d6;overflow-wrap:anywhere}
+.theme-light .catalog-audit{background:#fff;border-color:#e0e5eb}.theme-light .catalog-audit-row{border-color:#e5e9ee}.theme-light .catalog-audit-row small{color:#657180}
