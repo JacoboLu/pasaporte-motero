@@ -7,6 +7,7 @@ const reminders = read('../src/components/RiderReminders.tsx');
 const account = read('../src/components/AccountDataTools.tsx');
 const catalog = read('../src/components/DestinationCatalogAdmin.tsx');
 const app = read('../src/App.tsx');
+
 const migration = read('../supabase/migrations/20261125184054_rider_reminders_and_admin_audit.sql');
 const deleteFn = read('../supabase/functions/delete-account/index.ts');
 const catalogFn = read('../supabase/functions/manage-destination-catalog/index.ts');
@@ -41,4 +42,6 @@ test('regional managers receive a scoped review panel, not global admin controls
   assert.match(app, /\['admin','manager'\]\.includes\(profileRole\)/);
   assert.match(app, /GESTIÓN REGIONAL/);
   assert.match(app, /profileRole === 'admin' && <><button type="button" onClick/);
+  assert.match(app, /achievementXp/);
+  assert.match(app, /ridingStreak/);
 });
