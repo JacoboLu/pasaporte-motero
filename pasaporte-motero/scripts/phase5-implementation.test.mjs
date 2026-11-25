@@ -18,6 +18,9 @@ const aliasGuardMigration = read('../supabase/migrations/20261125200151_destinat
 const nationalNameMigration = read('../supabase/migrations/20261125200955_national_destination_name_homologation.sql');
 const nameReviewMigration = read('../supabase/migrations/20261125201026_destination_name_review_report.sql');
 const nationalBatch2Migration = read('../supabase/migrations/20261125201109_national_destination_name_consolidation_batch2.sql');
+const fuzzyMatchingMigration = read('../supabase/migrations/20261125201345_destination_name_fuzzy_matching.sql');
+const fuzzyConsolidationMigration = read('../supabase/migrations/20261125201438_national_fuzzy_destination_consolidation.sql');
+const fuzzyReviewMigration = read('../supabase/migrations/20261125201508_destination_fuzzy_name_review_report.sql');
 
 test('reminders are owner-scoped, date/km based, and support completion', () => {
   assert.match(reminders, /from\('rider_reminders'\)/);
@@ -112,4 +115,17 @@ test('destination aliases are unique per canonical record and guard is not publi
   const aliasScopeMigration = read('../supabase/migrations/20261125201251_destination_alias_locality_scope.sql');
   assert.match(aliasScopeMigration, /on public\.destination_name_aliases\(normalized_alias,destination_id\)/i);
   assert.match(aliasScopeMigration, /revoke all on function public\.guard_destination_name_alias\(\) from public,anon,authenticated/i);
+});
+
+test('national fuzzy matching consolidates only reviewed same-place pairs and retains a restricted review report', () => {
+  assert.match(fuzzyMatchingMigration, /create extension if not exists pg_trgm/i);
+  assert.match(fuzzyMatchingMigration, /destination_catalog_name_trgm_idx/);
+  assert.match(fuzzyConsolidationMigration, /MINCETUR ficha 1947/);
+  assert.match(fuzzyConsolidationMigration, /MINCETUR ficha 2600/);
+  assert.match(fuzzyConsolidationMigration, /MINCETUR ficha 2216/);
+  assert.match(fuzzyConsolidationMigration, /where id=4279/);
+  assert.match(fuzzyConsolidationMigration, /where id=4367/);
+  assert.match(fuzzyReviewMigration, /admin_destination_fuzzy_name_review_report/);
+  assert.match(fuzzyReviewMigration, /similarity\(a\.name,b\.name\)>=0\.60/);
+  assert.match(fuzzyReviewMigration, /revoke all on function public\.admin_destination_fuzzy_name_review_report\(\) from public,anon,authenticated/i);
 });
