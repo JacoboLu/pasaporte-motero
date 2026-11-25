@@ -15,6 +15,8 @@ const catalogFn = read('../supabase/functions/manage-destination-catalog/index.t
 const qualityMigration = read('../supabase/migrations/20261125193215_destination_quality_audit.sql');
 const nameMigration = read('../supabase/migrations/20261125200143_destination_name_homologation.sql');
 const aliasGuardMigration = read('../supabase/migrations/20261125200151_destination_name_alias_guard.sql');
+const nationalNameMigration = read('../supabase/migrations/20261125200955_national_destination_name_homologation.sql');
+const nameReviewMigration = read('../supabase/migrations/20261125201400_destination_name_review_report.sql');
 
 test('reminders are owner-scoped, date/km based, and support completion', () => {
   assert.match(reminders, /from\('rider_reminders'\)/);
@@ -74,4 +76,21 @@ test('destination names resolve to a single canonical record and prevent future 
   assert.match(aliasGuardMigration, /destination_catalog_alias_guard/);
   assert.match(aliasGuardMigration, /normalize_destination_name\(new\.name\)/);
   assert.match(aliasGuardMigration, /using errcode = '23505'/i);
+});
+
+test('national homologation archives the duplicate and preserves the official MINCETUR record', () => {
+  assert.match(nationalNameMigration, /where id=1292/);
+  assert.match(nationalNameMigration, /where id=4369/);
+  assert.match(nationalNameMigration, /MINCETUR.*ficha 1814/);
+  assert.match(nationalNameMigration, /set is_active=false/i);
+  assert.match(nationalNameMigration, /6371000/);
+  assert.match(nationalNameMigration, /<= 500/);
+  assert.match(nationalNameMigration, /same physical area/i);
+});
+
+test('national name review report is restricted to service role', () => {
+  assert.match(nameReviewMigration, /admin_destination_name_review_report/);
+  assert.match(nameReviewMigration, /having count\(\)>1/i);
+  assert.match(nameReviewMigration, /revoke all on function public\.admin_destination_name_review_report\(\) from public,anon,authenticated/i);
+  assert.match(nameReviewMigration, /grant execute on function public\.admin_destination_name_review_report\(\) to service_role/i);
 });
