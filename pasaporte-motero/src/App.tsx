@@ -503,6 +503,53 @@ export default function App() {
     return () => { alive = false; subscription.unsubscribe() }
   }, [])
   useEffect(() => {
+    if (!supabase || !authUserId) return
+    let active = true
+    const refreshOwnProfile = async () => {
+      const { data, error } = await supabase!.from('profiles')
+        .select('username, full_name, bio, city, avatar_url, motorcycle_brand, motorcycle_model, motorcycle_year, role')
+        .eq('id', authUserId).maybeSingle()
+      if (!active || error || !data) return
+      const avatarChanged = (data.avatar_url || '') !== avatarUrl
+      setProfileRole(data.role === 'admin' || data.role === 'manager' ? data.role : 'user')
+      setUsername(data.username || '')
+      setDisplayName(data.full_name || 'Viajero Motero')
+      setBio(data.bio || '')
+      setHomeCity(data.city || 'Perú')
+      setAvatarUrl(data.avatar_url || '')
+      setMotorcycleBrand(data.motorcycle_brand || '')
+      setMotorcycleModel(data.motorcycle_model || '')
+      setMotorcycleYear(data.motorcycle_year ? String(data.motorcycle_year) : '')
+      if (avatarChanged) void loadCommunityPosts()
+    }
+    const channel = supabase.channel('profile-sync-' + authUserId)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: 'id=eq.' + authUserId }, (payload:any) => {
+        if (!active || !payload.new) return
+        const profile = payload.new
+        const avatarChanged = (profile.avatar_url || '') !== avatarUrl
+        setUsername(profile.username || '')
+        setDisplayName(profile.full_name || 'Viajero Motero')
+        setBio(profile.bio || '')
+        setHomeCity(profile.city || 'Perú')
+        setAvatarUrl(profile.avatar_url || '')
+        setMotorcycleBrand(profile.motorcycle_brand || '')
+        setMotorcycleModel(profile.motorcycle_model || '')
+        setMotorcycleYear(profile.motorcycle_year ? String(profile.motorcycle_year) : '')
+        if (avatarChanged) { void loadCommunityPosts(); void loadMyActivity(authUserId) }
+      }).subscribe()
+    const onFocus = () => { void refreshOwnProfile() }
+    const onVisibility = () => { if (document.visibilityState === 'visible') void refreshOwnProfile() }
+    window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onVisibility)
+    void refreshOwnProfile()
+    return () => {
+      active = false
+      window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onVisibility)
+      void supabase!.removeChannel(channel)
+    }
+  }, [authUserId])
+  useEffect(() => {
     if (!isOwnerAdmin || profileRole !== 'admin') return
     void loadAdminVisits(); void loadAdminDashboardStats(); void loadContentReports(); void loadDepartmentManagers()
   }, [isOwnerAdmin, profileRole])
@@ -1953,25 +2000,33 @@ export default function App() {
     }
     setProfileBusy(true)
     let nextAvatarUrl = avatarUrl
+    let uploadedAvatarPath: string | null = null
     if (avatarFile) {
       let uploadFile: File
       try { uploadFile = await compressImageFile(avatarFile) } catch (error:any) { setProfileBusy(false); notify(error?.message || 'No se pudo comprimir la foto de perfil.'); return }
       const extension = uploadFile.type === 'image/png' ? 'png' : uploadFile.type === 'image/webp' ? 'webp' : 'jpg'
-      const path = user.id + '/' + crypto.randomUUID() + '.' + extension
-      const {error:uploadError} = await supabase.storage.from('avatars').upload(path,uploadFile,{upsert:false,contentType:uploadFile.type,cacheControl:'3600'})
+      uploadedAvatarPath = user.id + '/' + crypto.randomUUID() + '.' + extension
+      const {error:uploadError} = await supabase.storage.from('avatars').upload(uploadedAvatarPath,uploadFile,{upsert:false,contentType:uploadFile.type,cacheControl:'3600'})
       if (uploadError) { setProfileBusy(false); notify('No se pudo subir la foto de perfil: ' + uploadError.message); return }
-      nextAvatarUrl = supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl
+      nextAvatarUrl = supabase.storage.from('avatars').getPublicUrl(uploadedAvatarPath).data.publicUrl
     }
-    const { error } = await supabase.from('profiles').update({
+    const { data: savedProfile, error } = await supabase.from('profiles').update({
       username: cleanUsername, full_name: displayName.trim() || 'Viajero Motero',
       bio: bio.trim() || null, city: homeCity.trim() || null, avatar_url: nextAvatarUrl || null,
       motorcycle_brand: motorcycleBrand.trim() || null, motorcycle_model: motorcycleModel.trim() || null,
       motorcycle_year: year, profile_completed: true, updated_at: new Date().toISOString()
-    }).eq('id', user.id)
+    }).eq('id', user.id).select('id, avatar_url').single()
     setProfileBusy(false)
-    if (error) { notify(error.code === '23505' ? 'Ese nombre de usuario ya está ocupado.' : 'No se pudo guardar el perfil: ' + error.message); return }
+    if (error || !savedProfile) {
+      if (uploadedAvatarPath) await supabase.storage.from('avatars').remove([uploadedAvatarPath])
+      notify(error?.code === '23505' ? 'Ese nombre de usuario ya está ocupado.' : 'No se pudo confirmar el guardado del perfil: ' + (error?.message || 'No se encontró tu perfil.'))
+      return
+    }
+    nextAvatarUrl = savedProfile.avatar_url || ''
     setAvatarUrl(nextAvatarUrl); setAvatarFile(null)
     setUsername(cleanUsername)
+    void loadCommunityPosts()
+    void loadMyActivity(user.id)
     setSubview('')
     notify('Perfil guardado y sincronizado con tu cuenta.')
   }
