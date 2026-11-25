@@ -128,4 +128,8 @@ test('national fuzzy matching consolidates only reviewed same-place pairs and re
   assert.match(fuzzyReviewMigration, /admin_destination_fuzzy_name_review_report/);
   assert.match(fuzzyReviewMigration, /similarity\(a\.name,b\.name\)>=0\.60/);
   assert.match(fuzzyReviewMigration, /revoke all on function public\.admin_destination_fuzzy_name_review_report\(\) from public,anon,authenticated/i);
+  assert.match(catalogFn, /admin_destination_fuzzy_name_review_report/);
+  assert.match(catalogFn, /fuzzy_name_review:nameReview/);
+  assert.match(catalog, /Nombres similares que requieren revisión/);
+  assert.match(catalog, /No se fusionan automáticamente/);
 });
