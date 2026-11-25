@@ -1885,7 +1885,7 @@ export default function App() {
       if (uploadError) { setMotorcycleBusy(false); notify('No se pudo subir la fotografía: ' + uploadError.message); return }
       photoPath = 'motorcycles/' + path
     }
-    const payload = {user_id:user.id,brand:motorcycleBrand.trim(),model:motorcycleModel.trim(),year:motorcycleYear ? Number(motorcycleYear) : null,photo_url:photoPath,photo_position_x:motorcycleCropX,photo_position_y:motorcycleCropY,displacement_cc:cc,motorcycle_type:motorcycleType,fuel_type:motorcycleFuel,odometer_km:km,notes:motorcycleNotes.trim() || null,updated_at:new Date().toISOString()}
+    const payload = {user_id:user.id,brand:motorcycleBrand.trim(),model:motorcycleModel.trim(),year:motorcycleYear ? Number(motorcycleYear) : null,photo_url:photoPath,photo_position_x:Math.round(Math.min(100,Math.max(0,motorcycleCropX))),photo_position_y:Math.round(Math.min(100,Math.max(0,motorcycleCropY))),displacement_cc:cc,motorcycle_type:motorcycleType,fuel_type:motorcycleFuel,odometer_km:km,notes:motorcycleNotes.trim() || null,updated_at:new Date().toISOString()}
     const {data,error} = await supabase.from('motorcycles').upsert(payload,{onConflict:'user_id'}).select('id').single()
     setMotorcycleBusy(false); if (error) { notify('No se pudo guardar: ' + error.message); return }
     setMotorcycleId(data.id); setMotorcyclePhoto(photoPath || ''); setMotorcyclePhotoFile(null); if (photoPath?.startsWith('motorcycles/')) { const {data:signed}=await supabase.storage.from('motorcycles').createSignedUrl(photoPath.slice('motorcycles/'.length),3600); setMotorcyclePhotoPreview(signed?.signedUrl || '') } notify('Ficha de motocicleta sincronizada.')
