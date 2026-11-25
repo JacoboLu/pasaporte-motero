@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8');
 const reminders = read('../src/components/RiderReminders.tsx');
+const remindersComponent = reminders;
 const account = read('../src/components/AccountDataTools.tsx');
 const catalog = read('../src/components/DestinationCatalogAdmin.tsx');
 const app = read('../src/App.tsx');
@@ -18,6 +19,8 @@ test('reminders are owner-scoped, date/km based, and support completion', () => 
   assert.match(reminders, /due_odometer_km/);
   assert.match(reminders, /is_completed/);
   assert.match(reminders, /currentOdometer/);
+  assert.match(remindersComponent, /now\.getFullYear\(\)/);
+  assert.doesNotMatch(remindersComponent, /new Date\(\)\.toISOString\(\)\.slice\(0,10\)/);
   assert.match(migration, /alter table public\.rider_reminders enable row level security/i);
   assert.match(migration, /user_id=\(select auth\.uid\(\)\)/i);
 });
@@ -30,6 +33,7 @@ test('account export is explicit and deletion requires recent authentication plu
   assert.match(deleteFn, /Date\.now\(\)\/1000-Number\(claims\.auth_time\)>900/);
   assert.match(deleteFn, /admin\.auth\.admin\.deleteUser/);
   assert.match(deleteFn, /visit_qr_challenges/);
+  assert.match(deleteFn, /No se pudo completar la eliminación de forma segura/);
 });
 
 test('destination catalog changes are admin-only and audited', () => {
