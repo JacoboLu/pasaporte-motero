@@ -55,3 +55,39 @@ Una fase solo se marca completa cuando su interfaz, permisos, base de datos y fl
 - [ ] Aplicar la migración en una rama/base de pruebas y luego en producción tras validar el PR.
 - [ ] Probar GPS real en Android/iOS, permisos denegados, QR con dos cuentas, caducidad/reutilización, revisión y notificaciones end-to-end.
 - [ ] Verificar visibilidad de publicaciones con cuentas públicas, seguidoras y no seguidoras.
+
+
+---
+
+## Ejecución de auditoría integral — 25/11/2026
+
+### Cambios preparados en `stabilization/5-phases-2026-11`
+
+- [x] Corregir el cliente inexistente usado en la consulta de coordenadas compartidas de `validate-gps-visit`: ahora utiliza el cliente administrativo del servidor.
+- [x] Extraer normalización de categorías, validación del payload y cálculo de distancia a un módulo reutilizable y testeable.
+- [x] Normalizar tildes y espacios correctamente antes de comparar categorías no físicas.
+- [x] Rechazar destinos con coordenadas o radios de geocerca inválidos, sin otorgar sellos.
+- [x] Añadir pruebas automatizadas para categorías españolas, coordenadas, precisión, distancia y regresión del cliente GPS.
+- [x] Añadir diagnóstico SQL de solo lectura para identificar coordenadas compartidas, incompletas y geocercas inválidas.
+- [x] Dejar de precargar el fondo PNG de 3.76 MB; usar el JPG existente de aproximadamente 15 KB y renovar la caché del Service Worker.
+- [x] Incorporar pruebas GPS al pipeline CI.
+- [ ] Ejecutar CI y corregir cualquier fallo antes de integrar.
+- [ ] Desplegar la Edge Function GPS corregida después de validar el código.
+- [ ] Probar GPS, QR, revisión y sincronización real en dispositivos.
+
+### Hallazgos de datos que requieren revisión humana
+
+- El catálogo contiene 4,700 destinos; 4,699 están activos.
+- No se encontraron coordenadas ausentes, coordenadas fuera de rango ni radios de geocerca inválidos en la consulta global.
+- Hay grupos de destinos activos que comparten exactamente las mismas coordenadas. No se modificarán automáticamente: algunos pueden ser registros regionales o lugares próximos, y requieren verificación geográfica antes de habilitar GPS individual.
+- Las políticas RLS continúan habilitadas en las tablas públicas. El asesor de Supabase señala una tabla con RLS sin políticas (`visit_qr_challenges`); sus permisos de tabla para `anon` y `authenticated` están revocados, por lo que no se añadirá una política abierta para silenciar el aviso.
+
+### Pendientes de configuración externa
+
+- Activar la protección de contraseñas filtradas desde la configuración de Auth de Supabase; no existe una acción de configuración Auth disponible en esta conexión.
+- Conciliar el historial de migraciones entre GitHub y Supabase antes de aplicar nuevas migraciones: no se ejecutará un reset ni se volverán a aplicar migraciones existentes.
+- Probar la moderación, permisos de encargados, privacidad de publicaciones y flujos QR con cuentas reales.
+- Completar la implementación de navegación, recordatorios, exportación/eliminación de cuenta y gamificación avanzada. La cola de evidencias fotográficas existente no equivale a sincronización offline idempotente de toda la aplicación.
+- La modularización de `App.tsx` será incremental para no alterar pantallas que ya funcionan.
+
+**Criterio de cierre:** ningún bloque se considerará terminado hasta que compile, pase pruebas automatizadas y supere pruebas funcionales con cuentas y dispositivos reales.
