@@ -11,6 +11,7 @@ const app = read('../src/App.tsx');
 const migration = read('../supabase/migrations/20261125184054_rider_reminders_and_admin_audit.sql');
 const deleteFn = read('../supabase/functions/delete-account/index.ts');
 const catalogFn = read('../supabase/functions/manage-destination-catalog/index.ts');
+const qualityMigration = read('../supabase/migrations/20261126100000_destination_quality_audit.sql');
 
 test('reminders are owner-scoped, date/km based, and support completion', () => {
   assert.match(reminders, /from\('rider_reminders'\)/);
@@ -45,4 +46,15 @@ test('regional managers receive a scoped review panel, not global admin controls
   assert.match(app, /profileRole === 'admin' && <><button type="button" onClick/);
   assert.match(app, /achievementXp/);
   assert.match(app, /ridingStreak/);
+});
+
+
+test('destination quality audit is read-only and available only through the admin edge function', () => {
+  assert.match(qualityMigration, /admin_destination_quality_report/);
+  assert.match(qualityMigration, /duplicate_coordinate_groups/);
+  assert.match(qualityMigration, /duplicate_coordinate_destinations/);
+  assert.match(qualityMigration, /revoke all on function public\\.admin_destination_quality_report\\(\\) from public, anon, authenticated/i);
+  assert.match(catalogFn, /body\\.action===\"quality\"/);
+  assert.match(catalog, /Calidad de destinos/);
+  assert.match(catalog, /Ubicaciones compartidas que requieren verificación/);
 });
