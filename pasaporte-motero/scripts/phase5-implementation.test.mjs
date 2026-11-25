@@ -11,7 +11,7 @@ const app = read('../src/App.tsx');
 const migration = read('../supabase/migrations/20261125184054_rider_reminders_and_admin_audit.sql');
 const deleteFn = read('../supabase/functions/delete-account/index.ts');
 const catalogFn = read('../supabase/functions/manage-destination-catalog/index.ts');
-const qualityMigration = read('../supabase/migrations/20261126100000_destination_quality_audit.sql');
+const qualityMigration = read('../supabase/migrations/20261125193215_destination_quality_audit.sql');
 
 test('reminders are owner-scoped, date/km based, and support completion', () => {
   assert.match(reminders, /from\('rider_reminders'\)/);
