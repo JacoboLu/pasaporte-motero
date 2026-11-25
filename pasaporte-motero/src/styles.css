@@ -2904,7 +2904,7 @@ html,body,#root{background:var(--pm-paper)!important}
 
 /* Fondo oficial: papel envejecido y sellos postales ilustrados */
 .app-shell .content{
-  background:#EBD9BA url('/passport-parchment-background.webp') center top / 100% auto repeat-y!important;
+  background:#EBD9BA url('/passport-parchment-background.jpg') center top / 100% auto repeat-y!important;
   background-attachment:local!important;
 }
 .app-shell .content::before{
@@ -2938,7 +2938,7 @@ html,body,#root{background:var(--pm-paper)!important}
 }
 .app-shell .content .passport-page-face{
   background:
-    url('/passport-parchment-background.webp') center/cover,
+    url('/passport-parchment-background.jpg') center/cover,
     linear-gradient(105deg,#e7d5b6,#f8f0df 11%,#f4e9d3)!important;
 }
 /* Apertura: breve movimiento de bisagra, sin desvanecimiento brusco */
@@ -3924,12 +3924,12 @@ html,body,#root{background:var(--pm-paper)!important}
 
 
 /* Fondo maestro del Pasaporte Motero: archivo original, sin filtros ni overlays.
-   El PNG se incorpora sin editar en /public/passport-parchment-background.png */
+   El PNG se incorpora sin editar en /public/passport-parchment-background.jpg */
 .app-shell .content,
 .app-shell.theme-light .content,
 .app-shell.theme-dark .content{
   background-color:#EBD9BA!important;
-  background-image:url('/passport-parchment-background.png')!important;
+  background-image:url('/passport-parchment-background.jpg')!important;
   background-position:center top!important;
   background-size:100% auto!important;
   background-repeat:repeat-y!important;
@@ -3949,7 +3949,7 @@ html,body,#root{background:var(--pm-paper)!important}
 }
 /* El tema oscuro no oscurece ni tiñe la ilustración del papel. */
 .app-shell.theme-dark .content{
-  background-image:url('/passport-parchment-background.png')!important;
+  background-image:url('/passport-parchment-background.jpg')!important;
   background-color:#EBD9BA!important;
   filter:none!important;
 }
@@ -3961,7 +3961,7 @@ html,body,#root{background:var(--pm-paper)!important}
 .app-shell.theme-light,
 .app-shell.theme-dark{
   background-color:#EBD9BA!important;
-  background-image:url('/passport-parchment-background.png')!important;
+  background-image:url('/passport-parchment-background.jpg')!important;
   background-position:center top!important;
   background-size:100% auto!important;
   background-repeat:repeat-y!important;
@@ -3971,7 +3971,7 @@ html,body,#root{background:var(--pm-paper)!important}
 .app-shell.theme-light main.content,
 .app-shell.theme-dark main.content{
   background-color:transparent!important;
-  background-image:url('/passport-parchment-background.png')!important;
+  background-image:url('/passport-parchment-background.jpg')!important;
   background-position:center top!important;
   background-size:100% auto!important;
   background-repeat:repeat-y!important;
@@ -3992,7 +3992,7 @@ html,body,#root{background:var(--pm-paper)!important}
   background-color:#F4E9D5!important;
   background-image:
     linear-gradient(rgba(248,241,226,.76),rgba(248,241,226,.76)),
-    url('/passport-parchment-background.png')!important;
+    url('/passport-parchment-background.jpg')!important;
   background-position:center top!important;
   background-size:100% auto,100% auto!important;
   background-repeat:repeat-y,repeat-y!important;
