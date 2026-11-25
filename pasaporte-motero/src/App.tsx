@@ -402,19 +402,29 @@ export default function App() {
     let active = true
     const loadAllDestinations = async () => {
       setDestinationsLoading(true)
-      const pageSize = 500
+      const pageSize = 1000
+      const columns = 'id,name,department,province,city,category,description,latitude,longitude,geofence_radius_m,image_url,source_note'
       const allRows: any[] = []
       try {
-        for (let from = 0; ; from += pageSize) {
-          const { data, error } = await supabase!.from('destination_catalog')
-            .select('id,name,department,province,city,category,description,latitude,longitude,geofence_radius_m,image_url,source_note')
-            .eq('is_active', true)
-            .order('id', { ascending: true })
-            .range(from, from + pageSize - 1)
-          if (error) throw error
-          const page = data || []
-          allRows.push(...page)
-          if (page.length < pageSize) break
+        // Read the first page with an exact count, then fetch the remaining pages concurrently.
+        // This replaces the previous 10 sequential round-trips for the current 4.7k catalog.
+        const first = await supabase!.from('destination_catalog')
+          .select(columns, { count: 'exact' })
+          .eq('is_active', true)
+          .order('id', { ascending: true })
+          .range(0, pageSize - 1)
+        if (first.error) throw first.error
+        allRows.push(...(first.data || []))
+        const total = first.count ?? allRows.length
+        const offsets = Array.from({ length: Math.ceil(Math.max(0, total - pageSize) / pageSize) }, (_, index) => (index + 1) * pageSize)
+        const pages = await Promise.all(offsets.map(from => supabase!.from('destination_catalog')
+          .select(columns)
+          .eq('is_active', true)
+          .order('id', { ascending: true })
+          .range(from, from + pageSize - 1)))
+        for (const page of pages) {
+          if (page.error) throw page.error
+          allRows.push(...(page.data || []))
         }
         if (!active) return
         const rows = allRows.map((row: any): Destination => {
@@ -683,7 +693,7 @@ export default function App() {
     </div>
   }
   const normalizedQuery = normalizeSearchText(query)
-  const filteredDestinations = mapDestinations.filter(d => {
+  const filteredDestinations = useMemo(() => mapDestinations.filter(d => {
     const categoryMatch = category === 'Todos' || d.category === category
     const regionMatch = regionFilter === 'Todos' || normalizeSearchText(d.region) === normalizeSearchText(regionFilter)
     const provinceMatch = provinceFilter === 'Todos' || normalizeSearchText(d.province) === normalizeSearchText(provinceFilter)
@@ -691,7 +701,7 @@ export default function App() {
     const searchable = normalizeSearchText(`${d.title} ${d.region} ${d.province} ${d.city} ${d.category}`)
     const queryMatch = !normalizedQuery || normalizedQuery.split(' ').every(term => searchable.includes(term))
     return categoryMatch && regionMatch && provinceMatch && cityMatch && queryMatch
-  })
+  }), [mapDestinations, category, regionFilter, provinceFilter, cityFilter, normalizedQuery])
   const searchSuggestions = useMemo(() => {
     if (normalizedQuery.length < 2) return []
     const values = new globalThis.Map<string, {label:string; kind:string; count:number; rank:number}>()
@@ -714,8 +724,8 @@ export default function App() {
     .map(destination => ({ ...destination, distanceFromUser: exploreLocation && destination.lat !== null && destination.lng !== null ? distanceKmBetween(exploreLocation.lat, exploreLocation.lng, destination.lat, destination.lng) : null }))
     .sort((a, b) => exploreLocation ? (a.distanceFromUser ?? Infinity) - (b.distanceFromUser ?? Infinity) : a.id - b.id)
     .slice(0, 4), [mapDestinations, visitedIds, visits, exploreLocation])
-  const provinceOptions = [...new Set(mapDestinations.filter(d => regionFilter === 'Todos' || normalizeSearchText(d.region) === normalizeSearchText(regionFilter)).map(d => d.province).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'))
-  const cityOptions = [...new Set(mapDestinations.filter(d => (regionFilter === 'Todos' || normalizeSearchText(d.region) === normalizeSearchText(regionFilter)) && (provinceFilter === 'Todos' || normalizeSearchText(d.province) === normalizeSearchText(provinceFilter))).map(d => d.city).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'))
+  const provinceOptions = useMemo(() => [...new Set(mapDestinations.filter(d => regionFilter === 'Todos' || normalizeSearchText(d.region) === normalizeSearchText(regionFilter)).map(d => d.province).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es')), [mapDestinations, regionFilter])
+  const cityOptions = useMemo(() => [...new Set(mapDestinations.filter(d => (regionFilter === 'Todos' || normalizeSearchText(d.region) === normalizeSearchText(regionFilter)) && (provinceFilter === 'Todos' || normalizeSearchText(d.province) === normalizeSearchText(provinceFilter))).map(d => d.city).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es')), [mapDestinations, regionFilter, provinceFilter])
   const catalogOpen = showAllDestinations || !!query.trim() || regionFilter !== 'Todos' || provinceFilter !== 'Todos' || cityFilter !== 'Todos' || category !== 'Todos'
   const filteredMapDestinations = filteredDestinations
   const visiblePosts = posts.filter(p => p.visibility !== 'private').filter(p => feedMode === 'all' || (!!p.authorId && followed.includes(p.authorId)))
