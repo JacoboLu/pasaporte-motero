@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pasaporte-motero-shell-v16'
+const CACHE_NAME = 'pasaporte-motero-shell-v17'
 const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/logo-pasaporte-motero.png', '/passport-parchment-background.jpg']
 
 self.addEventListener('install', event => {
