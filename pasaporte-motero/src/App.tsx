@@ -548,7 +548,7 @@ export default function App() {
       document.removeEventListener('visibilitychange', onVisibility)
       void supabase!.removeChannel(channel)
     }
-  }, [authUserId])
+  }, [authUserId, avatarUrl])
   useEffect(() => {
     if (!isOwnerAdmin || profileRole !== 'admin') return
     void loadAdminVisits(); void loadAdminDashboardStats(); void loadContentReports(); void loadDepartmentManagers()
