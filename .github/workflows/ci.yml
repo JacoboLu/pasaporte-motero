@@ -5,8 +5,9 @@ on:
     paths:
       - "pasaporte-motero/**"
       - ".github/workflows/ci.yml"
+  workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, "stabilization/**"]
     paths:
       - "pasaporte-motero/**"
       - ".github/workflows/ci.yml"
