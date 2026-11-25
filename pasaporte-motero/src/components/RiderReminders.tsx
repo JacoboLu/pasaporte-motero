@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Bell, CalendarClock, CheckCircle2, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 type Reminder={id:string;title:string;reminder_type:'maintenance'|'document'|'custom';due_date:string|null;due_odometer_km:number|null;notes:string|null;is_completed:boolean;created_at:string}
-const today=()=>new Date().toISOString().slice(0,10)
+const today=()=>{const now=new Date();return [now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-')}
 const kindLabel=(k:Reminder['reminder_type'])=>k==='maintenance'?'Mantenimiento':k==='document'?'Documento':'Personal'
 const dateState=(date:string|null)=>{if(!date)return 'Por kilometraje';const diff=Math.ceil((new Date(date+'T00:00:00').getTime()-new Date(today()+'T00:00:00').getTime())/86400000);return diff<0?'Vencido hace '+Math.abs(diff)+' día(s)':diff===0?'Vence hoy':diff<=30?'En '+diff+' día(s)':new Date(date+'T00:00:00').toLocaleDateString('es-PE',{day:'2-digit',month:'short',year:'numeric'})}
 export function RiderReminders({userId,onBack}:{userId:string|null;onBack:()=>void}){
