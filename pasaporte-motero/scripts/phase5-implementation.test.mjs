@@ -107,3 +107,9 @@ test('national batch consolidates verified official/proposed pairs while retaini
   assert.match(nationalBatch2Migration, /MINCETUR ficha 11665/);
   assert.match(nationalBatch2Migration, /MINCETUR ficha 494/);
 });
+
+test('destination aliases are unique per canonical record and guard is not publicly executable', () => {
+  const aliasScopeMigration = read('../supabase/migrations/20261125201251_destination_alias_locality_scope.sql');
+  assert.match(aliasScopeMigration, /on public\.destination_name_aliases\(normalized_alias,destination_id\)/i);
+  assert.match(aliasScopeMigration, /revoke all on function public\.guard_destination_name_alias\(\) from public,anon,authenticated/i);
+});
