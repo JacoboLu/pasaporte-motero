@@ -105,3 +105,66 @@ Una fase solo se marca completa cuando su interfaz, permisos, base de datos y fl
 - El catálogo activo presenta 107 grupos de coordenadas compartidas que abarcan 332 destinos. Se mantiene la protección: esos destinos no deben obtener sellos por GPS hasta verificar y corregir sus coordenadas individualmente.
 - Storage conserva políticas duplicadas o solapadas para algunos archivos de avatar y comunidad. No se eliminaron para evitar interrumpir lectura/borrado de archivos.
 - El aviso de Supabase sobre `visit_qr_challenges` corresponde a RLS sin políticas, pero los permisos de tabla de `anon` y `authenticated` están revocados. No se creó una política de acceso para ocultar el aviso.
+
+
+---
+
+## Segunda entrega de implementación — 25/11/2026
+
+### Fase 1 — Estabilización y seguridad
+- [x] Corregir validación GPS server-side y bloquear coordenadas compartidas para evitar sellos incorrectos.
+- [x] Validar precisión GPS, rangos de coordenadas, radios y categorías no físicas.
+- [x] Cola persistente cifrada e idempotente para evidencias fotográficas sin conexión.
+- [x] Mantener QR y revisión manual protegidos por JWT; el backend limita encargados a departamentos asignados.
+- [x] Añadir pruebas automatizadas de regresión GPS, seguridad y controles de las fases nuevas.
+- [ ] Completar pruebas físicas en Android/iOS, permisos GPS denegados, QR con dos cuentas y aprobación/rechazo real.
+- [ ] Revisar recuperación de cuenta y probar sincronización en dos dispositivos con cuentas reales.
+
+### Fase 2 — Pasaporte, catálogo y gamificación
+- [x] Auditar coordenadas: 107 grupos de coordenadas compartidas abarcan 332 destinos activos. La validación GPS bloquea esos registros hasta corregirlos.
+- [x] Mantener el otorgamiento de sellos únicamente desde visitas validadas; no se modifican sellos históricos.
+- [x] Ampliar logros con hitos de destinos, departamentos, publicaciones y bitácoras; incorporar niveles XP y rachas calculadas con visitas validadas.
+- [ ] Completar fotografías verificadas para todo el catálogo. El proceso por bloques de 20 sigue disponible; destinos sin coincidencia/licencia verificable permanecen sin imagen.
+- [ ] Verificar y corregir manualmente las coordenadas duplicadas con fuentes geográficas confiables.
+
+### Fase 3 — Comunidad
+- [x] Mantener notificaciones in-app de seguidores, likes, comentarios y revisión de visitas.
+- [x] Bandeja de reportes y acciones de moderación para administradores.
+- [x] Conservar políticas de visibilidad para publicaciones públicas, seguidores y privadas.
+- [ ] Ejecutar pruebas de privacidad con cuentas reales públicas, seguidoras y no seguidoras, incluyendo comentarios y fotografías.
+- [ ] Notificaciones push en segundo plano: no incluidas en esta entrega; la bandeja actual es in-app.
+
+### Fase 4 — Administración
+- [x] Panel regional disponible para encargados con rol `manager`.
+- [x] Cola de evidencias fotográficas filtrada en backend por departamentos asignados.
+- [x] Validación QR limitada por departamento en el backend.
+- [x] UI de asignación/desactivación de encargados para administradores.
+- [x] CRUD de destinos con Edge Function de acceso exclusivo para administradores.
+- [x] Registro de auditoría para altas, ediciones y desactivaciones del catálogo.
+- [ ] Prueba funcional con un administrador y encargados de dos departamentos distintos.
+
+### Fase 5 — Funciones avanzadas
+- [x] Planificación de bitácoras con paradas del catálogo y paradas personalizadas.
+- [x] Apertura de navegación externa con Google Maps para rutas de dos o más paradas.
+- [x] Recordatorios sincronizados de mantenimiento, documentos y tareas, por fecha o kilometraje.
+- [x] Exportación de los datos personales accesibles por RLS en JSON.
+- [x] Solicitud de eliminación de cuenta con confirmación literal, sesión reciente, limpieza de QR asociados, protección de último administrador y limpieza de archivos personales.
+- [x] Gamificación ampliada con XP, niveles, logros adicionales y rachas de visitas validadas.
+- [ ] Extender la cola offline a operaciones distintas de evidencias fotográficas. No se promete edición offline completa.
+- [ ] Probar exportación y eliminación de cuenta en una cuenta de prueba con archivos en cada bucket antes de recomendar su uso en producción.
+- [ ] Recordatorios push/background: no incluidos; los recordatorios se consultan dentro de la aplicación.
+
+### Cambios de base de datos y funciones desplegados
+- Migración aplicada: `20261125184054_rider_reminders_and_admin_audit`.
+- Tablas nuevas: `rider_reminders` (RLS por propietario) y `admin_audit_log` (lectura solo de administradores; escrituras desde backend).
+- Edge Functions nuevas: `manage-destination-catalog` v2 y `delete-account` v2, ambas con JWT obligatorio.
+- Edge Function GPS existente: `validate-gps-visit` v9.
+- Las nuevas funciones de catálogo y eliminación no se han ejecutado con cuentas reales durante esta validación para evitar modificar destinos o eliminar cuentas reales.
+
+### Límites del plan gratuito y hallazgos de seguridad
+- La protección de contraseñas filtradas de Supabase Auth requiere el plan Pro o superior según la documentación vigente; se mantiene desactivada para respetar el plan gratuito solicitado.
+- `visit_qr_challenges` mantiene RLS sin políticas y sin privilegios de acceso para `anon` ni `authenticated`; no se abre acceso para eliminar el aviso informativo del asesor.
+- Los 38 índices reportados como no utilizados no se eliminan automáticamente: deben observarse con carga real antes de retirar índices.
+- El historial de migraciones anterior a esta entrega no coincide completamente entre GitHub y Supabase. La nueva migración se registró con su versión exacta; no se ejecutó reset ni se reaplicaron migraciones antiguas.
+
+**Estado de cierre:** las funcionalidades pendientes de interfaz/backend de las cinco fases ya tienen una implementación inicial concreta. Las fases no se declaran certificadas para producción hasta completar los casos end-to-end y las verificaciones manuales marcadas arriba.
