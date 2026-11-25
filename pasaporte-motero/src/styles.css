@@ -6331,3 +6331,11 @@ html[data-theme="dark"],html[data-theme="dark"] body,html[data-theme="dark"] #ro
 .theme-light .catalog-quality-clusters summary{color:#263445}
 .theme-light .catalog-quality-clusters li strong{color:#202a35}
 @media(max-width:360px){.catalog-quality-grid{grid-template-columns:1fr 1fr}.catalog-quality-head{flex-direction:column}}
+
+
+/* Evita el zoom automático de Safari iOS y mejora la legibilidad de campos táctiles. */
+@media(max-width:480px){
+  .app-shell input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  .app-shell textarea,
+  .app-shell select{font-size:16px!important;}
+}
