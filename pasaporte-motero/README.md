@@ -2,7 +2,7 @@
 
 PWA mobile-first para descubrir destinos, coleccionar sellos, documentar viajes y compartir experiencias.
 
-## Qué incluye esta entrega
+## Qué incluye la aplicación
 
 - Interfaz basada en el diseño compartido: exploración de destinos, pasaporte con sellos, comunidad, perfil y acción central.
 - Exploración con búsqueda, filtros por departamento/categoría y ficha individual de destino.
@@ -42,10 +42,28 @@ Para producción todavía se requiere:
 - Base directory en el repositorio actual: `pasaporte-motero`
 - Package directory: vacío
 
-No se necesita instalar herramientas en el equipo del usuario: GitHub y Netlify pueden ejecutar el build en la nube.
+El repositorio usa GitHub para el código y Cloudflare Pages para compilar y publicar. No se requiere instalar herramientas localmente.
 
 ## Supabase
 
 Ejecuta `supabase/migrations/0001_initial_schema.sql` desde SQL Editor. La base incluye perfiles, QR, catálogo, visitas, fotos, publicaciones, relaciones sociales, comentarios, encargados, validaciones, reportes, viajes, destinos asociados, destinos guardados y logros.
 
 La validación de QR, la aprobación definitiva de visitas y el otorgamiento de logros deben ejecutarse en backend confiable. No habilitar actualizaciones directas del estado de visita desde el navegador.
+
+
+## Funciones de la estabilización integral (25/11/2026)
+
+- Recordatorios sincronizados de mantenimiento, documentos y tareas personales.
+- Exportación JSON de los datos personales disponibles bajo RLS.
+- Eliminación de cuenta con sesión reciente, confirmación explícita y limpieza de archivos privados.
+- Administración del catálogo mediante Edge Function restringida a administradores, con registro de auditoría.
+- Edge Functions GPS con verificación de coordenadas duplicadas y precisión.
+- La sincronización offline implementada cubre evidencias fotográficas cifradas; no debe interpretarse como edición offline de toda la aplicación.
+- Las notificaciones actuales son in-app; las notificaciones push en segundo plano no están habilitadas.
+
+## Despliegue y seguridad
+
+- Hosting: Cloudflare Pages (proyecto existente).
+- Datos y Auth: Supabase.
+- Las migraciones de este proyecto contienen historial heredado que debe reconciliarse antes de usar un reset o un despliegue masivo de migraciones.
+- No desplegar a producción desde ramas de Preview sin validar los flujos con cuentas reales.
