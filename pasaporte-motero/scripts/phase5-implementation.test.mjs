@@ -21,6 +21,7 @@ const nationalBatch2Migration = read('../supabase/migrations/20261125201109_nati
 const fuzzyMatchingMigration = read('../supabase/migrations/20261125201345_destination_name_fuzzy_matching.sql');
 const fuzzyConsolidationMigration = read('../supabase/migrations/20261125201438_national_fuzzy_destination_consolidation.sql');
 const fuzzyReviewMigration = read('../supabase/migrations/20261125201508_destination_fuzzy_name_review_report.sql');
+const normalizerSearchPathMigration = read('../supabase/migrations/20261125201747_destination_normalizer_search_path.sql');
 
 test('reminders are owner-scoped, date/km based, and support completion', () => {
   assert.match(reminders, /from\('rider_reminders'\)/);
@@ -132,4 +133,8 @@ test('national fuzzy matching consolidates only reviewed same-place pairs and re
   assert.match(catalogFn, /fuzzy_name_review:nameReview/);
   assert.match(catalog, /Nombres similares que requieren revisión/);
   assert.match(catalog, /No se fusionan automáticamente/);
+});
+
+test('destination name normalizer pins its search path', () => {
+  assert.match(normalizerSearchPathMigration, /set search_path=pg_catalog/i);
 });
